@@ -27,6 +27,12 @@ class Source:
     # different PDF structure, and thus a different parser) — models then
     # determines which found documents belong to which source.
     models: list[str] = field(default_factory=list)
+    # "pdf" (every brand so far) or "json" (Audi's own price data comes
+    # from its web configurator's JSON API, not a downloadable price-list
+    # PDF - see parsers/audi.py's module docstring). SourceMonitor picks
+    # the matching downloader by this field; ScraperPipeline skips the
+    # PDF-only release-date extraction step for anything other than "pdf".
+    content_type: str = "pdf"
 
 
 class SourceRegistry:

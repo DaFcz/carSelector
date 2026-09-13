@@ -1,9 +1,10 @@
 """Pipeline orchestration: registry -> monitor -> downloader -> parser -> DB.
 
-For each active source it finds new PDF price lists
-(SourceMonitor.fetch_new_documents), parses them with the parser matching
-`parser_key` (parsers/registry.py), and stores the resulting variants and
-prices in the DB (VariantRepository).
+For each active source it finds new price-list documents
+(SourceMonitor.fetch_new_documents - a PDF for every brand except Audi,
+whose own `content_type` is "json", see sources/registry.py), parses them
+with the parser matching `parser_key` (parsers/registry.py), and stores
+the resulting variants and prices in the DB (VariantRepository).
 """
 from __future__ import annotations
 
@@ -54,23 +55,27 @@ class ScraperPipeline:
 
         Args:
             source: The source `document` was discovered under (gives
-                `parser_key`/`brand`).
+                `parser_key`/`brand`/`content_type`).
             document: The document to parse - `document.release_date` is
-                set here from the PDF itself before parsing.
+                set here from the PDF itself before parsing, for `pdf`
+                sources only (see `source.content_type`'s own docstring -
+                Audi's own JSON API has no comparable "valid from" field
+                to read, so its documents just keep the download date).
         """
         parser_cls = PARSERS.get(source.parser_key)
         if parser_cls is None:
             print(f"  skipped (unknown parser_key {source.parser_key!r}): {document.document_url}")
             return
 
-        pdf_path = Path(document.file_path)
+        document_path = Path(document.file_path)
 
-        with pdfplumber.open(pdf_path) as pdf:
-            document.release_date = extract_release_date(pdf)
-        self._session.commit()
+        if source.content_type == "pdf":
+            with pdfplumber.open(document_path) as pdf:
+                document.release_date = extract_release_date(pdf)
+            self._session.commit()
 
         try:
-            variants = parser_cls().parse(pdf_path)
+            variants = parser_cls().parse(document_path)
         except NotImplementedError as exc:
             print(f"  skipped ({exc}): {document.document_url}")
             return

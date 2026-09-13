@@ -21,6 +21,24 @@ to one or more related commits.
 
 ---
 
+## 0.2.25 — 2026-09-14
+
+### Added
+- Audi support in the scraper: discovery + parser for Audi's entire
+  current CZ lineup - 22 model groups, 110 model/engine rows across
+  base and "S line" trims plus S/RS performance models
+  (`scraper/parsers/audi.py`, `scraper/monitors/discovery/audi.py`), with
+  a real fixture and parser tests. Audi is the first brand here with no
+  downloadable price-list PDF at all - its data comes from its own web
+  configurator's JSON API instead, reachable directly with `requests`.
+- Generalized the scraper pipeline to support a non-PDF source: `Source`
+  gained a `content_type` field (`"pdf"` by default, `"json"` for Audi),
+  a new `JsonDownloader` mirrors `PdfDownloader`'s hash-based storage for
+  JSON responses, `SourceMonitor` picks the matching downloader per
+  source, and `ScraperPipeline` skips the PDF-only release-date
+  extraction step for non-PDF sources. No changes needed for any
+  existing brand (`content_type` defaults to `"pdf"`).
+
 ## 0.2.24 — 2026-09-13
 
 ### Added

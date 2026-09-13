@@ -116,6 +116,7 @@ BRAND_NAMES = {
     "opel": "Opel",
     "peugeot": "Peugeot",
     "mg": "MG",
+    "audi": "Audi",
 }
 
 _SCRAPER_TO_FUEL_TYPE = {

@@ -21,7 +21,7 @@ A list of passenger car brands with an active sales/dealer presence in the Czech
 | 13 | Cupra | 4,200 | 1.8% | ✓ |
 | 14 | Opel | 3,657 | 1.5% | ✓ |
 | 15 | Citroën | 3,397 | 1.4% | |
-| 16 | Audi | — | — | |
+| 16 | Audi | — | — | ✓ |
 | 17 | Seat | — | — | |
 | 18 | Volvo | — | — | |
 | 19 | Suzuki | — | — | |

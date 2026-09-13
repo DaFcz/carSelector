@@ -5,6 +5,7 @@ in main.py needs to change.
 """
 from __future__ import annotations
 
+from .audi import AudiParser
 from .base import BaseParser
 from .bmw import BmwParser
 from .cupra import CupraParser
@@ -42,4 +43,5 @@ PARSERS: dict[str, type[BaseParser]] = {
     "opel": OpelParser,
     "peugeot": PeugeotParser,
     "mg": MgParser,
+    "audi": AudiParser,
 }

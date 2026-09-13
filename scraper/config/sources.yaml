@@ -413,3 +413,41 @@ sources:
     parser_key: mg
     active: true
     models: ["3", "S9 PHEV", ZS, HS, "4 EV Urban", "S5 EV", Cyberster]
+
+  # Verified 2026-09-14 - unlike every other brand here, Audi doesn't
+  # publish a downloadable price-list PDF at all (audi.cz's own homepage
+  # and "Všechny modely" page have no "ceníky ke stažení" link anywhere).
+  # The real breakdown only exists inside the web configurator
+  # (konfigurator.audi.cz), a JS-rendered app - but its own network calls
+  # reveal a plain JSON API behind it that returns every current model
+  # group, engine and price in ONE response, reachable with a bare
+  # `requests.get()` (no blocking). `content_type: json` routes this
+  # source through `JsonDownloader` instead of `PdfDownloader`, and makes
+  # `ScraperPipeline` skip the PDF-only release-date step for it (see
+  # sources/registry.py's own `content_type` docstring) - Audi's own API
+  # has no comparable "valid from" field to read anyway, so its documents
+  # just keep the download date, same as most other brands here.
+  #
+  # AudiParser reads real trim data out of this response after all -
+  # despite Audi's own CZ configurator having no named equipment tiers
+  # the way Škoda's Style/Selection does, there IS a genuine base/"S line"
+  # price split hiding in the data once several model groups are compared
+  # - see AudiParser's own module docstring for the classification rules,
+  # including why S3/RS3-style performance variants are promoted to their
+  # own model instead (BMW's own M2/M4 convention, not a trim).
+  #
+  # Like BMW's own combined price list, one document covers Audi's entire
+  # current lineup - `models` below is descriptive of what's covered
+  # (all 22 of Audi's own current CZ model groups), not something the
+  # parser filters against, same convention as BMW's own entry.
+  - brand: audi
+    country: cz
+    source_url: "https://www.audi.cz"
+    pdf_pattern: null
+    parser_key: audi
+    active: true
+    content_type: json
+    models: [A3 Limuzína, A3 Sportback, A3 allstreet, A5 Limuzína, A5 Avant, A6 Limuzína,
+      A6 Sportback e-tron, A6 Avant, A6 Avant e-tron, A6 allroad, e-tron GT, Q3, Q3 Sportback,
+      Q4 e-tron, Q4 Sportback e-tron, Q5, Q5 Sportback, Q6 e-tron, Q6 Sportback e-tron,
+      Q7 SUV, Q8 SUV, Q9 SUV]

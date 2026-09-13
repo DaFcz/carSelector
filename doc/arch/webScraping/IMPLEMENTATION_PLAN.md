@@ -142,21 +142,34 @@ in `infer_drivetrain`; mgmotor-czech.cz has no bot-blocking at all, unlike
 Opel/Peugeot; `extract_release_date`'s own regex was widened to also
 match MG's "Platnost ceníku od ..." wording, so this is also the first of
 the recent additions with real per-document release dates instead of
-falling back to the download date), optional equipment for Škoda (one of
-three formats — "Samostatné prvky výbavy" / standalone equipment items).
+falling back to the download date), Audi (22 model groups, 110 model/
+engine rows - the entire current CZ lineup; ICE/MHEV/PHEV/EV; the first
+brand here with no downloadable price-list PDF at all - its own data
+comes from its web configurator's JSON API instead, which needed the
+pipeline itself generalized: `Source` gained a `content_type` field
+(`"pdf"`/`"json"`), a new `JsonDownloader` sits alongside `PdfDownloader`,
+and `ScraperPipeline` skips the PDF-only release-date step for non-PDF
+sources - no change needed for any existing brand. AudiParser also reads
+a real trim out of a response with no explicit trim field at all - a
+base/"S line" split hiding in the data once several model groups are
+compared, with S/RS performance variants promoted to their own model
+instead, same convention as BMW's own M2/M4 - see its own module
+docstring), optional equipment for Škoda (one of three formats —
+"Samostatné prvky výbavy" / standalone equipment items).
 
 Remaining: Škoda "Pakety" (packages) and per-trim standard equipment
 (the other two equipment formats), VW/Kia/Toyota/Hyundai/Mercedes-Benz/
-Mazda/BMW/Dacia/Ford/CUPRA/Renault/Opel/Peugeot/MG equipment, Kia/Toyota/
-Hyundai/Mercedes-Benz/Mazda/BMW/Dacia/Ford/CUPRA/Renault/Opel/Peugeot
-release-date extraction (see Data coverage above - CUPRA's and Renault's
-own disclaimer text would actually match `extract_release_date`'s
-date-format pattern, but it's on the price-table page, not the cover page
-that helper reads; same gap for Opel's/Peugeot's own campaign-window
-date - MG is the exception, see Done above), the rest of Ford's current
-CZ lineup (see Done, above), Peugeot's own Traveller and plain-308, and
-the rest of `doc/carVendors.md`'s "Mainstream brands" list beyond the
-original top-10-by-CZ-market-share scope (Citroën, Audi, Seat, Volvo,
+Mazda/BMW/Dacia/Ford/CUPRA/Renault/Opel/Peugeot/MG/Audi equipment,
+Kia/Toyota/Hyundai/Mercedes-Benz/Mazda/BMW/Dacia/Ford/CUPRA/Renault/Opel/
+Peugeot/Audi release-date extraction (see Data coverage above - CUPRA's
+and Renault's own disclaimer text would actually match
+`extract_release_date`'s date-format pattern, but it's on the price-table
+page, not the cover page that helper reads; same gap for Opel's/Peugeot's
+own campaign-window date, and Audi's own JSON API simply has no
+comparable field - MG is the one exception, see Done above), the rest of
+Ford's current CZ lineup (see Done, above), Peugeot's own Traveller and
+plain-308, and the rest of `doc/carVendors.md`'s "Mainstream brands" list
+beyond the original top-10-by-CZ-market-share scope (Citroën, Seat, Volvo,
 Suzuki, Nissan, Honda, Mitsubishi, Fiat, ...). Details and the reasoning
 for scaling one piece at a time (vertical slice, verify on real data,
 then generalize) are in the phases above.

@@ -1,10 +1,12 @@
 """Common interface for all per-OEM price list/equipment parsers.
 
-Every brand has its own PDF layout, so instead of one universal parser
-there's a single `BaseParser` and per-OEM implementations. If a brand has
-structurally different lineups (e.g. Škoda: combustion models vs. EVs
-have a completely different table), they get their own parser
-(skoda_ice.py, skoda_ev.py) instead of branching inside one — see
+Every brand has its own PDF layout (or, for Audi alone, a JSON API
+response instead of a PDF - see `parsers/audi.py`'s own module
+docstring), so instead of one universal parser there's a single
+`BaseParser` and per-OEM implementations. If a brand has structurally
+different lineups (e.g. Škoda: combustion models vs. EVs have a
+completely different table), they get their own parser (skoda_ice.py,
+skoda_ev.py) instead of branching inside one — see
 doc/arch/webScraping/IMPLEMENTATION_PLAN.md.
 
 A new brand/lineup = a new file in this directory + registration in
@@ -53,8 +55,10 @@ class BaseParser:
         where available) from one downloaded price-list PDF.
 
         Args:
-            pdf_path: Local path to the downloaded PDF, as returned by
-                `downloaders.pdf_downloader.PdfDownloader.download`.
+            pdf_path: Local path to the downloaded document, as returned
+                by `downloaders.pdf_downloader.PdfDownloader.download`
+                (or, for Audi alone, `downloaders.json_downloader
+                .JsonDownloader.download`).
 
         Returns:
             One `ExtractedVariant` per vehicle variant/trim/powertrain

@@ -6,6 +6,7 @@ else in source_monitor.py needs to change. Same pattern as
 """
 from __future__ import annotations
 
+from .audi import AudiDiscoverer
 from .base import BaseDiscoverer
 from .bmw import BmwDiscoverer
 from .cupra import CupraDiscoverer
@@ -41,4 +42,5 @@ DISCOVERERS: dict[str, type[BaseDiscoverer]] = {
     "opel": OpelDiscoverer,
     "peugeot": PeugeotDiscoverer,
     "mg": MgDiscoverer,
+    "audi": AudiDiscoverer,
 }
