@@ -21,6 +21,42 @@ to one or more related commits.
 
 ---
 
+## 0.2.26 — 2026-09-14
+
+### Added
+- Tesla support in the scraper: discovery + parser for Tesla's whole
+  current CZ lineup - Model Y and Model 3, the only two models sold here
+  (Model S/X have no CZ configurator page) - 4 trims each (base RWD,
+  "Premium" Long Range RWD/AWD, "Performance" AWD), all EV
+  (`scraper/parsers/tesla.py`, `scraper/monitors/discovery/tesla.py`),
+  with real fixtures and parser tests. Like Audi, Tesla has no
+  downloadable price-list PDF; unlike Audi, it also has no separately-
+  callable JSON API - the data is embedded in its own web configurator
+  ("Design Studio") page's own HTML, extracted via a balanced-brace scan
+  for the `"Lexicon.<model>":` key rather than parsing the page's own
+  `dataJson` wrapper as a whole (which isn't strict JSON).
+- Generalized the scraper pipeline with a third `content_type`: `"html"`
+  alongside `"pdf"`/`"json"`, with a new `HtmlDownloader` mirroring
+  `PdfDownloader`/`JsonDownloader`'s hash-based storage.
+  `SourceMonitor`/`ScraperPipeline` route Tesla's own source through it
+  the same way Audi's `"json"` one already works. No changes needed for
+  any existing brand.
+- Broadened `scripts/import_scraper_data.py`'s drivetrain detection for
+  Tesla's own Czech wording: `_RWD_RE` now matches "zadní"'s inflected
+  forms (e.g. "zadních", not just the bare word MG's price tables use),
+  and `_AWD_RE` gained a "všech kol" alternative.
+
+### Known limitation
+- Tesla's `sources.yaml` entry is registered but `active: false`, unlike
+  every other brand here - every tesla.com path returns a 403 from
+  Akamai's bot protection for a bare `requests.get()` (even with a full
+  browser header set) and for a vanilla Playwright browser (headless or
+  headed) alike, from this environment. The parser itself is complete and
+  verified against real Design Studio pages saved through an interactive
+  browser session that wasn't blocked; flipping the source to
+  `active: true` needs a working unattended fetch path first (see
+  `doc/arch/webScraping/IMPLEMENTATION_PLAN.md`).
+
 ## 0.2.25 — 2026-09-14
 
 ### Added

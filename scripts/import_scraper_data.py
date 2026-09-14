@@ -117,6 +117,7 @@ BRAND_NAMES = {
     "peugeot": "Peugeot",
     "mg": "MG",
     "audi": "Audi",
+    "tesla": "Tesla",
 }
 
 _SCRAPER_TO_FUEL_TYPE = {
@@ -131,13 +132,17 @@ _KW_RE = re.compile(r"(\d+)\s*kW", re.IGNORECASE)
 # "4×4" (Dacia's own marker, e.g. "hybrid 150 4×4") uses the real
 # multiplication sign U+00D7, not a literal "x" - "4x4" alone wouldn't match it.
 # "4WD" (CUPRA's own marker, e.g. "2.0 TSI 204k DSG 4WD") is yet another
-# spelling none of the others cover.
-_AWD_RE = re.compile(r"4x4|4×4|4wd|4motion|awd|quattro|4matic|xdrive", re.IGNORECASE)
+# spelling none of the others cover. "všech kol" ("all wheels") is Tesla's
+# own wording (e.g. "... s pohonem všech kol Dual Motor") - its own price
+# data never uses a marker any of the other alternatives here would catch.
+_AWD_RE = re.compile(r"4x4|4×4|4wd|4motion|awd|quattro|4matic|xdrive|všech kol", re.IGNORECASE)
 # MG's own POHON (drivetrain) column is printed per row, in Czech, and
 # kept verbatim in variant_name - "zadní" ("rear") is the one other
 # brands here don't expose plainly enough to be worth a general marker
-# for (see infer_drivetrain's own docstring on that gap).
-_RWD_RE = re.compile(r"\bzadní\b", re.IGNORECASE)
+# for (see infer_drivetrain's own docstring on that gap). `\w*` (not a
+# bare `\b`) also matches Tesla's own inflected "zadních" ("... s pohonem
+# zadních kol"), which the plain word "zadní" alone never appears as.
+_RWD_RE = re.compile(r"\bzadní\w*\b", re.IGNORECASE)
 # \d{2,3}d\b: BMW's own diesel suffix ("118d", "320d", "M340d" - fused
 # directly onto the trim's number with no space, unlike Mercedes-Benz's
 # "220 d" - see bmw.py's module docstring). Doesn't need a leading \b

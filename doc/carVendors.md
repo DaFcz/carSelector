@@ -99,6 +99,7 @@ The Czech market has seen rapid growth in Chinese-affiliated brands — 28 were 
 - Škoda alone holds roughly a third of the entire new-car market, an unusually high concentration reflecting its status as the domestic Czech brand under VW Group ownership.
 - Many of the Chinese brands listed have very low volume so far (some only just launching or with single-digit/low hundreds of registrations) but are officially represented with importers/dealer networks.
 - If you need used-car marketplaces or dealer networks instead of manufacturer brands (e.g. Sauto.cz, AAA Auto, TipCars, Autobazar.eu), that's a different list — let me know and I'll pull it separately.
+- Tesla (rank 33) has a scraper parser/discoverer implemented and verified against real data (Model Y/Model 3, its whole current CZ lineup), but its `sources.yaml` entry is `active: false`, not `true` like every other ✓ row above — tesla.com blocks the scraper's own fetch mechanism outright (see `doc/arch/webScraping/IMPLEMENTATION_PLAN.md`'s "Status and next steps" section), so it isn't marked ✓ here yet despite the code being ready.
 
 **Sources:**
 - https://www.cebia.cz/novinky/trh-s-automobily/top-30-nejprodavanejsi-auta-ceska-v-roce-2025

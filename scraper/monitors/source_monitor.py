@@ -11,6 +11,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from scraper.database.models import Document
+from scraper.downloaders.html_downloader import HtmlDownloader
 from scraper.downloaders.json_downloader import JsonDownloader
 from scraper.downloaders.pdf_downloader import PdfDownloader
 from scraper.monitors.discovery.registry import DISCOVERERS
@@ -25,10 +26,12 @@ class SourceMonitor:
         session: Session,
         downloader: PdfDownloader | None = None,
         json_downloader: JsonDownloader | None = None,
+        html_downloader: HtmlDownloader | None = None,
     ) -> None:
         self._session = session
         self._downloader = downloader or PdfDownloader()
         self._json_downloader = json_downloader or JsonDownloader()
+        self._html_downloader = html_downloader or HtmlDownloader()
 
     def check_and_store(self, source: Source, pdf_url: str) -> Document | None:
         """Downloads the document, and if its hash isn't in the DB yet, creates a new Document.
@@ -38,13 +41,19 @@ class SourceMonitor:
                 `source.brand`/`source.content_type`).
             pdf_url: URL of the document to download and check (a PDF for
                 every brand except Audi, whose own `content_type` is
-                "json" - see `sources/registry.py`'s own docstring).
+                "json", and Tesla, whose own is "html" - see
+                `sources/registry.py`'s own docstring).
 
         Returns:
             The newly created `Document`, or `None` if a document with
             this exact content (same brand + SHA256 hash) already exists.
         """
-        downloader = self._json_downloader if source.content_type == "json" else self._downloader
+        if source.content_type == "json":
+            downloader = self._json_downloader
+        elif source.content_type == "html":
+            downloader = self._html_downloader
+        else:
+            downloader = self._downloader
         path, file_hash = downloader.download(pdf_url, brand=source.brand)
 
         existing = (

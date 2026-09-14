@@ -155,7 +155,21 @@ base/"S line" split hiding in the data once several model groups are
 compared, with S/RS performance variants promoted to their own model
 instead, same convention as BMW's own M2/M4 - see its own module
 docstring), optional equipment for Škoda (one of three formats —
-"Samostatné prvky výbavy" / standalone equipment items).
+"Samostatné prvky výbavy" / standalone equipment items), Tesla parser and
+discoverer (Model Y/Model 3, the only two models currently sold in the
+Czech Republic; EV only, both currently-offered trims each - base RWD,
+"Premium" Long Range RWD/AWD, "Performance" AWD - verified against real
+Design Studio pages; `content_type` gained an `"html"` option alongside
+`"pdf"`/`"json"`, with a new `HtmlDownloader`, since Tesla's own price
+data is embedded in that page's own HTML rather than a PDF or a
+separately-callable JSON API - see parsers/tesla.py's module docstring).
+Unlike every other brand above, this source is registered but NOT
+`active: true` yet - every tesla.com path is blocked for both a bare
+`requests.get()` (even with a full browser header set) and a vanilla
+Playwright browser (headless or headed) from this environment, a harder
+block than Opel's/Peugeot's own WAFs (whose actual document endpoints, not
+just their listing pages, stayed reachable) - see sources.yaml's own tesla
+entry for what unblocking this would need.
 
 Remaining: Škoda "Pakety" (packages) and per-trim standard equipment
 (the other two equipment formats), VW/Kia/Toyota/Hyundai/Mercedes-Benz/
@@ -166,7 +180,11 @@ and Renault's own disclaimer text would actually match
 `extract_release_date`'s date-format pattern, but it's on the price-table
 page, not the cover page that helper reads; same gap for Opel's/Peugeot's
 own campaign-window date, and Audi's own JSON API simply has no
-comparable field - MG is the one exception, see Done above), the rest of
+comparable field - MG is the one exception, see Done above; Tesla's own
+Lexicon response DOES carry a real `effective_date`/`release_date` per
+model, unlike Audi's, but reading it isn't wired up yet either), flipping
+Tesla's own source to `active: true` once it can actually be fetched
+unattended (see Done above), the rest of
 Ford's current CZ lineup (see Done, above), Peugeot's own Traveller and
 plain-308, and the rest of `doc/carVendors.md`'s "Mainstream brands" list
 beyond the original top-10-by-CZ-market-share scope (Citroën, Seat, Volvo,

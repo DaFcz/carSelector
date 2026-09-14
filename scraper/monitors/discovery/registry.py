@@ -21,6 +21,7 @@ from .opel import OpelDiscoverer
 from .peugeot import PeugeotDiscoverer
 from .renault import RenaultDiscoverer
 from .skoda import SkodaDiscoverer
+from .tesla import TeslaDiscoverer
 from .toyota import ToyotaDiscoverer
 from .volkswagen import VolkswagenDiscoverer
 
@@ -43,4 +44,5 @@ DISCOVERERS: dict[str, type[BaseDiscoverer]] = {
     "peugeot": PeugeotDiscoverer,
     "mg": MgDiscoverer,
     "audi": AudiDiscoverer,
+    "tesla": TeslaDiscoverer,
 }

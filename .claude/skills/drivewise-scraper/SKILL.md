@@ -1,6 +1,6 @@
 ---
 name: drivewise-scraper
-description: The web-scraping data-collection service (scraper/) for DriveWise AI that downloads manufacturer PDF price lists (or, for Audi alone, a JSON API response - see `content_type`), parses variants/prices/equipment via per-brand plugin parsers, and stores them in its own SQLite/Postgres database (document/variant/price_history/equipment). Use this whenever building or changing anything under scraper/ — discoverers, parsers, downloaders, normalization, or the ScraperPipeline. Reach for it any time a task involves pulling car data from manufacturer sites or PDF price lists, adding a new brand/model, or verifying extracted data against a source document.
+description: The web-scraping data-collection service (scraper/) for DriveWise AI that downloads manufacturer PDF price lists (or, for Audi, a JSON API response, or for Tesla, an HTML configurator page - see `content_type`), parses variants/prices/equipment via per-brand plugin parsers, and stores them in its own SQLite/Postgres database (document/variant/price_history/equipment). Use this whenever building or changing anything under scraper/ — discoverers, parsers, downloaders, normalization, or the ScraperPipeline. Reach for it any time a task involves pulling car data from manufacturer sites or PDF price lists, adding a new brand/model, or verifying extracted data against a source document.
 ---
 
 # DriveWise AI — Web Scraping Service (`scraper/`)
@@ -21,13 +21,17 @@ scraper.main`.
 ## Pipeline
 
 ```
-sources.yaml → SourceMonitor (discoverers) → PdfDownloader/JsonDownloader → per-brand Parser → EquipmentNormalizer → scraper.db
+sources.yaml → SourceMonitor (discoverers) → PdfDownloader/JsonDownloader/HtmlDownloader → per-brand Parser → EquipmentNormalizer → scraper.db
 ```
 
-`Source.content_type` ("pdf", default, or "json") picks the downloader and tells `ScraperPipeline`
-whether to run the PDF-only release-date extraction step. Audi is the only "json" source so far
-(its data comes from its web configurator's own API, not a downloadable price list) — see
-`parsers/audi.py`'s module docstring.
+`Source.content_type` ("pdf", default, "json", or "html") picks the downloader and tells
+`ScraperPipeline` whether to run the PDF-only release-date extraction step. Audi is the only
+"json" source so far (its data comes from its web configurator's own API, not a downloadable price
+list) — see `parsers/audi.py`'s module docstring. Tesla is the only "html" source (its data is
+embedded in its own web configurator page's HTML, with no separate API to call) — see
+`parsers/tesla.py`'s module docstring. Tesla's own source is registered but `active: false` — see
+that source's own comment in `sources.yaml` for why (tesla.com blocks the scraper's fetch
+mechanism outright, unlike every other brand's own bot-protection here).
 
 ## Schema (`scraper/database/models.py`)
 

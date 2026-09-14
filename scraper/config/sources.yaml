@@ -451,3 +451,38 @@ sources:
       A6 Sportback e-tron, A6 Avant, A6 Avant e-tron, A6 allroad, e-tron GT, Q3, Q3 Sportback,
       Q4 e-tron, Q4 Sportback e-tron, Q5, Q5 Sportback, Q6 e-tron, Q6 Sportback e-tron,
       Q7 SUV, Q8 SUV, Q9 SUV]
+
+  # Verified 2026-09-14. Like Audi, Tesla has no downloadable price-list
+  # PDF; unlike Audi, it also has no clean, separately-callable JSON API -
+  # the real data lives embedded in each model's own web-configurator
+  # ("Design Studio") page HTML (`content_type: html`, routing through the
+  # new `HtmlDownloader` - see parsers/tesla.py's own module docstring for
+  # the extraction technique). Only two models are currently sold in the
+  # Czech Republic (Model S/X have no CZ configurator page at all), so
+  # TeslaDiscoverer just returns both fixed `/design` URLs directly, same
+  # "no real discovery needed" convention as Audi's/BMW's own entries.
+  #
+  # `active: false`, unlike every other brand registered here: every path
+  # on tesla.com (not just a listing page, unlike Opel's/Peugeot's own
+  # WAFs) returns a 403 from AkamaiGHost for a bare `requests.get()`, even
+  # with the same full browser header set that clears those - and a real
+  # Playwright browser (headless or headed, default fingerprint) hits an
+  # Akamai Bot Manager JS sensor challenge instead of the real page, which
+  # did not resolve to real content in this environment either. TeslaParser
+  # itself IS fully implemented and verified - against real pages saved
+  # through an interactive browser session that wasn't itself blocked (see
+  # scraper/tests/fixtures/tesla_modely_design.html/tesla_model3_design.html
+  # and test_tesla_parser.py) - so this source is ready to flip to
+  # `active: true` once it can actually be fetched unattended (e.g. a
+  # proper headed-Chromium + display setup, or running from a network
+  # Akamai doesn't challenge this way), same "documented, not silently
+  # worked around" spirit as this file's own Ford/BMW "not independently
+  # verified from this environment" note above.
+  - brand: tesla
+    country: cz
+    source_url: "https://www.tesla.com/cs_cz"
+    pdf_pattern: null
+    parser_key: tesla
+    active: false
+    content_type: html
+    models: [Model Y, Model 3]

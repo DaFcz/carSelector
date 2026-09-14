@@ -21,6 +21,7 @@ from .peugeot import PeugeotParser
 from .renault import RenaultParser
 from .skoda_ev import SkodaEvParser
 from .skoda_ice import SkodaIceParser
+from .tesla import TeslaParser
 from .toyota import ToyotaParser
 from .volkswagen import VolkswagenParser
 from .volkswagen_ev import VolkswagenEvParser
@@ -44,4 +45,5 @@ PARSERS: dict[str, type[BaseParser]] = {
     "peugeot": PeugeotParser,
     "mg": MgParser,
     "audi": AudiParser,
+    "tesla": TeslaParser,
 }

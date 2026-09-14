@@ -1,8 +1,9 @@
 """Pipeline orchestration: registry -> monitor -> downloader -> parser -> DB.
 
 For each active source it finds new price-list documents
-(SourceMonitor.fetch_new_documents - a PDF for every brand except Audi,
-whose own `content_type` is "json", see sources/registry.py), parses them
+(SourceMonitor.fetch_new_documents - a PDF for every brand except Audi
+(`content_type` "json") and Tesla (`content_type` "html"), see
+sources/registry.py), parses them
 with the parser matching `parser_key` (parsers/registry.py), and stores
 the resulting variants and prices in the DB (VariantRepository).
 """
