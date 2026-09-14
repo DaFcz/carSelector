@@ -44,8 +44,15 @@ Trim levels (Comfort/Style/Premium, SPIN/TOP, BLACK EDITION/GT-Line, ...)
 are their own line directly above the rows they apply to — same
 convention as `volkswagen.py`.
 
-No equipment extraction yet (matches Volkswagen's current scope, not
-Škoda's — see README "Status and next steps")."""
+Equipment is extracted separately from the "Hlavní prvky standardní
+výbavy" bullet page (page 3, right after the price table) — see
+`kia_equipment.py`'s own module docstring for the delta-by-reference
+convention it follows and the availability-matrix page it deliberately
+doesn't cover yet. Trims for `parse_standard_equipment` are collected
+from the variants already parsed above (same two-pass "parse rows first,
+then derive the trim list, then backfill `equipment`" shape as
+`mazda.py`), since the bullet page's own headings are matched against
+that same already-extracted trim text rather than parsed fresh."""
 from __future__ import annotations
 
 import re
@@ -54,6 +61,7 @@ from pathlib import Path
 import pdfplumber
 
 from .base import BaseParser, ExtractedVariant
+from .kia_equipment import parse_standard_equipment
 
 _ROW_RE = re.compile(
     r"^(?P<engine>.+?\s\d+\s*k\s*/\s*\d+\s*kW)\s+(?P<tail>[\d ]+)$"
@@ -118,7 +126,9 @@ class KiaParser(BaseParser):
         Returns:
             One `ExtractedVariant` per price row found (across all
             pages with a `_TABLE_HEADER_MARKER` table), `powertrain`
-            classified per-row via `_classify_powertrain`.
+            classified per-row via `_classify_powertrain` and `equipment`
+            populated from the "Hlavní prvky standardní výbavy" bullet
+            page where available (see `kia_equipment.parse_standard_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
@@ -164,5 +174,14 @@ class KiaParser(BaseParser):
                             powertrain=_classify_powertrain(engine),
                         )
                     )
+
+            trims: list[str] = []
+            for variant in variants:
+                if variant.trim is not None and variant.trim not in trims:
+                    trims.append(variant.trim)
+
+            equipment_by_trim = parse_standard_equipment(pdf, trims)
+            for variant in variants:
+                variant.equipment = equipment_by_trim.get(variant.trim, {})
 
         return variants

@@ -63,7 +63,14 @@ Like most other brands here, the cover page carries no usable release
 date (just the model name over a version subtitle) - the real "Platnost
 ceníku od D. M. RRRR" disclaimer is on the price-table page instead, same
 gap as CUPRA's own (see cupra.py's module docstring) - so `release_date`
-stays None; VariantRepository falls back to the download date."""
+stays None; VariantRepository falls back to the download date.
+
+`equipment` is populated per-trim from each document's own "hlavní prvky
+sériové výbavy" overview page, for the seven of the twelve models whose own
+PDF lays that page out as a single column - see
+`renault_equipment.parse_standard_equipment`'s own module docstring for
+which those are and why the other five (a two-side-by-side-columns layout)
+are a known, accepted gap instead."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -72,6 +79,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .renault_equipment import parse_standard_equipment
 
 # Cover-page text (uppercased) -> canonical model name. "RENAULT 4"/
 # "RENAULT 5" need the "RENAULT " prefix to disambiguate from a bare "4"/
@@ -160,7 +168,13 @@ def _classify_powertrain(model: str, engine: str) -> str:
     return "ICE"
 
 
-def _parse_row(line: list[dict], model: str, trim: str | None, source_page: int) -> ExtractedVariant | None:
+def _parse_row(
+    line: list[dict],
+    model: str,
+    trim: str | None,
+    source_page: int,
+    equipment_by_trim: dict[str, dict[str, str]],
+) -> ExtractedVariant | None:
     """Args:
         line: One line's words from the price table (a data row, a trim
             heading, or leftover legal/promo text below the table).
@@ -168,6 +182,9 @@ def _parse_row(line: list[dict], model: str, trim: str | None, source_page: int)
         trim: The trim currently in effect (from the last heading line
             seen) - `None` if no heading has been seen yet on this page.
         source_page: 1-based page number `line` was read from.
+        equipment_by_trim: `{trim: {item_name: "STANDARD"}}` from
+            `renault_equipment.parse_standard_equipment` - looked up by
+            this row's own trim, same as `dacia.py`'s `_parse_row`.
 
     Returns:
         The row's `ExtractedVariant`, or `None` if `line` isn't a price
@@ -205,6 +222,7 @@ def _parse_row(line: list[dict], model: str, trim: str | None, source_page: int)
         source_page=source_page,
         raw_text=line_text(line),
         powertrain=_classify_powertrain(model, engine),
+        equipment=equipment_by_trim.get(trim, {}),
     )
 
 
@@ -220,12 +238,16 @@ class RenaultParser(BaseParser):
 
         Returns:
             One `ExtractedVariant` per price row found on the page(s)
-            with a "verze ... ceníková cena ..." header.
+            with a "verze ... ceníková cena ..." header, with `equipment`
+            populated from the "hlavní prvky sériové výbavy" overview page
+            where that page's own layout allows it (see
+            `renault_equipment.parse_standard_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
         with pdfplumber.open(pdf_path) as pdf:
             model = _extract_model_name(pdf)
+            equipment_by_trim = parse_standard_equipment(pdf)
 
             for page in pdf.pages:
                 lines = group_into_lines(page.extract_words())
@@ -240,7 +262,7 @@ class RenaultParser(BaseParser):
                     if text.startswith(_END_OF_TABLE_MARKER):
                         break
 
-                    variant = _parse_row(line, model, trim, page.page_number)
+                    variant = _parse_row(line, model, trim, page.page_number, equipment_by_trim)
                     if variant is not None:
                         variants.append(variant)
                     elif not any(w["text"].isdigit() for w in line):

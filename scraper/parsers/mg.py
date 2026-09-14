@@ -74,7 +74,11 @@ date used to fall outside `_pdf_layout.extract_release_date`'s exact
 "Platnost od ..." wording ("Platnost ceníku od ...", one extra word) -
 that helper's own regex was widened to accept both, so `release_date` is
 populated normally here rather than falling back to the download date the
-way it does for CUPRA/Renault/Opel/Peugeot."""
+way it does for CUPRA/Renault/Opel/Peugeot.
+
+`equipment` is populated per row from MG's own "VÝBAVA" checkbox-matrix
+pages (see `mg_equipment.py`'s own module docstring) - looked up by
+`trim`, the same as `dacia.py`'s own `equipment_by_trim.get(trim, {})`."""
 from __future__ import annotations
 
 import re
@@ -84,6 +88,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .mg_equipment import parse_equipment
 
 _MODEL_LINE_RE = re.compile(r"^(.+?)\s+OD\s+[\d\s]+K", re.MULTILINE)
 _PRICE_RE = re.compile(r"\d[\d\s]*\s*Kč")
@@ -176,7 +181,9 @@ class MgParser(BaseParser):
 
         Returns:
             One `ExtractedVariant` per price row found under a genuine
-            "CENÍK MG ..." table (see `_looks_like_price_list_title`).
+            "CENÍK MG ..." table (see `_looks_like_price_list_title`),
+            with `equipment` populated from MG's own "VÝBAVA" checkbox-
+            matrix pages (see `mg_equipment.parse_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
@@ -254,5 +261,20 @@ class MgParser(BaseParser):
                                 powertrain=_classify_powertrain(engine),
                             )
                         )
+
+            # Trim order comes from the price rows just parsed above (a
+            # single model per document, unlike Mazda's per-page
+            # trims_by_model) - see mg_equipment.py's own module docstring
+            # for why this also doubles as the mechanism that skips MG
+            # HS's own equipment pages (their column count never matches
+            # this trim list's length).
+            trims: list[str] = []
+            for variant in variants:
+                if variant.trim not in trims:
+                    trims.append(variant.trim)
+
+            equipment_by_trim = parse_equipment(pdf, trims)
+            for variant in variants:
+                variant.equipment = equipment_by_trim.get(variant.trim, {})
 
         return variants

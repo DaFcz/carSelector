@@ -18,6 +18,9 @@ class SeededData:
     model_id: int
     config_prime_2wd_id: int
     config_centre_awd_id: int
+    vw_model_id: int
+    config_people_fwd_id: int
+    config_rline_awd_id: int
 
 
 @pytest.fixture()
@@ -44,6 +47,9 @@ def seeded_session(db_session: Session) -> SeededData:
         model_id=data.model_id,
         config_prime_2wd_id=data.config_prime_2wd_id,
         config_centre_awd_id=data.config_centre_awd_id,
+        vw_model_id=data.vw_model_id,
+        config_people_fwd_id=data.config_people_fwd_id,
+        config_rline_awd_id=data.config_rline_awd_id,
     )
 
 

@@ -89,6 +89,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .dacia_equipment import parse_standard_equipment
 
 # Longest name first, so "Sandero Stepway"'s cover page isn't misread as plain "Sandero".
 _KNOWN_MODELS = ("Sandero Stepway", "Sandero", "Bigster", "Duster", "Jogger", "Spring")
@@ -172,7 +173,12 @@ def _is_header_line(line: list[dict]) -> bool:
 
 
 def _parse_row(
-    line: list[dict], model: str, seats: str | None, trim: str | None, source_page: int
+    line: list[dict],
+    model: str,
+    seats: str | None,
+    trim: str | None,
+    source_page: int,
+    equipment_by_trim: dict[str, dict[str, str]],
 ) -> tuple[ExtractedVariant | None, str | None]:
     """Args:
         line: One line's words from the price table (a data row, or
@@ -185,6 +191,10 @@ def _parse_row(
             a new trim group) - carried forward when a row has no trim
             column of its own.
         source_page: 1-based page number `line` was read from.
+        equipment_by_trim: `{trim: {item_name: "STANDARD"}}` from
+            `dacia_equipment.parse_standard_equipment` - looked up by this
+            row's own trim, same as `skoda_ice.py`'s
+            `equipment_by_trim.get(trim_label, {})`.
 
     Returns:
         `(variant, trim)` - `variant` is `None` if `line` isn't a price
@@ -228,6 +238,7 @@ def _parse_row(
             source_page=source_page,
             raw_text=line_text(line),
             powertrain=_classify_powertrain(engine),
+            equipment=equipment_by_trim.get(trim, {}),
         ),
         trim,
     )
@@ -246,12 +257,15 @@ class DaciaParser(BaseParser):
 
         Returns:
             One `ExtractedVariant` per price row found on the page(s)
-            with a "VÝBAVA MOTOR ... SPLÁTKA" header.
+            with a "VÝBAVA MOTOR ... SPLÁTKA" header, with `equipment`
+            populated from the "Hlavní prvky sériové výbavy" overview page
+            (see `dacia_equipment.parse_standard_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
         with pdfplumber.open(pdf_path) as pdf:
             model = _extract_model_name(pdf)
+            equipment_by_trim = parse_standard_equipment(pdf)
 
             for page in pdf.pages:
                 lines = group_into_lines(page.extract_words())
@@ -265,7 +279,7 @@ class DaciaParser(BaseParser):
                         seats = _seats_label(line)
                         trim = None
                         continue
-                    variant, trim = _parse_row(line, model, seats, trim, page.page_number)
+                    variant, trim = _parse_row(line, model, seats, trim, page.page_number, equipment_by_trim)
                     if variant is not None:
                         variants.append(variant)
 

@@ -1,0 +1,52 @@
+POROVNÁNÍ@28.4 | JEDNOTLIVÝCH@123.3 | STUPŇŮ@238.3 | VÝBAVY@301.3
+–@104.5
+Standardně@36.7 | Není@112.5 | k@130.3 | dispozici@135.7
+Pohodlí@32.3 | a@64.2 | funkčnost@70.8 | Active@338.1 | Comfort@382.0 | Style@436.8 | Executive@476.1 | GR@523.1 | SPORT@536.6
+Čelní@32.3 | sklo@51.8 | snižující@67.2 | hluk@95.8 | v@112.0 | prostoru@117.2 | pro@148.3 | cestující@161.8
+Elektricky@32.3 | ovládaná@66.7 | přední@100.0 | a@124.1 | zadní@130.0 | okna@150.3
+Automaticky@32.3 | sklopná@76.5 | vnější@105.0 | zpětná@126.3 | zrcátka@151.6
+Vyhřívaná@32.3 | vnější@67.5 | zpětná@88.8 | zrcátka@114.1 | –@140.1 | elektricky@145.9 | ovládaná@180.3
+Vnitřní@32.3 | zpětné@56.3 | zrcátko@81.7 | s@108.0 | automatickou@113.2 | clonou@161.6
+12@32.3 | V@41.3 | zásuvka@47.4 | ve@76.0 | středové@85.3 | konzole@116.9
+Dálkové@32.3 | centrální@61.3 | zamykání@93.0
+Osvětlení@32.3 | interiéru@66.7
+Ambientní@32.3 | LED@69.2 | osvětlení@84.3 | interiéru@116.8 | –@348.1 | –@396.3
+Multifunkční@32.3 | volant@76.0
+Automatická@32.3 | klimatizace@76.8 | –@492.7 | –@540.9
+Automatická@32.3 | klimatizace@76.8 | dvouzónová@116.6 | s@159.7 | technologií@164.9 | Nanoe-X@205.4 | –@348.1 | –@396.3 | –@444.5
+Startování@32.3 | klíčkem@68.8 | –@444.5 | –@492.7 | –@540.9
+Bezklíčové@32.3 | odemykání@69.0 | a@107.4 | startování@113.1 | Smart@148.2 | Entry@169.6 | &@188.5 | Start@195.0 | –@348.1 | –@396.3
+Bezdrátové@32.3 | nabíjení@72.1 | mobilního@101.3 | telefonu@137.7 | –@348.1 | –@396.3
+Vyhřívaný@32.3 | volant@66.9 | –@348.1 | Business@383.6
+Osvětlení@32.3 | Active@338.1 | Comfort@382.0 | Style@436.8 | Executive@476.1 | GR@523.1 | SPORT@536.7
+Systém@32.3 | zpožděného@58.3 | zhasnutí@102.6 | světel@132.9 | (Follow@154.8 | Me@181.6 | Home)@193.7
+Světla@32.3 | denního@54.8 | svícení@85.0 | –@444.5 | –@492.7 | –@540.9
+LED@32.3 | denní@47.4 | svícení@68.6 | –@348.1 | –@396.3
+Projektorové@32.3 | přední@77.0 | světlomety@101.2 | halogenové@140.3 | –@444.5 | –@492.7 | –@540.9
+Bi-LED@32.3 | přední@57.3 | světlomety@81.5 | –@348.1 | –@396.3
+Přední@32.3 | mlhová@56.0 | světla@82.8 | halogenová@104.7 | –@348.1 | –@444.5 | –@492.7 | –@540.9
+Přední@32.3 | mlhová@56.0 | světla@82.8 | LED@104.8 | –@348.1 | –@396.3
+Brzdové@32.3 | světlo@61.5 | LED@83.7
+Zadní@32.3 | kombinovaná@53.5 | světla@101.2 | LED@123.1 | –@348.1 | –@396.3
+Osvětlení@32.3 | ve@66.7 | sluneční@76.0 | cloně@106.3 | spolujezdce@126.9 | –@348.1 | –@396.3 | –@444.5 | –@540.9
+Osvětlení@32.3 | ve@66.7 | sluneční@76.0 | cloně@106.3 | řidiče@126.9 | –@348.1 | –@396.3 | –@444.5 | –@540.9
+Automatická@32.3 | dálková@76.8 | světla@105.0 | (AHB)@127.0
+Toyota@32.3 | T-MATE@60.1 | Active@338.1 | Comfort@382.0 | Style@436.8 | Executive@476.1 | GR@522.8 | SPORT@536.6
+Předkolizní@32.3 | bezpečnostní@71.5 | systém@119.5 | s@145.0 | funkcí@150.2 | rozpoznávání@172.2 | chodců,@219.1
+cyklistů@32.3 | a@59.7 | motocyklistů@65.6 | (PCS)@111.1
+Inteligentní@32.3 | adaptivní@72.0 | tempomat@104.6 | s@140.8 | funkcí@145.8 | Stop&Go@167.1 | (IACC)@199.5
+Asistent@32.3 | pro@61.4 | udržení@74.8 | v@102.3 | jízdním@107.6 | pruhu@133.6 | (LTA)@155.8
+Systém@32.3 | sledování@58.3 | pozornosti@92.7 | řidiče@130.9
+Systém@32.3 | rozpoznávání@58.3 | dopravních@105.2 | značek@145.4 | (RSA)@170.8
+Systém@32.3 | nouzového@58.3 | zastavení@97.7 | (EDSS)@131.2
+Systém@32.3 | omezení@58.3 | zrychlení@88.9 | při@121.1 | nízké@132.2 | rychlosti@151.3
+Online@32.3 | aktualizace@57.2 | over-the-air@97.4 | (OTA)@140.3
+Zadní@32.3 | parkovací@53.5 | kamera@88.0
+Upozornění@32.3 | na@73.9 | dopravu@84.1 | za@114.4 | vozem@123.8 | s@147.3 | automatickou@152.5 | brzdnou@200.9 | funkcí@231.4 | (RCTAB)@253.5 | –@348.1 | –@396.3 | –@444.5
+Parkovací@32.3 | senzory@66.3 | –@94.4 | přední@100.1 | a@124.3 | zadní@130.2 | –@348.1 | Business@383.6
+Parkovací@32.3 | senzory@66.3 | s@94.4 | automatickou@99.6 | brzdnou@148.0 | funkcí@178.5 | (ICS)@200.6 | –@348.1 | Business@383.6
+Asistent@32.3 | bezpečného@61.4 | vystupování@105.6 | (SEA)@148.3 | –@348.1 | –@396.3 | –@444.5
+Systém@32.3 | sledování@58.3 | slepého@92.7 | úhlu@121.8 | (BSM)@138.8 | –@348.1 | –@396.3 | –@444.5
+Bezpečnostní@32.3 | systém@80.2 | eCall@105.7
+Proaktivní@32.3 | asistent@67.7 | řízení@95.9 | (PDA)@116.1
+8@562.3

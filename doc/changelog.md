@@ -21,6 +21,58 @@ to one or more related commits.
 
 ---
 
+## 0.2.28 — 2026-09-14
+
+### Added
+- Equipment extraction in the Dacia scraper parser (`scraper/parsers/
+  dacia_equipment.py`): every Dacia model's price list has its own
+  "Hlavní prvky sériové výbavy" page listing each trim's standard
+  equipment - either as that trim's complete list, or (Sandero, Sandero
+  Stepway, Spring, Jogger) as a delta "navíc oproti <nižší trim>" on top
+  of a lower trim's list. `DaciaParser` now reads this page once per
+  document and attaches the right per-trim set to each `ExtractedVariant`
+  (all `STANDARD` - Dacia's price lists have no priced a-la-carte options),
+  the same generic `ExtractedVariant.equipment` field every parser can
+  populate - `scripts/import_scraper_data.py` needed no changes.
+  Fixes: Dacia vehicles (e.g. "Sandero Expression", "Sandero Stepway
+  Extreme") showing no equipment at all in the vehicle detail view.
+- `storage/scraper.db` backfilled with equipment for the 6 Dacia
+  documents already scraped before this parser change (re-parsed their
+  already-downloaded PDFs locally, no re-scrape) - 1,710 new
+  `equipment_assignment` rows, then re-imported into `storage/
+  drivewise.db` via the existing `scripts/import_scraper_data.py`.
+
+## 0.2.27 — 2026-09-14
+
+### Added
+- Volkswagen Tiguan as a second real, hand-verified vehicle in
+  `app.db.seed.seed_demo_data()` (`backend/app/db/seed.py`), alongside the
+  existing Mazda CX-5 - People/R-Line People trims, one FWD diesel and one
+  AWD petrol configuration, all figures (prices, tech specs, paint codes,
+  optional-equipment surcharges) read from
+  `storage/cars/vw/tiguan/Akcni_Tiguan_People_01_07_2026_new_cover_new.pdf`.
+- Real colors and per-trim equipment for the Mazda CX-5 seed, replacing the
+  previous single placeholder color/option: all 7 paint options from the
+  brochure's "NABÍDKA BAREV KAROSERIE" table and ~70 real standard-equipment
+  items per trim from its VÝBAVA tables (audio, exterior, interior, safety,
+  comfort) - both configurations now exercise the vehicle detail modal's
+  colors/standard-equipment sections with real brochure data instead of a
+  single fabricated row each.
+- VW's optional equipment (wheels, lighting packages, upholstery,
+  warranty/service packages) seeded with real Kč surcharges, so the
+  detail modal's "Volitelná výbava" section - previously always empty in
+  the demo data - now shows real priced options for the first time.
+
+### Changed
+- `SeededData` (`backend/app/db/seed.py`, mirrored in
+  `backend/tests/conftest.py`) gained `vw_model_id`/`config_people_fwd_id`/
+  `config_rline_awd_id` alongside the existing Mazda fields.
+- Catalog-level tests (`test_catalog_api.py`, `tests/ui/test_state.py`)
+  updated for the now 2-brand/4-configuration seeded catalog; the
+  `Color.finish_type` on Mazda's colors moved from a hardcoded `solid` to
+  `None`, matching the brochure (which states no finish per color, unlike
+  VW's explicit solid/metallic/pearlescent categorization).
+
 ## 0.2.26 — 2026-09-14
 
 ### Added

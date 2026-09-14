@@ -66,6 +66,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .hyundai_equipment import parse_equipment
 
 _TABLE_HEADER_MARKER = "Výbava a motor"
 _COLUMN_GAP_THRESHOLD = 15.0  # pt; continuation gaps are ~1-3pt, real column gaps are 27pt+
@@ -146,12 +147,15 @@ class HyundaiParser(BaseParser):
             One `ExtractedVariant` per engine/trim row found across all
             pages with a `_TABLE_HEADER_MARKER` table (a document can have
             more than one, e.g. Santa Fe's HEV table on page 1 and PHEV
-            table on page 8), `powertrain` classified per-row.
+            table on page 8), `powertrain` classified per-row, `equipment`
+            populated from the "Přehled hlavních prvků stupňů výbav"
+            matrix (see `hyundai_equipment.parse_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
         with pdfplumber.open(pdf_path) as pdf:
             model = _extract_model(pdf)
+            equipment_by_trim = parse_equipment(pdf)
 
             for page in pdf.pages:
                 text = page.extract_text() or ""
@@ -193,6 +197,7 @@ class HyundaiParser(BaseParser):
                             source_page=page.page_number,
                             raw_text=line_text(line),
                             powertrain=_classify_powertrain(engine),
+                            equipment=equipment_by_trim.get(trim, {}),
                         )
                     )
 

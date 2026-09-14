@@ -1,0 +1,129 @@
+=== Trophy (64) ===
+ - 10,25" přístrojový štít před řidičem
+ - 12V zásuvka
+ - 19" kola z lehkých slitin, přední pneumatiky 245/45R19, zadní pneumatiky 275/40R19
+ - 2 USB porty (1x USB A, 1x USB C)
+ - 2 mikrofony
+ - 360° parkovací kamera*
+ - 7" dotykový displej ve středovém tunelu pro ovládání klimatizace a dalších funkcí
+ - Adaptivní tempomat (ACC)
+ - Aktivní mřížka chladiče
+ - Asistent pro jízdu v koloně (TJA)
+ - Automaticky sklopná, vyhřívaná zpětná zrcátka
+ - Automatická dvouzónová klimatizace
+ - Automatická dálková světla (IHC)
+ - Automatické světlomety
+ - Bezklíčový přístup
+ - Bluetooth® handsfree
+ - Dva 7" dotykové displeje
+ - Elektricky ovládané dveře, výklopné nahoru
+ - Elektronická parkovací brzda (EPB) s funkcí Auto Hold
+ - Elektronická uzávěrka diferenciálu (XDS)
+ - Full LED světlomety
+ - Integrovaný hlavový a hrudní airbag
+ - Inteligentní asistent rychlosti (ISA)
+ - Interiér včetně sedadel v šedé barvě
+ - Jednopedálové ovládání
+ - Launch Control
+ - Možnost využití vozidla jako záložního zdroje energie (V2L)
+ - Nabíjecí kabel Mode 3 Typ 2
+ - Navigační systém s informacemi o dopravní situaci v reálném čase
+ - Nouzový asistent pro udržení jízdního pruhu (ELK)
+ - Okna elektricky ovládaná s funkcí auto a ochranou proti přiskřípnutí
+ - Osvětlení zavazadlového prostoru
+ - Ovládání některých funkcí pomocí aplikace iSmart (klimatizace, vyhřívání sedadel, volantu, kontrola nabití baterie,…)
+ - Plátěná střecha elektricky ovládaná
+ - Podélně i výškově nastavitelný volant
+ - Prémiový audiosystém Bose s 8 reproduktory
+ - Přední a zadní parkovací senzory
+ - Režim displeje Track Mode
+ - Sada na opravu pneumatik
+ - Sedadlo řidiče i spolujezdce elektricky ovládané v 6 směrech
+ - Sportovní brzdové třmeny a brzdiče Brembo
+ - Sportovní pedály
+ - Sportovní sedadla s čalouněním v kombinaci látka/syntetická kůže
+ - Systém automatického nouzového brzdění (AEB)
+ - Systém monitorování tlaku v pneumatikách (TPMS)
+ - Systém nouzového volání E-Call
+ - Systém sledování mrtvého úhlu (BSM)
+ - Systém sledování pozornosti řidiče (DMS)
+ - Systém udržování v jízdním pruhu (LKA)
+ - Systém varování před opuštěním jízdního pruhu (LDW)
+ - Upozornění na hrozící kolizi za vozidlem (RCW)
+ - Upozornění na nezapnuté bezpečnostní pásy
+ - Upozornění na vozy přijíždějící z boku při couvání (RCTA)
+ - Upozornění na únavu řidiče (UDW)
+ - Varování před přijíždějícími vozidly při otevírání dveří (DOW)
+ - Vnitřní zpětné zrcátko s automatickým stmíváním
+ - Vyhřívaná sedadla
+ - Vyhřívaný volant
+ - Wi-Fi Hotspot
+ - Zadní LED světlomety
+ - Zadní mlhové světlomety
+ - Zatmavená okna
+ - Zrcadlení chytrého telefonu Apple Carplay/Android Auto
+ - Černá střecha
+=== GT (63) ===
+ - 10,25" přístrojový štít před řidičem
+ - 12V zásuvka
+ - 2 USB porty (1x USB A, 1x USB C)
+ - 2 mikrofony
+ - 20" kola z lehkých slitin, přední pneumatiky 245/40R20, zadní pneumatiky 275/35R20
+ - 360° parkovací kamera*
+ - 7" dotykový displej ve středovém tunelu pro ovládání klimatizace a dalších funkcí
+ - Adaptivní tempomat (ACC)
+ - Aktivní mřížka chladiče
+ - Asistent pro jízdu v koloně (TJA)
+ - Automaticky sklopná, vyhřívaná zpětná zrcátka
+ - Automatická dvouzónová klimatizace
+ - Automatická dálková světla (IHC)
+ - Automatické světlomety
+ - Bezklíčový přístup
+ - Bluetooth® handsfree
+ - Dva 7" dotykové displeje
+ - Elektricky ovládané dveře, výklopné nahoru
+ - Elektronická parkovací brzda (EPB) s funkcí Auto Hold
+ - Elektronická uzávěrka diferenciálu (XDS)
+ - Full LED světlomety
+ - Integrovaný hlavový a hrudní airbag
+ - Inteligentní asistent rychlosti (ISA)
+ - Interiér včetně sedadel v šedé barvě
+ - Jednopedálové ovládání
+ - Launch Control
+ - Možnost využití vozidla jako záložního zdroje energie (V2L)
+ - Nabíjecí kabel Mode 3 Typ 2
+ - Navigační systém s informacemi o dopravní situaci v reálném čase
+ - Nouzový asistent pro udržení jízdního pruhu (ELK)
+ - Okna elektricky ovládaná s funkcí auto a ochranou proti přiskřípnutí
+ - Osvětlení zavazadlového prostoru
+ - Ovládání některých funkcí pomocí aplikace iSmart (klimatizace, vyhřívání sedadel, volantu, kontrola nabití baterie,…)
+ - Plátěná střecha elektricky ovládaná
+ - Podélně i výškově nastavitelný volant
+ - Prémiový audiosystém Bose s 8 reproduktory
+ - Přední a zadní parkovací senzory
+ - Režim displeje Track Mode
+ - Sada na opravu pneumatik
+ - Sedadlo řidiče i spolujezdce elektricky ovládané v 6 směrech
+ - Sportovní brzdové třmeny a brzdiče Brembo
+ - Sportovní pedály
+ - Systém automatického nouzového brzdění (AEB)
+ - Systém monitorování tlaku v pneumatikách (TPMS)
+ - Systém nouzového volání E-Call
+ - Systém sledování mrtvého úhlu (BSM)
+ - Systém sledování pozornosti řidiče (DMS)
+ - Systém udržování v jízdním pruhu (LKA)
+ - Systém varování před opuštěním jízdního pruhu (LDW)
+ - Upozornění na hrozící kolizi za vozidlem (RCW)
+ - Upozornění na nezapnuté bezpečnostní pásy
+ - Upozornění na vozy přijíždějící z boku při couvání (RCTA)
+ - Upozornění na únavu řidiče (UDW)
+ - Varování před přijíždějícími vozidly při otevírání dveří (DOW)
+ - Vnitřní zpětné zrcátko s automatickým stmíváním
+ - Vyhřívaná sedadla
+ - Vyhřívaný volant
+ - Wi-Fi Hotspot
+ - Zadní LED světlomety
+ - Zadní mlhové světlomety
+ - Zatmavená okna
+ - Zrcadlení chytrého telefonu Apple Carplay/Android Auto
+ - Černá střecha

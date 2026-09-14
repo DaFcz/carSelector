@@ -98,6 +98,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .opel_equipment import parse_standard_equipment, resolve_trim_equipment
 
 _KNOWN_MODELS = (
     "Astra Sports Tourer",
@@ -259,12 +260,15 @@ class OpelParser(BaseParser):
         Returns:
             One `ExtractedVariant` per price row found on the page(s)
             with a "MOTOR ... PŘEVODOVKA ..." (or, on the all-electric
-            documents, "MOTOR ... BATERIE ... DOJEZD ...") header.
+            documents, "MOTOR ... BATERIE ... DOJEZD ...") header, with
+            `equipment` populated from the "STANDARDNÍ VÝBAVA" page where
+            available (see `opel_equipment.parse_standard_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
         with pdfplumber.open(pdf_path) as pdf:
             model = _extract_model_name(pdf)
+            equipment_by_trim = parse_standard_equipment(pdf)
 
             for page in pdf.pages:
                 words = page.extract_words()
@@ -346,6 +350,7 @@ class OpelParser(BaseParser):
                             source_page=page.page_number,
                             raw_text=line_text(row_words_sorted),
                             powertrain=_classify_powertrain(motor),
+                            equipment=resolve_trim_equipment(equipment_by_trim, trim),
                         )
                     )
 

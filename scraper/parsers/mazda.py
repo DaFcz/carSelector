@@ -94,6 +94,7 @@ from pathlib import Path
 import pdfplumber
 
 from .base import BaseParser, ExtractedVariant
+from .mazda_equipment import parse_equipment
 
 _MODEL_LINE_RE = re.compile(r"MAZDA(.+)")
 _BODY_STYLE_MARKERS = (("CENY HATCHBACK", ""), ("CENY SEDAN", " Sedan"))
@@ -168,7 +169,9 @@ class MazdaParser(BaseParser):
         Returns:
             One `ExtractedVariant` per validated price row found across
             all pages, `model` split into a body-style-specific name where
-            the document has more than one (currently just Mazda3).
+            the document has more than one (currently just Mazda3), each
+            with `equipment` populated from the VÝBAVA pages (see
+            `mazda_equipment.parse_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
@@ -214,5 +217,24 @@ class MazdaParser(BaseParser):
                             powertrain=self.powertrain,
                         )
                     )
+
+            # Trim names/order per model come from the price rows just
+            # parsed above (first-seen order = left-to-right column order
+            # on a VÝBAVA page too, verified against all three fixtures),
+            # not from re-parsing an equipment page's own header - see
+            # mazda_equipment.py's module docstring for why (a genuine
+            # two-word trim, Mazda3's "Homura Plus", can't be told apart
+            # from two one-word trims by splitting header text alone).
+            trims_by_model: dict[str, list[str]] = {}
+            for variant in variants:
+                trims_by_model.setdefault(variant.model, [])
+                if variant.trim not in trims_by_model[variant.model]:
+                    trims_by_model[variant.model].append(variant.trim)
+
+            equipment_by_model = parse_equipment(pdf, trims_by_model)
+            for variant in variants:
+                variant.equipment = equipment_by_model.get(variant.model, {}).get(variant.trim, {})
+
+        return variants
 
         return variants

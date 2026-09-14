@@ -26,6 +26,7 @@ import pdfplumber
 
 from .base import BaseParser, ExtractedVariant
 from .volkswagen import _MODEL_HEADER_RE, _TABLE_HEADER_MARKER
+from .vw_equipment import parse_standard_equipment
 
 _ROW_RE = re.compile(
     r"^(?P<description>.+?)\s+"
@@ -77,6 +78,10 @@ class VolkswagenEvParser(BaseParser):
                         continue
 
                     variants.append(self._build_variant(model, trim, page.page_number, row_match))
+
+            equipment_by_trim = parse_standard_equipment(pdf)
+            for variant in variants:
+                variant.equipment = equipment_by_trim.get(variant.trim, {})
 
         return variants
 

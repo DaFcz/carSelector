@@ -1,0 +1,16 @@
+=== scraper/tests/fixtures\mg_cyberster_cenik.pdf ===
+=== scraper/tests/fixtures\mg_hs_cenik.pdf ===
+=== scraper/tests/fixtures\mg_mg3_cenik.pdf ===
+ - ovládání klimatizace a vyhřívání sedadel na dálku z chytrého telefonu
+ - z chytrého telefonu
+=== scraper/tests/fixtures\mg_mg4ev_cenik.pdf ===
+ - ovládání klimatizace a vyhřívání sedadel)
+ - v jízdním pruhu (ELK)
+=== scraper/tests/fixtures\mg_mgs5ev_cenik.pdf ===
+ - ovládání klimatizace a vyhřívání sedadel)
+=== scraper/tests/fixtures\mg_mgs9phev_cenik.pdf ===
+=== scraper/tests/fixtures\mg_zs_cenik.pdf ===
+ - ovládání klimatizace a vyhřívání sedadel na dálku z chytrého telefonu
+ - přivření
+ - v jízdním pruhu (ELK), upozornění na opuštění jízdního pruhu (LDW) a prevence
+ - z chytrého telefonu

@@ -7,16 +7,19 @@ def test_list_brands(client: TestClient):
     response = client.get("/api/brands")
     assert response.status_code == 200
     body = response.json()
-    assert body["items"] == [{"id": 1, "name": "Mazda", "slug": "mazda"}]
+    assert body["items"] == [
+        {"id": 1, "name": "Mazda", "slug": "mazda"},
+        {"id": 2, "name": "Volkswagen", "slug": "volkswagen"},
+    ]
 
 
 def test_list_vehicles_returns_seeded_configurations(client: TestClient):
     response = client.get("/api/vehicles")
     assert response.status_code == 200
     body = response.json()
-    assert body["total"] == 2
+    assert body["total"] == 4
     trims = {item["trim"] for item in body["items"]}
-    assert trims == {"Prime-Line", "Centre-Line"}
+    assert trims == {"Prime-Line", "Centre-Line", "People", "R-Line People"}
     prime = next(item for item in body["items"] if item["trim"] == "Prime-Line")
     assert prime["price"] == {"amount": 824900.0, "currency": "CZK"}
     assert prime["match_score"] is None
@@ -27,8 +30,9 @@ def test_list_vehicles_filters_by_drivetrain(client: TestClient):
     response = client.get("/api/vehicles", params={"drivetrain": "awd"})
     assert response.status_code == 200
     body = response.json()
-    assert body["total"] == 1
-    assert body["items"][0]["trim"] == "Centre-Line"
+    assert body["total"] == 2
+    trims = {item["trim"] for item in body["items"]}
+    assert trims == {"Centre-Line", "R-Line People"}
 
 
 def test_list_vehicles_filters_by_brand(client: TestClient):
@@ -50,7 +54,9 @@ def test_list_vehicles_filters_by_fuel_type(client: TestClient):
     response = client.get("/api/vehicles", params={"fuel_type": "petrol"})
     assert response.status_code == 200
     body = response.json()
-    assert body["total"] == 2
+    # Both Mazda configs plus the VW R-Line (2.0 TSI 4MOTION, petrol) - the
+    # VW People config is diesel, so it's excluded.
+    assert body["total"] == 3
 
 
 def test_list_vehicles_filters_by_budget_and_currency(client: TestClient):
@@ -79,7 +85,9 @@ def test_list_vehicles_sorts_alphabetically(client: TestClient):
     response = client.get("/api/vehicles", params={"sort": "alpha"})
     assert response.status_code == 200
     trims = [item["trim"] for item in response.json()["items"]]
-    assert trims == ["Centre-Line", "Prime-Line"]
+    # Ordered by (brand, model, trim): Mazda before Volkswagen, then
+    # alphabetically by trim name within each.
+    assert trims == ["Centre-Line", "Prime-Line", "People", "R-Line People"]
 
 
 def test_list_vehicles_rejects_unknown_sort(client: TestClient):
@@ -95,13 +103,46 @@ def test_get_vehicle_detail(client: TestClient, seeded_session: SeededData):
     assert body["model"] == "CX-5"
     assert body["powertrain"]["drivetrain"] == "fwd"
     assert body["powertrain"]["consumption_min"] == 7.0
-    assert body["colors"] == [
-        {"name": "Arctic White", "finish_type": "solid", "surcharge": {"amount": 0.0, "currency": "CZK"}}
-    ]
-    assert body["standard_equipment"] == ["17-inch alloy wheels"]
+    # 7 real colors from the brochure's "NABÍDKA BAREV KAROSERIE" table -
+    # a flat list with no solid/metallic/pearlescent labeling given.
+    assert len(body["colors"]) == 7
+    colors_by_name = {c["name"]: c for c in body["colors"]}
+    assert colors_by_name["Arctic White"] == {
+        "name": "Arctic White", "finish_type": None, "surcharge": {"amount": 0.0, "currency": "CZK"}
+    }
+    assert colors_by_name["Jet Black"]["surcharge"] == {"amount": 14900.0, "currency": "CZK"}
+    # Real per-trim VÝBAVA data (Prime-Line column) - standard only, since
+    # the source gives no per-item price for its "optional within a
+    # package" (m) rows.
+    assert len(body["standard_equipment"]) == 73
+    assert "Elektrická parkovací brzda (EPB) + Auto Hold" in body["standard_equipment"]
+    assert "17-inch alloy wheels" not in body["standard_equipment"]  # old placeholder, gone
     assert body["optional_equipment"] == []
     assert len(body["price_history"]) == 1
     assert body["price_history"][0]["lowest_price_30d"] == {"amount": 875900.0, "currency": "CZK"}
+
+
+def test_get_vehicle_detail_vw_has_priced_optional_equipment(client: TestClient, seeded_session: SeededData):
+    response = client.get(f"/api/vehicles/{seeded_session.config_rline_awd_id}")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["brand"] == "Volkswagen"
+    assert body["model"] == "Tiguan"
+    assert body["powertrain"]["drivetrain"] == "awd"
+    assert len(body["colors"]) == 8
+    colors_by_name = {c["name"]: c for c in body["colors"]}
+    assert colors_by_name["Bílá Oryx perleťový efekt"] == {
+        "name": "Bílá Oryx perleťový efekt",
+        "finish_type": "pearlescent",
+        "surcharge": {"amount": 11100.0, "currency": "CZK"},
+    }
+    # R-Line People = People's standard equipment plus its own extras.
+    assert "Tříbodové bezpečnostní pásy s předepínači" in body["standard_equipment"]
+    assert "IQ.LIGHT HD LED Matrix světlomety s Dynamic Light Assist" in body["standard_equipment"]
+    optional_by_name = {o["name"]: o for o in body["optional_equipment"]}
+    assert optional_by_name["Paket Black Style"] == {
+        "name": "Paket Black Style", "category": "package", "surcharge": {"amount": 7100.0, "currency": "CZK"}
+    }
 
 
 def test_get_vehicle_detail_404(client: TestClient):

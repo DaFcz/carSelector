@@ -99,8 +99,8 @@ switching `DATABASE_URL` to Postgres later needs no model/migration changes.
 
 ```bash
 alembic upgrade head      # creates storage/drivewise.db and the schema in it
-python -m app.db.seed     # seeds one real, hand-verified vehicle (Mazda CX-5) - safe to re-run,
-                           # skips if the DB already has data
+python -m app.db.seed     # seeds two real, hand-verified vehicles (Mazda CX-5, VW Tiguan) - safe to
+                           # re-run, skips if the DB already has data
 ```
 
 `python -m app.db.seed` also calls `Base.metadata.create_all()` first, so on a totally fresh
@@ -202,8 +202,8 @@ pytest tests/ui           # just the UI layer
 
 `tests/conftest.py` spins up a throwaway in-memory SQLite DB per test (via `Base.metadata.create_all`,
 not Alembic), seeds it via `app.db.seed.seed_demo_data()` — the same real sample data drawn from
-the Mazda CX-5 price list in `storage/cars/` that `python -m app.db.seed` writes to the persistent
-dev DB, one source of truth for both — and drives the FastAPI app through `TestClient` - so the
+the Mazda CX-5 and VW Tiguan price lists in `storage/cars/` that `python -m app.db.seed` writes to
+the persistent dev DB, one source of truth for both — and drives the FastAPI app through `TestClient` - so the
 catalog endpoints (brands/models/vehicles/compare) are exercised end to end, not just imported. The
 conversation endpoints are tested only up to the point that requires a live Claude API call (they
 correctly degrade without a key); the AI layer itself isn't covered by this suite.

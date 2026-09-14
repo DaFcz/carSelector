@@ -20,13 +20,15 @@ from tests.conftest import SeededData
 async def test_catalog_state_loads_brands(patch_ui_session, seeded_session: SeededData) -> None:
     state = CatalogState()
     await state.load_brands()
-    assert [b.name for b in state.brands] == ["Mazda"]
+    assert [b.name for b in state.brands] == ["Mazda", "Volkswagen"]
 
 
 async def test_catalog_state_filters_by_drivetrain(patch_ui_session, seeded_session: SeededData) -> None:
     state = CatalogState(drivetrain=Drivetrain.awd)
     await state.load_first_page(sort=None)
-    assert state.total == 1
+    assert state.total == 2
+    # Default order is configuration.id ascending - the Mazda AWD
+    # configuration was seeded first, so it still sorts first.
     assert state.cars[0].configuration_id == seeded_session.config_centre_awd_id
 
 
@@ -40,8 +42,8 @@ async def test_catalog_state_filters_by_brand_id(patch_ui_session, seeded_sessio
 async def test_catalog_state_loads_seeded_vehicles(patch_ui_session, seeded_session: SeededData) -> None:
     state = CatalogState()
     await state.load_first_page(sort=None)
-    assert state.total == 2
-    assert len(state.cars) == 2
+    assert state.total == 4
+    assert len(state.cars) == 4
     assert not state.error
 
 
@@ -134,7 +136,10 @@ async def test_conversation_state_send_wizard_answers_works_without_api_key(
 
     assert state.error is None
     assert state.has_narrowed is True
-    assert len(state.cars) == 2
+    # No budget filter - every seeded SUV (both Mazda configs, both VW
+    # configs) qualifies; AWD is a soft preference so the cheaper of the
+    # two AWD vehicles (Mazda's) still ranks first.
+    assert len(state.cars) == 4
     assert state.cars[0].configuration_id == seeded_session.config_centre_awd_id
     assert state.messages[-2] == ("user", "Vyplnil(a) jsem průvodce: ...")
     assert state.messages[-1][0] == "assistant"

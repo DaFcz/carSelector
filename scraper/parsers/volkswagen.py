@@ -30,6 +30,7 @@ from pathlib import Path
 import pdfplumber
 
 from .base import BaseParser, ExtractedVariant
+from .vw_equipment import parse_standard_equipment
 
 _ROW_RE = re.compile(
     r"^(?P<engine>.+?)\s*/\s*(?P<engine_kw>\d+)\s*kW\s+"
@@ -67,7 +68,8 @@ class VolkswagenParser(BaseParser):
         Returns:
             One `ExtractedVariant` per engine/trim row found across pages
             with a price table, `powertrain` classified per-row via
-            `_classify_powertrain`.
+            `_classify_powertrain`, `equipment` populated from the
+            "Sériová Výbava" pages (see `vw_equipment.parse_standard_equipment`).
         """
         variants: list[ExtractedVariant] = []
 
@@ -96,6 +98,10 @@ class VolkswagenParser(BaseParser):
                         continue
 
                     variants.append(self._build_variant(model, trim, page.page_number, row_match))
+
+            equipment_by_trim = parse_standard_equipment(pdf)
+            for variant in variants:
+                variant.equipment = equipment_by_trim.get(variant.trim, {})
 
         return variants
 
