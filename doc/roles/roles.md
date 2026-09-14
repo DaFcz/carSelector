@@ -463,4 +463,5 @@ This role significantly increases trust in the final recommendations and often d
 | Martin Kolá | Web scraping, document processing |
 | Jan Pikryl | Backend Lead |
 | Dušan Juhás | Frontend Lead |
+| Daniel Fritz | DevOps Engineer |
 
