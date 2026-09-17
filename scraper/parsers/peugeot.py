@@ -95,6 +95,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .peugeot_equipment import parse_equipment as _parse_equipment_pages
 
 _KNOWN_MODELS = ("308 SW", "2008", "208", "3008", "408", "5008", "Rifter")
 _CODE_RE = re.compile(r"^[A-Z0-9]{16}$")
@@ -299,5 +300,18 @@ class PeugeotParser(BaseParser):
                             continue
 
                         pending.append(line)
+
+            trims_by_model: dict[str, list[str]] = {}
+            for variant in variants:
+                trims_by_model.setdefault(variant.model, [])
+                if variant.trim not in trims_by_model[variant.model]:
+                    trims_by_model[variant.model].append(variant.trim)
+
+            equipment_by_model = _parse_equipment_pages(pdf, trims_by_model)
+            for variant in variants:
+                per_trim = equipment_by_model.get(variant.model, {})
+                equipment, surcharge = per_trim.get(variant.trim, ({}, {}))
+                variant.equipment = equipment
+                variant.equipment_surcharge = surcharge
 
         return variants
