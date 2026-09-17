@@ -21,6 +21,16 @@ to one or more related commits.
 
 ---
 
+## 0.2.29 — 2026-09-17
+
+### Changed
+- `scripts/statistics.py` (the repo's own Python file/line-count tool):
+  scan root no longer hardcoded to a local machine path, now resolved from
+  the script's own location; excludes `.venv`/`.git`/caches so third-party
+  code doesn't skew the numbers; output broken down per top-level directory
+  with a size column (B/KB/MB/GB) alongside file/line counts; added
+  `scripts/statistics.bat` wrapper.
+
 ## 0.2.28 — 2026-09-14
 
 ### Added
