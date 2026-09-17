@@ -18,6 +18,15 @@ if exist ".venv\Scripts\activate.bat" (
     exit /b 1
 )
 
+REM Pulls in whatever scraper/ has found since the catalog was last
+REM imported (storage/scraper.db -> storage/drivewise.db) - safe to
+REM re-run every time (natural-key lookups, append-only price history,
+REM see scripts/import_scraper_data.py's own docstring). Failure here
+REM (e.g. no storage/drivewise.db yet - run alembic upgrade head first)
+REM doesn't block starting the app, just leaves the catalog as it was.
+echo Importing scraper data into the catalog...
+python scripts\import_scraper_data.py
+
 cd backend
 echo Starting DriveWise AI at http://localhost:8000/  (API docs at /docs)
 python -m uvicorn app.main:app --reload

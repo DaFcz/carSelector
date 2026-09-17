@@ -258,6 +258,14 @@ def parse_equipment(
                 equipment, surcharge = model_equipment[trim]
                 if status == "STANDARD":
                     equipment[item_name] = "STANDARD"
+                    # An identical item_name can legitimately recur under a
+                    # different row elsewhere on the page (e.g. a paint
+                    # option repeated per engine block) - if an earlier
+                    # pass already recorded a price for this same name on
+                    # this trim, drop it so `equipment`/`equipment_surcharge`
+                    # never disagree (STANDARD must never carry a price -
+                    # see option_availability's own CHECK constraint).
+                    surcharge.pop(item_name, None)
                 elif status == "OPTIONAL" and price is not None:
                     equipment[item_name] = "OPTIONAL"
                     surcharge[item_name] = price

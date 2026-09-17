@@ -21,6 +21,67 @@ to one or more related commits.
 
 ---
 
+## 0.2.30 — 2026-09-17
+
+### Added
+- Equipment extraction for nine more scraper brands, following the same
+  pattern 0.2.28 established for Dacia (`ExtractedVariant.equipment`/
+  `equipment_surcharge`, no changes needed in `scripts/
+  import_scraper_data.py`): Mazda (`mazda_equipment.py` - a checkbox
+  matrix whose mark glyphs differ per fixture, read from each page's own
+  legend line rather than hardcoded), Volkswagen ICE/EV (`vw_equipment.py`
+  - a bold-title card grid, shared by both `volkswagen.py`/
+  `volkswagen_ev.py`), Hyundai, MG, Opel, Kia, Renault (bullet-list or
+  matrix pages, per brand), and Peugeot (`peugeot_equipment.py` - a
+  checkbox/price hybrid matrix using a Private-Use-Area glyph for
+  "included", with real per-trim option prices where the source states
+  one). Fixes the reported case: Peugeot 208 GT (and every other Peugeot
+  trim) showing no equipment at all - now 69 standard + 5 priced optional
+  items for that specific trim.
+- `storage/scraper.db` backfilled for all nine brands' already-scraped
+  documents (local re-parse of already-downloaded PDFs, no re-scrape) -
+  30,709 new `equipment_assignment` rows, then re-imported into `storage/
+  drivewise.db` via the existing `scripts/import_scraper_data.py`
+  (30,388 new `option_availability` rows).
+- `scripts/run.bat` now runs `scripts/import_scraper_data.py` before
+  starting the app, so the catalog picks up whatever `scraper/` has found
+  since the last run automatically - a failure there (e.g. no `storage/
+  drivewise.db` yet) doesn't block starting the server, it just leaves
+  the catalog as it was.
+
+### Fixed
+- `peugeot_equipment.py`: an item name that legitimately recurs elsewhere
+  on the same page (e.g. a paint option repeated per engine block) could
+  end up written as `STANDARD` for one trim while an earlier pass had
+  already recorded a price for that same name/trim - violating `option_
+  availability`'s own "a price exists iff optional" CHECK constraint once
+  imported. Setting `STANDARD` now always clears any stale price for that
+  item name first.
+
+### Removed
+- CUPRA's and Ford's own equipment-extraction modules, added in the same
+  work as the brands above: both produced badly garbled item names (their
+  own multi-column word-clustering logic didn't handle these two brands'
+  particular page layouts correctly - verified by hand, not a marginal
+  quality gap) and were never wired into their parsers. Removed rather
+  than shipped half-working or left as unused dead code; equipment
+  extraction for these two brands is still an open gap, same status as
+  BMW/Mercedes-Benz (no equipment section in the source PDF at all) and
+  Audi/Tesla (JSON/HTML sources - see below).
+- Stray debug-session output files that had been committed by mistake
+  (`scratch_*.txt`, `*_out.txt` at the repo root).
+
+### Known limitation
+- Audi's scraped source (`konfigurator.audi.cz`'s modelgroup JSON API)
+  carries no per-vehicle color or equipment catalog - only a single
+  preselected paint code (for the configurator's own preview image) and,
+  for a handful of variants, a warranty marketing blurb, not equipment
+  features. Real color/equipment data would need a materially different,
+  stateful per-model configurator API session this scraper doesn't
+  currently fetch (investigated live via the actual konfigurator.audi.cz
+  app - confirmed such a session-based flow exists behind its "Design"/
+  "Výbava" steps, but reliably automating through it wasn't completed).
+
 ## 0.2.29 — 2026-09-17
 
 ### Changed
