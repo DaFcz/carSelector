@@ -21,6 +21,46 @@ to one or more related commits.
 
 ---
 
+## 0.2.31 — 2026-09-18
+
+### Added
+- Equipment and color extraction for CUPRA (`cupra_equipment.py`), rewritten
+  from scratch after 0.2.30 deleted the brand's first, badly-garbled attempt.
+  Standard equipment comes from CUPRA's own "SÉRIOVÁ VÝBAVA" pages (a 2-4
+  column newspaper grid told apart from category headings purely by font
+  size, read in column-major order since one trim's own section can span
+  several columns/pages without re-declaring itself); colors come from the
+  "BARVY" pages (a Private-Use-Area included/priced-option glyph per trim
+  column, same icon-font convention `peugeot_equipment.py` already found) and
+  are folded into the same `equipment`/`equipment_surcharge` fields, since
+  `ExtractedVariant` has no dedicated colors field. Verified against all six
+  CZ models (Born, Formentor, Leon, Leon Sportstourer, Raval, Terramar) - see
+  `scraper/tests/test_cupra_equipment.py`.
+- `storage/scraper.db` backfilled for all six already-scraped CUPRA
+  documents (local re-parse, no re-scrape) - 6,155 new
+  `equipment_assignment` rows, then re-imported into `storage/drivewise.db`
+  via `scripts/import_scraper_data.py`.
+
+### Fixed
+- `cupra.py`: Terramar's own price table calls its special editions "Tribe
+  Edition"/"Tribe VZ Edition", but the SAME document's SÉRIOVÁ VÝBAVA
+  headings drop the "Edition" suffix ("Tribe"/"Tribe VZ") - a genuine
+  naming split within CUPRA's own PDF, not a parser bug. Without handling
+  it, both trims silently got zero equipment items. `_resolve_equipment`
+  now falls back to the suffix-stripped name when the exact trim name
+  isn't found.
+
+### Known limitation
+- Raval's own "Akční model ROOKIE" special edition has no SÉRIOVÁ VÝBAVA
+  section under any name in its source PDF - stays a genuine equipment gap
+  (it still gets colors, from the BARVY page's own sequential trim
+  consumption, which doesn't depend on the equipment page at all).
+- A few CUPRA "BARVY" pages (e.g. Terramar's) carry an unexplained second
+  glyph cluster far to the right of the real per-trim mark columns; excluded
+  via a hardcoded x-position bound (`_MARK_MAX_X0`) rather than fully
+  root-caused, so a handful of color rows on those specific pages may still
+  be missing.
+
 ## 0.2.30 — 2026-09-17
 
 ### Added

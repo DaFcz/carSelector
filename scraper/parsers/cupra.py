@@ -72,6 +72,7 @@ import pdfplumber
 
 from ._pdf_layout import group_into_lines, line_text
 from .base import BaseParser, ExtractedVariant
+from .cupra_equipment import parse_colors, parse_standard_equipment
 
 # Longest name first, so "Leon Sportstourer"'s cover page isn't misread as plain "Leon".
 _KNOWN_MODELS = ("Leon Sportstourer", "Leon", "Formentor", "Terramar", "Born", "Raval")
@@ -113,6 +114,31 @@ def _is_header_line(line: list[dict]) -> bool:
 
 def _parse_price(text: str) -> float:
     return float(text.replace(" ", "").replace(",", ""))
+
+
+def _resolve_equipment(trim: str, equipment_by_trim: dict[str, dict[str, str]]) -> dict[str, str]:
+    """Args:
+        trim: A price-table trim name (`ExtractedVariant.trim`).
+        equipment_by_trim: `parse_standard_equipment`'s own result, keyed
+            by the SÉRIOVÁ VÝBAVA page's own heading text.
+
+    Returns:
+        That trim's equipment, or `{}` if genuinely uncovered. Handles
+        one verified naming split, not a general fuzzy match: Terramar's
+        price table calls its special editions "Tribe Edition"/"Tribe VZ
+        Edition", but the SAME document's own SÉRIOVÁ VÝBAVA headings
+        drop the marketing suffix ("Tribe"/"Tribe VZ" - see
+        cupra_equipment.py's own module docstring for how a bare heading
+        vs. a "<TRIM> /navíc oproti výbavě <OTHER>" one is told apart;
+        neither form ever restates "Edition"). Raval's own "Akční model
+        ROOKIE" has no such alias - it has no SÉRIOVÁ VÝBAVA section
+        under ANY name - so it stays a genuine `{}` gap, not guessed.
+    """
+    if trim in equipment_by_trim:
+        return equipment_by_trim[trim]
+    if trim.endswith(" Edition"):
+        return equipment_by_trim.get(trim[: -len(" Edition")], {})
+    return {}
 
 
 def _classify_powertrain(engine: str, consumption_unit: str | None) -> str:
@@ -209,5 +235,29 @@ class CupraParser(BaseParser):
                         # module docstring) - skipped without touching
                         # `trim`, not mistaken for a new heading.
                         trim = text.strip()
+
+            trims_in_order: list[str] = []
+            for variant in variants:
+                if variant.trim not in trims_in_order:
+                    trims_in_order.append(variant.trim)
+
+            equipment_by_trim = parse_standard_equipment(pdf)
+            colors_by_trim = parse_colors(pdf, trims_in_order)
+
+            for variant in variants:
+                equipment = dict(_resolve_equipment(variant.trim, equipment_by_trim))
+                surcharge: dict[str, float] = {}
+                trim_colors, trim_color_surcharge = colors_by_trim.get(variant.trim, ({}, {}))
+                # Colors have no dedicated place in this schema (see
+                # base.py's ExtractedVariant) - folded into the same
+                # equipment/equipment_surcharge fields every other item
+                # already uses, same convention storage/README.md and
+                # every other brand's own paint-as-equipment items here
+                # (e.g. peugeot_equipment.py's own priced paint options)
+                # already follow.
+                equipment.update(trim_colors)
+                surcharge.update(trim_color_surcharge)
+                variant.equipment = equipment
+                variant.equipment_surcharge = surcharge
 
         return variants
