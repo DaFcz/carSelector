@@ -40,3 +40,13 @@ def test_t_count_few() -> None:
 
 def test_t_count_other() -> None:
     assert t_count("results.title", 7) == "7 shod pro vás"
+
+
+def test_error_message_is_specific_for_ai_failures_and_generic_otherwise() -> None:
+    from app.ui.i18n import STRINGS
+    from app.ui.pages import error_message
+
+    for code in STRINGS["chat"]["errors"]:
+        assert error_message(code) == STRINGS["chat"]["errors"][code]
+    assert error_message("ai_not_configured") == STRINGS["chat"]["aiNotConfigured"]
+    assert error_message("unknown_error") == STRINGS["chat"]["genericError"]

@@ -84,9 +84,10 @@ class RequirementInterpreter:
         Returns:
             The `LlmClient` this instance uses for API calls.
         """
-        if self._client is None:
-            self._client = get_client()
-        return self._client
+        # Not cached on `self`: `get_client()` is already a cached singleton,
+        # and re-resolving it each time lets a key entered/changed in the UI
+        # take effect without a restart.
+        return self._client if self._client is not None else get_client()
 
     @staticmethod
     def _strip_code_fences(text: str) -> str:

@@ -33,13 +33,16 @@ CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-5")
 
 # Groq (https://console.groq.com) - an alternative provider with a free,
 # no-credit-card developer tier (rate-limited, not credit-limited), useful
-# for dev/testing without spending Anthropic credits. llama-3.3-70b-versatile
-# is Groq's strongest general-purpose model as of this writing - a
-# reasonable default for structured JSON extraction + Czech generation,
-# but prompt behavior against it is unverified (same caveat backend/README.md
-# already documents for Claude - see there).
+# for dev/testing without spending Anthropic credits. Groq retires models
+# on a schedule (https://console.groq.com/docs/deprecations): the former
+# default llama-3.3-70b-versatile was shut down on 2026-08-16, after which
+# calls fail with "model not available". openai/gpt-oss-120b is the
+# replacement Groq names for it - a reasoning model, which
+# app/ai/llm.py's GroqLlmClient accounts for. Prompt behavior against it is
+# unverified (same caveat backend/README.md already documents for Claude).
+# If this one is retired too, override with GROQ_MODEL in the environment.
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 # Origins an external client (not the bundled UI, which is served from this
 # same origin - see app/ui/ - and never needs CORS) can call this API from.

@@ -12,10 +12,12 @@ synchronous SQLAlchemy/orchestrator calls never block the event loop other
 connections share - see `app/ui/db.py`.
 """
 
+import logging
 from dataclasses import dataclass, field
 
 from nicegui import run
 
+from app.ai.errors import AiProviderError
 from app.models.enums import Drivetrain, FuelType
 from app.schemas.catalog import BrandRead
 from app.schemas.common import Money
@@ -28,6 +30,8 @@ from app.ui import db as ui_db
 # Mirrors frontend/src/types/conversation.ts's ChatMessage.
 ChatMessage = tuple[str, str]  # (role, text) - role is "user" | "assistant"
 
+logger = logging.getLogger(__name__)
+
 PAGE_SIZE = 20
 
 
@@ -36,8 +40,9 @@ class ConversationState:
     """The chat/narrowing side of the page - AI-driven conversation state.
 
     Mirrors `conversationStore` + `useConversation`'s combined state and
-    behavior. `error` is one of `"ai_not_configured"` | `"unknown_error"`
-    | `None` - there's no `"network_error"` case here (unlike the old
+    behavior. `error` is one of `"ai_not_configured"` |
+    an `AiProviderError.code` (`"ai_invalid_key"`, `"ai_rate_limited"`, ...)
+    | `"unknown_error"` | `None` - there's no `"network_error"` case here (unlike the old
     frontend's `ApiError`), since calling the orchestrator in-process has
     no network hop to fail.
     """
@@ -104,7 +109,11 @@ class ConversationState:
             # AI layer not configured (missing ANTHROPIC_API_KEY) - see
             # app/ai/client.py.
             self.error = "ai_not_configured"
+        except AiProviderError as exc:
+            logger.warning("AI provider call failed (%s): %s", exc.code, exc)
+            self.error = exc.code
         except Exception:
+            logger.exception("Sending a chat message failed")
             self.error = "unknown_error"
         finally:
             self.is_sending = False
@@ -142,7 +151,13 @@ class ConversationState:
             self.requirements = result.requirements
             self.cars = result.vehicles
             self.has_narrowed = True
+        except AiProviderError as exc:
+            # Only the explanation step calls the AI here (no free text to
+            # interpret), but it can still be rejected - e.g. a bad key.
+            logger.warning("AI provider call failed (%s): %s", exc.code, exc)
+            self.error = exc.code
         except Exception:
+            logger.exception("Applying the wizard's answers failed")
             self.error = "unknown_error"
         finally:
             self.is_sending = False

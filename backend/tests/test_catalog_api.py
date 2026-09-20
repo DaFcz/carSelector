@@ -214,3 +214,18 @@ def test_send_message_without_api_key_returns_503(client: TestClient):
     )
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "ai_not_configured"
+
+
+def test_send_message_maps_ai_provider_failure_to_502(client, monkeypatch) -> None:
+    from app.ai.errors import AiProviderError
+    from app.api import conversations as conversations_api
+
+    def _reject(*_args, **_kwargs):
+        raise AiProviderError("ai_invalid_key", "Invalid API Key")
+
+    monkeypatch.setattr(conversations_api.orchestrator, "handle_message", _reject)
+    conversation_id = client.post("/api/conversations").json()["conversation_id"]
+    response = client.post(f"/api/conversations/{conversation_id}/messages", json={"text": "Hello"})
+
+    assert response.status_code == 502
+    assert response.json()["error"]["code"] == "ai_invalid_key"

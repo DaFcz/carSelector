@@ -9,9 +9,11 @@ from dataclasses import dataclass
 from nicegui import app, ui
 from nicegui.events import GenericEventArguments
 
+from app.ai.client import is_configured
 from app.models.enums import Drivetrain, FuelType
 from app.schemas.requirement import StructuredRequirements
 from app.schemas.vehicle import VehicleSummary
+from app.ui.components.api_key_dialog import api_key_dialog
 from app.ui.components.chat_column import chat_column
 from app.ui.components.filter_bar import filter_bar
 from app.ui.components.header import app_header
@@ -19,12 +21,23 @@ from app.ui.components.requirements_drawer import requirements_drawer
 from app.ui.components.results_grid import append_car_cards, results_grid, sort_control
 from app.ui.components.vehicle_detail_modal import vehicle_detail_modal
 from app.ui.components.wizard import wizard_dialog
-from app.ui.i18n import t, t_count
+from app.ui.i18n import STRINGS, t, t_count
 from app.ui.sort import BACKEND_SORT_OPTIONS, sort_cars
 from app.ui.state import PAGE_SIZE, CatalogState, ConversationState, WizardState
 from app.ui.styles import register_styles
 
 CUSTOM_ORDER_KEY = "custom_car_order"
+
+
+def error_message(error: str) -> str:
+    """User-facing text for a `ConversationState.error` code - specific for
+    the AI failures (`ai_not_configured` and every `AiProviderError.code`),
+    the generic one for anything else."""
+    if error == "ai_not_configured":
+        return t("chat.aiNotConfigured")
+    if error in STRINGS["chat"]["errors"]:
+        return t(f"chat.errors.{error}")
+    return t("chat.genericError")
 
 
 @dataclass
@@ -144,6 +157,12 @@ async def index() -> None:
         refresh_all()
 
     open_wizard_dialog = wizard_dialog(wizard_state, finish_wizard)
+
+    def on_api_key_changed() -> None:
+        conv.error = None  # a "not configured" banner may be stale now
+        refresh_all()
+
+    open_api_key_dialog = api_key_dialog(on_api_key_changed)
 
     def open_wizard() -> None:
         wizard_state.open_wizard()
@@ -282,7 +301,9 @@ async def index() -> None:
 
         @ui.refreshable
         def chrome() -> None:
-            app_header(len(conv.requirements), restart, toggle_drawer, open_wizard)
+            app_header(
+                len(conv.requirements), restart, toggle_drawer, open_wizard, is_configured(), open_api_key_dialog
+            )
 
         chrome()
 
@@ -324,7 +345,7 @@ async def index() -> None:
                         )
 
                     if conv.error is not None:
-                        message = t("chat.aiNotConfigured") if conv.error == "ai_not_configured" else t("chat.genericError")
+                        message = error_message(conv.error)
                         ui.label(message).classes(
                             "mb-4 w-full rounded-control bg-flag-bg px-3.5 py-2.5 text-[13px] text-flag"
                         )

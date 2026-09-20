@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.ai.errors import AiProviderError
 from app.api.deps import get_db
 from app.api.errors import api_error
 from app.schemas.conversation import ConversationStartResponse, MessageRequest, MessageResponse
@@ -27,3 +28,7 @@ def send_message(
         # AI layer not configured (missing ANTHROPIC_API_KEY) - see
         # app/ai/client.py.
         api_error(503, "ai_not_configured", str(exc))
+    except AiProviderError as exc:
+        # The provider rejected/failed the call (bad key, rate limit, ...) -
+        # a bad-gateway-style failure, distinct from "not configured" above.
+        api_error(502, exc.code, str(exc))

@@ -219,3 +219,36 @@ def test_wizard_state_needs_awd_false_leaves_drivetrain_unset() -> None:
     wizard.needs_awd = False
 
     assert wizard.to_structured_requirements().drivetrain is None
+
+
+async def test_conversation_state_send_surfaces_ai_provider_error_code(patch_ui_session, monkeypatch, caplog) -> None:
+    from app.ai.errors import AiProviderError
+    from app.ui import state as state_module
+
+    def _reject(*_args, **_kwargs):
+        raise AiProviderError("ai_invalid_key", "Invalid API Key")
+
+    monkeypatch.setattr(state_module.orchestrator, "handle_message", _reject)
+    state = ConversationState()
+    await state.begin()
+    with caplog.at_level("WARNING"):
+        await state.send("Chci rodinné auto.")
+
+    assert state.error == "ai_invalid_key"
+    assert not state.is_sending
+    assert "ai_invalid_key" in caplog.text  # logged, not silently swallowed
+
+
+async def test_conversation_state_send_logs_unexpected_errors(patch_ui_session, monkeypatch, caplog) -> None:
+    from app.ui import state as state_module
+
+    def _explode(*_args, **_kwargs):
+        raise ValueError("kaboom")
+
+    monkeypatch.setattr(state_module.orchestrator, "handle_message", _explode)
+    state = ConversationState()
+    await state.begin()
+    await state.send("Chci rodinné auto.")
+
+    assert state.error == "unknown_error"
+    assert "kaboom" in caplog.text

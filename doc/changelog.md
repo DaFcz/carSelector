@@ -21,6 +21,48 @@ to one or more related commits.
 
 ---
 
+## 0.2.32 — 2026-09-20
+
+### Added
+- "AI klíč" button in the header (`app/ui/components/api_key_dialog.py`) that
+  opens a dialog for entering the AI provider's API key (Groq by default per
+  `AI_PROVIDER`) at runtime, so no key has to be written into source code or
+  `.env`. The button is highlighted ("AI klíč chybí") while no key is set.
+  The key is held in process memory only (`app.ai.client.set_runtime_api_key`),
+  takes priority over the environment's key, is never shown back, and has to
+  be re-entered after an app restart.
+
+- `AiProviderError` (`app/ai/errors.py`): the `LlmClient` adapters now translate
+  Anthropic/Groq SDK failures into provider-agnostic codes (`ai_invalid_key`,
+  `ai_rate_limited`, `ai_model_unavailable`, `ai_unreachable`, `ai_error`).
+  The chat and the wizard show a specific Czech message for each (e.g. "AI
+  služba odmítla API klíč ..."), and `POST /api/conversations/{id}/messages`
+  answers 502 with the same code.
+
+### Changed
+- Default `GROQ_MODEL` is now `openai/gpt-oss-120b`: Groq shut down the former
+  default `llama-3.3-70b-versatile` on 2026-08-16, so every Groq call failed
+  with "model not available". Because it is a reasoning model,
+  `GroqLlmClient` sends `reasoning_effort="low"` and `include_reasoning=False`
+  and adds headroom to `max_tokens` for `openai/gpt-oss*` models, so short
+  answers (the 100-token explanation) aren't eaten by the thinking budget.
+
+### Fixed
+- The API-key dialog now rejects a key containing diacritics/non-ASCII
+  characters or spaces (typically a typo or the wrong keyboard layout). Such
+  a key used to reach the HTTP layer and crash it with a `UnicodeEncodeError`
+  while building the `Authorization` header, before any request was sent -
+  shown only as the generic error.
+  The rejection names the offending character and its position (never the
+  key), and the key field is `autocomplete=new-password` so browsers don't
+  autofill a saved credential into it.
+- A rejected/failed AI call used to surface only as the generic "Něco se
+  nepovedlo" with nothing logged; `ConversationState` now logs the cause
+  (`logging`) and reports the specific error code instead.
+- `RequirementInterpreter`/`ExplanationGenerator` no longer cache the shared
+  default client on first use, so a key entered or changed after the first AI
+  call takes effect without restarting.
+
 ## 0.2.31 — 2026-09-18
 
 ### Added

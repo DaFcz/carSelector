@@ -9,6 +9,33 @@ from typing import Protocol
 import anthropic
 import groq
 
+from app.ai.errors import AiProviderError
+
+
+def _to_provider_error(exc: Exception, connection_error: type[Exception]) -> AiProviderError:
+    """Maps an SDK exception to an `AiProviderError`. Anthropic's and
+    Groq's SDKs share the same layout (a status-carrying `APIStatusError`
+    family plus an `APIConnectionError`), so one mapping serves both.
+
+    Args:
+        exc: The SDK exception (`anthropic.APIError` / `groq.APIError`).
+        connection_error: That SDK's `APIConnectionError` class (covers
+            timeouts too) - the one case with no HTTP status.
+    """
+    status = getattr(exc, "status_code", None)
+    text = str(exc)
+    if isinstance(exc, connection_error):
+        code = "ai_unreachable"
+    elif status in (401, 403):
+        code = "ai_invalid_key"
+    elif status == 429:
+        code = "ai_rate_limited"
+    elif status == 404 or (status == 400 and "model" in text.lower()):
+        code = "ai_model_unavailable"
+    else:
+        code = "ai_error"
+    return AiProviderError(code, text)
+
 
 class LlmClient(Protocol):
     """One system-prompted, single-turn text completion call - the only
@@ -28,6 +55,10 @@ class LlmClient(Protocol):
         Returns:
             The model's text reply, concatenated if the provider returns
             it in multiple parts.
+
+        Raises:
+            AiProviderError: The provider rejected or failed the call
+                (bad key, rate limit, unknown model, unreachable, ...).
         """
         ...
 
@@ -46,13 +77,27 @@ class AnthropicLlmClient:
 
     def complete(self, *, system: str, user_content: str, max_tokens: int) -> str:
         """See `LlmClient.complete`."""
-        response = self._client.messages.create(
-            model=self._model,
-            max_tokens=max_tokens,
-            system=system,
-            messages=[{"role": "user", "content": user_content}],
-        )
+        try:
+            response = self._client.messages.create(
+                model=self._model,
+                max_tokens=max_tokens,
+                system=system,
+                messages=[{"role": "user", "content": user_content}],
+            )
+        except anthropic.APIError as exc:
+            raise _to_provider_error(exc, anthropic.APIConnectionError) from exc
         return "".join(block.text for block in response.content if block.type == "text")
+
+
+# Groq models that "think" before answering (e.g. `openai/gpt-oss-120b`):
+# the thinking tokens are spent from the same completion budget as the
+# answer, so a tight `max_tokens` (the explanation call asks for 100) can be
+# used up before any answer text - an empty reply. For these models the
+# client asks for little thinking, hides it from the reply, and adds
+# headroom to the budget. Other models don't take these parameters, so
+# they're only sent when the model name matches.
+_REASONING_MODEL_PREFIXES = ("openai/gpt-oss",)
+_REASONING_HEADROOM_TOKENS = 512
 
 
 class GroqLlmClient:
@@ -72,12 +117,20 @@ class GroqLlmClient:
         parameter (unlike Anthropic) - the system prompt is just the
         first message, with role `"system"`.
         """
-        response = self._client.chat.completions.create(
-            model=self._model,
-            max_tokens=max_tokens,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_content},
-            ],
-        )
+        extra: dict = {}
+        if self._model.startswith(_REASONING_MODEL_PREFIXES):
+            extra = {"reasoning_effort": "low", "include_reasoning": False}
+            max_tokens += _REASONING_HEADROOM_TOKENS
+        try:
+            response = self._client.chat.completions.create(
+                model=self._model,
+                max_tokens=max_tokens,
+                **extra,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_content},
+                ],
+            )
+        except groq.APIError as exc:
+            raise _to_provider_error(exc, groq.APIConnectionError) from exc
         return response.choices[0].message.content or ""

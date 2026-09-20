@@ -13,6 +13,26 @@ STRINGS: dict = {
         "restart": "Restartovat",
         "technicalRequirements": "Technické požadavky",
         "startWizard": "Průvodce výběrem",
+        "apiKey": "AI klíč",
+        "apiKeyMissing": "AI klíč chybí",
+    },
+    "apiKey": {
+        "title": "API klíč pro AI ({provider})",
+        "description": (
+            "Klíč se uloží jen do paměti běžící aplikace — nikam na disk ani do zdrojových kódů. "
+            "Po restartu aplikace ho bude potřeba zadat znovu."
+        ),
+        "label": "API klíč",
+        "getKey": "Klíč získáte zdarma na {url}.",
+        "configured": "AI klíč je nastavený.",
+        "save": "Uložit",
+        "cancel": "Zrušit",
+        "clear": "Odebrat klíč",
+        "empty": "Zadejte prosím klíč.",
+        "invalid": (
+            "Klíč obsahuje nepovolený znak „{char}“ na pozici {position}. Skutečný klíč je jen z "
+            "písmen, číslic a podtržítek bez mezer — zkuste ho vložit znovu (Ctrl+V)."
+        ),
     },
     "chat": {
         "typePlaceholder": "Napište odpověď…",
@@ -23,6 +43,18 @@ STRINGS: dict = {
             "ale bez rozpoznávání požadavků a doporučení."
         ),
         "genericError": "Něco se nepovedlo. Zkuste to prosím znovu.",
+        "errors": {
+            "ai_invalid_key": (
+                "AI služba odmítla API klíč (neplatný nebo zrušený). "
+                "Zadejte ho znovu přes tlačítko „AI klíč“ v záhlaví."
+            ),
+            "ai_rate_limited": "Byl překročen limit požadavků AI služby. Zkuste to prosím za chvíli.",
+            "ai_model_unavailable": (
+                "Zvolený AI model není dostupný. Zkontrolujte nastavení modelu (GROQ_MODEL / CLAUDE_MODEL)."
+            ),
+            "ai_unreachable": "Nepodařilo se spojit s AI službou. Zkontrolujte připojení k internetu.",
+            "ai_error": "AI služba vrátila chybu. Zkuste to prosím znovu.",
+        },
     },
     "wizard": {
         "title": "Průvodce výběrem auta",

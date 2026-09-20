@@ -12,6 +12,8 @@ def app_header(
     on_restart: Callable[[], None],
     on_toggle_drawer: Callable[[], None],
     on_open_wizard: Callable[[], None],
+    ai_configured: bool,
+    on_open_api_key: Callable[[], None],
 ) -> None:
     """Builds the top bar: brand/tagline on the left, restart + wizard +
     requirements-drawer toggle on the right.
@@ -23,6 +25,10 @@ def app_header(
         on_open_wizard: Called when "Průvodce výběrem" is clicked - opens
             the guided question-by-question alternative to the free-text
             chat (see `app/ui/components/wizard.py`).
+        ai_configured: Whether an AI API key is set - switches the API-key
+            button between its plain and "missing" (highlighted) look.
+        on_open_api_key: Called when the API-key button is clicked - opens
+            `app/ui/components/api_key_dialog.py`.
     """
     with ui.row().classes("shrink-0 items-center justify-between border-b border-border px-7 py-4.5 w-full"):
         with ui.column().classes("gap-0.5"):
@@ -31,6 +37,14 @@ def app_header(
 
         with ui.row().classes("items-center gap-2.5"):
             ui.link("Admin", "/admin").classes("text-[12.5px] text-subtext underline-offset-2 hover:underline")
+            ui.button(
+                t("header.apiKey") if ai_configured else t("header.apiKeyMissing"),
+                icon="key",
+                on_click=on_open_api_key,
+            ).props("flat no-caps").classes(
+                "rounded-control border px-3.5 py-2 text-[13px] "
+                + ("border-border text-subtext" if ai_configured else "border-flag bg-flag-bg text-flag")
+            )
             ui.button(t("header.startWizard"), on_click=on_open_wizard).props("no-caps unelevated").classes(
                 "rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text"
             )

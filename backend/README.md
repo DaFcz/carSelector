@@ -56,12 +56,17 @@ CLAUDE_MODEL=claude-sonnet-5   # optional, this is the default
 
 # only needed if AI_PROVIDER=groq
 GROQ_API_KEY=gsk_...
-GROQ_MODEL=llama-3.3-70b-versatile   # optional, this is the default
+GROQ_MODEL=openai/gpt-oss-120b   # optional, this is the default
 ```
 
 Groq (https://console.groq.com) has a free, no-credit-card developer tier - useful for dev/testing
 without spending Anthropic credits, at the cost of a different (generally less instruction-precise)
 model family; see the verification note below, which applies per-provider, not just to Claude.
+
+Instead of putting a key in `.env`, you can enter it in the running app: the header's "AI klíč"
+button opens a dialog whose value is kept in process memory only (never written to disk) and
+overrides the environment's key. It has to be re-entered after every restart, and it is
+process-wide - fine for a local single-user app, but not something to expose on a shared server.
 
 There is no default for either provider's API key — `app/ai/client.py` raises loudly if the
 *selected* provider's key is missing, rather than running the AI layer silently disabled. The
