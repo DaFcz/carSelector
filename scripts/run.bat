@@ -18,6 +18,14 @@ if exist ".venv\Scripts\activate.bat" (
     exit /b 1
 )
 
+REM Applies pending schema migrations (e.g. the users/login_codes tables
+REM added with email login) - a no-op when already up to date. Like the
+REM import below, a failure doesn't block starting the app.
+echo Applying database migrations...
+pushd backend
+python -m alembic upgrade head
+popd
+
 REM Pulls in whatever scraper/ has found since the catalog was last
 REM imported (storage/scraper.db -> storage/drivewise.db) - safe to
 REM re-run every time (natural-key lookups, append-only price history,

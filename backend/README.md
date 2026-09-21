@@ -63,10 +63,11 @@ Groq (https://console.groq.com) has a free, no-credit-card developer tier - usef
 without spending Anthropic credits, at the cost of a different (generally less instruction-precise)
 model family; see the verification note below, which applies per-provider, not just to Claude.
 
-Instead of putting a key in `.env`, you can enter it in the running app: the header's "AI klíč"
-button opens a dialog whose value is kept in process memory only (never written to disk) and
-overrides the environment's key. It has to be re-entered after every restart, and it is
-process-wide - fine for a local single-user app, but not something to expose on a shared server.
+Instead of putting a key in `.env`, an **admin** can enter it in the running app: the header's "AI
+klíč" button (shown to admins only, see Login below) opens a dialog whose value is kept in process
+memory only (never written to disk) and overrides the environment's key. It has to be re-entered
+after every restart, and it is process-wide (every visitor's AI calls use it) - which is why it is
+admin-only.
 
 There is no default for either provider's API key — `app/ai/client.py` raises loudly if the
 *selected* provider's key is missing, rather than running the AI layer silently disabled. The
@@ -81,6 +82,50 @@ The UI additionally uses:
 NICEGUI_STORAGE_SECRET=...   # optional locally - see app/core/config.py; set a real value before
                               # any shared/public deployment
 ```
+
+### Login (email code) and admins
+
+Anyone can use the catalog, chat and wizard without an account. Logging in is by **email only, no
+password**: enter an address, receive a 6-digit code, type it in (`app/services/auth.py`,
+`app/ui/components/login_dialog.py`). Any address can create a regular account this way - the first
+successful login creates it. **Admin rights** (the `/admin` console, the "AI klíč" button) are never
+self-service: an address becomes admin only by being listed in `ADMIN_EMAILS` (applied at its next
+login, grant-only - removing an address from the list does not demote anyone) or by having
+`users.is_admin` set in the database.
+
+```
+ADMIN_EMAILS=you@example.cz,colleague@example.cz   # comma-separated; empty = nobody is admin
+
+# How codes are delivered: "console" (default) only prints the code to the server log - development
+# only, anyone who can read the log can log in as anyone. Use "smtp" anywhere else.
+EMAIL_BACKEND=console
+SMTP_HOST=smtp.example.cz
+SMTP_PORT=587                 # default
+SMTP_USER=...
+SMTP_PASSWORD=...
+SMTP_FROM=no-reply@example.cz # defaults to SMTP_USER
+SMTP_SECURITY=starttls        # or "ssl" (port 465) / "none"
+
+# Optional tuning - defaults shown
+AUTH_SECRET=...               # keys the hash codes are stored under; defaults to NICEGUI_STORAGE_SECRET
+LOGIN_CODE_TTL_MINUTES=10
+LOGIN_CODE_MAX_ATTEMPTS=5     # wrong guesses before a code is burned
+LOGIN_CODE_MAX_REQUESTS_PER_EMAIL_HOUR=5
+LOGIN_CODE_MAX_REQUESTS_PER_IP_HOUR=20
+AUTH_SESSION_DAYS=30
+```
+
+Codes are stored only as a keyed hash, are single-use, and requesting a new one invalidates the
+old. Set a real `NICEGUI_STORAGE_SECRET` (it signs the session cookie) before any shared
+deployment. The per-IP limit uses the connection's address; behind a reverse proxy, make uvicorn
+trust its forwarded headers (`--forwarded-allow-ips`), otherwise every visitor shares the proxy's
+address and its limit. A session is checked against the database on every page load, so
+deactivating an account (`users.is_active = false`) or removing `is_admin` takes effect on the
+user's next page load.
+
+The `users` / `login_codes` tables come from an Alembic migration - run `alembic upgrade head` after
+pulling (`scripts/run.bat` does it for you). The REST API (`/api/*`) is unchanged and still
+unauthenticated; login only gates the UI.
 
 **The AI layer (`app/ai/requirement_interpreter.py`, `app/ai/explanation_generator.py`) was
 written without access to a live API key and has not been exercised against either real provider.**
@@ -193,10 +238,10 @@ Both jobs run as real subprocesses (`sys.executable -m scraper.main` /
 `sys.executable scripts/import_scraper_data.py`), not in-process imports of `scraper`/`scripts`
 code - keeps that boundary a real process boundary, so a scraper crash can't take the app down.
 Running the scraper alone does **not** update the catalog the chat UI shows - run the import step
-afterward for that (see the on-page description of each). No authentication (matches this app's
-"no auth in v1" posture, see `doc/api-contract.md`) - fine locally, but don't expose this route on
-a shared/public deployment as-is, since it lets a visitor trigger outbound network requests and DB
-writes.
+afterward for that (see the on-page description of each). **Admin-only**: anonymous visitors get a
+login prompt and regular accounts a "no admin rights" note instead of the console - see Login above.
+The header's "Admin" link is only shown to admins, but the real check is on the page itself (an
+unprivileged browser never receives the job buttons at all).
 
 ## Tests
 

@@ -13,10 +13,12 @@ from app.ai.client import is_configured
 from app.models.enums import Drivetrain, FuelType
 from app.schemas.requirement import StructuredRequirements
 from app.schemas.vehicle import VehicleSummary
+from app.ui.auth import AuthState
 from app.ui.components.api_key_dialog import api_key_dialog
 from app.ui.components.chat_column import chat_column
 from app.ui.components.filter_bar import filter_bar
 from app.ui.components.header import app_header
+from app.ui.components.login_dialog import login_dialog
 from app.ui.components.requirements_drawer import requirements_drawer
 from app.ui.components.results_grid import append_car_cards, results_grid, sort_control
 from app.ui.components.vehicle_detail_modal import vehicle_detail_modal
@@ -29,12 +31,18 @@ from app.ui.styles import register_styles
 CUSTOM_ORDER_KEY = "custom_car_order"
 
 
-def error_message(error: str) -> str:
+def error_message(error: str, is_admin: bool = True) -> str:
     """User-facing text for a `ConversationState.error` code - specific for
     the AI failures (`ai_not_configured` and every `AiProviderError.code`),
-    the generic one for anything else."""
+    the generic one for anything else.
+
+    `is_admin` matters for `ai_invalid_key`: the fix (the header's "AI
+    klíč" button) is admin-only, so everyone else gets text that doesn't
+    point at a control they can't see."""
     if error == "ai_not_configured":
         return t("chat.aiNotConfigured")
+    if error == "ai_invalid_key" and not is_admin:
+        return t("chat.errors.ai_invalid_key_user")
     if error in STRINGS["chat"]["errors"]:
         return t(f"chat.errors.{error}")
     return t("chat.genericError")
@@ -99,6 +107,12 @@ async def index() -> None:
     """
     register_styles()
 
+    # Awaited before anything is built so the header renders the right
+    # login/admin controls on first paint instead of flashing the anonymous
+    # ones until a later refresh.
+    auth_state = AuthState()
+    await auth_state.refresh()
+
     conv = ConversationState()
     catalog_state = CatalogState()
     wizard_state = WizardState()
@@ -162,7 +176,18 @@ async def index() -> None:
         conv.error = None  # a "not configured" banner may be stale now
         refresh_all()
 
-    open_api_key_dialog = api_key_dialog(on_api_key_changed)
+    # Admin-only (the key is process-wide): the header hides the button from
+    # everyone else, and the dialog re-checks at click time regardless.
+    open_api_key_dialog = api_key_dialog(on_api_key_changed, lambda: auth_state.is_admin)
+
+    def on_logged_in() -> None:
+        chrome.refresh()
+
+    open_login_dialog = login_dialog(auth_state, on_logged_in)
+
+    def logout() -> None:
+        auth_state.logout()
+        chrome.refresh()
 
     def open_wizard() -> None:
         wizard_state.open_wizard()
@@ -302,7 +327,15 @@ async def index() -> None:
         @ui.refreshable
         def chrome() -> None:
             app_header(
-                len(conv.requirements), restart, toggle_drawer, open_wizard, is_configured(), open_api_key_dialog
+                len(conv.requirements),
+                restart,
+                toggle_drawer,
+                open_wizard,
+                is_configured(),
+                open_api_key_dialog,
+                auth_state.user,
+                open_login_dialog,
+                logout,
             )
 
         chrome()
@@ -345,7 +378,7 @@ async def index() -> None:
                         )
 
                     if conv.error is not None:
-                        message = error_message(conv.error)
+                        message = error_message(conv.error, auth_state.is_admin)
                         ui.label(message).classes(
                             "mb-4 w-full rounded-control bg-flag-bg px-3.5 py-2.5 text-[13px] text-flag"
                         )

@@ -7,12 +7,14 @@ from app.models.car_model import CarModel
 from app.models.color import Color
 from app.models.configuration import Configuration
 from app.models.configuration_color import ConfigurationColor
+from app.models.login_code import LoginCode
 from app.models.option_availability import OptionAvailability
 from app.models.option_item import OptionItem
 from app.models.powertrain import Powertrain
 from app.models.price import Price
 from app.models.source_document import SourceDocument
 from app.models.trim import Trim
+from app.models.user import User
 
 __all__ = [
     "Brand",
@@ -20,10 +22,12 @@ __all__ = [
     "Color",
     "Configuration",
     "ConfigurationColor",
+    "LoginCode",
     "OptionAvailability",
     "OptionItem",
     "Powertrain",
     "Price",
     "SourceDocument",
     "Trim",
+    "User",
 ]

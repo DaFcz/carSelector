@@ -15,6 +15,35 @@ STRINGS: dict = {
         "startWizard": "Průvodce výběrem",
         "apiKey": "AI klíč",
         "apiKeyMissing": "AI klíč chybí",
+        "login": "Přihlásit se",
+        "logout": "Odhlásit",
+    },
+    "auth": {
+        "title": "Přihlášení",
+        "emailDescription": "Zadejte e-mail — pošleme vám jednorázový kód. Účet se vytvoří automaticky, heslo není potřeba.",
+        "emailLabel": "E-mail",
+        "sendCode": "Poslat kód",
+        "sending": "Odesílám…",
+        "codeDescription": "Poslali jsme šestimístný kód na {email}. Platí {minutes} minut.",
+        "codeLabel": "Kód z e-mailu",
+        "verify": "Potvrdit",
+        "verifying": "Ověřuji…",
+        "resend": "Poslat nový kód",
+        "changeEmail": "Změnit e-mail",
+        "cancel": "Zrušit",
+        "adminOnly": "Tato stránka je jen pro administrátory.",
+        "adminOnlyLoggedIn": "Jste přihlášen(a) jako {email}, ale tento účet nemá administrátorská práva.",
+        "backToApp": "← Zpět na appku",
+        "errors": {
+            "invalid_email": "Zadejte prosím platnou e-mailovou adresu.",
+            "rate_limited": "Příliš mnoho požadavků na kód. Zkuste to prosím za chvíli.",
+            "email_delivery_failed": "E-mail se nepodařilo odeslat. Zkuste to prosím znovu za chvíli.",
+            "email_not_configured": "Odesílání e-mailů není nastavené (EMAIL_BACKEND / SMTP_* na serveru).",
+            "invalid_code": "Kód není správný nebo mu vypršela platnost.",
+            "too_many_attempts": "Příliš mnoho nesprávných pokusů. Pošlete si prosím nový kód.",
+            "account_disabled": "Tento účet je zablokovaný.",
+            "unknown_error": "Něco se nepovedlo. Zkuste to prosím znovu.",
+        },
     },
     "apiKey": {
         "title": "API klíč pro AI ({provider})",
@@ -47,6 +76,12 @@ STRINGS: dict = {
             "ai_invalid_key": (
                 "AI služba odmítla API klíč (neplatný nebo zrušený). "
                 "Zadejte ho znovu přes tlačítko „AI klíč“ v záhlaví."
+            ),
+            # Shown instead of ai_invalid_key to non-admins, who can't reach the
+            # "AI klíč" button (admin-only) that message points at.
+            "ai_invalid_key_user": (
+                "AI služba je dočasně nedostupná (neplatný API klíč na straně serveru). "
+                "Dejte prosím vědět administrátorovi."
             ),
             "ai_rate_limited": "Byl překročen limit požadavků AI služby. Zkuste to prosím za chvíli.",
             "ai_model_unavailable": (

@@ -26,7 +26,10 @@ option_availability / prices / source_documents` (see conversation history / fut
   `{ "items": [...], "page": 1, "page_size": 20, "total": 137 }`
 - Errors: `{ "error": { "code": "string", "message": "string", "details": {} } }` with a matching
   HTTP status (400 validation, 404 not found, 422 unprocessable, 500 server error)
-- No auth in v1 (see architecture doc's bonus features) — endpoints are unauthenticated
+- No auth on `/api/*` in v1 (see architecture doc's bonus features) — endpoints are unauthenticated.
+  The bundled UI has its own email-code login (admin console, API-key dialog; see
+  `backend/README.md`'s Login section), but it calls the service layer in-process and does not
+  go through these endpoints, so this contract is unaffected
 - Language: all free-text fields meant for display (`explanation`, `flag`, conversation replies)
   are Czech, matching the frontend UI language — prompt the Claude integration accordingly. See
   `doc/prompt/CLAUDE.md`.

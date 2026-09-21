@@ -13,10 +13,13 @@ exception is `scraper.sources.registry.SourceRegistry`, read directly
 in-process below - it only parses a YAML file (no DB/network), so there's
 no boundary risk worth a subprocess for a read-only listing.
 
-No authentication - matches this app's existing "no auth in v1" posture
-(see doc/api-contract.md). Fine for local/single-developer use; add auth
-before exposing this route on any shared/public deployment, since it lets
-a visitor trigger outbound network requests and write to the DB.
+Admin-only: the page checks `AuthState.is_admin` (see `app/ui/auth.py`)
+before building anything, and builds nothing but a login prompt / "no
+rights" message otherwise. That matters more than hiding a link - the job
+buttons' handlers only exist on the pages of users who passed the check, so
+there is nothing for a non-admin's browser to send events to. The console
+lets whoever reaches it trigger outbound network requests and write to the
+DB, hence the wall.
 """
 
 import asyncio
@@ -27,6 +30,9 @@ from pathlib import Path
 
 from nicegui import ui
 
+from app.ui.auth import AuthState
+from app.ui.components.login_dialog import login_dialog
+from app.ui.i18n import t
 from app.ui.styles import register_styles
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -160,14 +166,54 @@ def _job_section(title: str, description: str, state: JobState, command: list[st
         content()
 
 
+def _access_denied(auth_state: AuthState) -> None:
+    """Builds the page non-admins get instead of the console: a login
+    prompt if anonymous, a "no admin rights" note if logged in. Logging in
+    from here reloads the page, which then shows the console if the account
+    turned out to be an admin.
+
+    Args:
+        auth_state: This connection's login state.
+    """
+    # The client is captured now, not looked up when the reload runs: by then
+    # the click handler that triggers it belongs to a dialog button that the
+    # dialog's own re-render has already deleted, and `ui.navigate.reload()`
+    # called from that dead slot raises "parent element ... has been deleted".
+    client = ui.context.client
+
+    def reload_page() -> None:
+        with client:
+            ui.navigate.reload()
+
+    open_login_dialog = login_dialog(auth_state, reload_page)
+
+    with ui.column().classes("min-h-screen w-full items-start bg-bg text-text gap-4 p-8"):
+        ui.label("Rovis — Admin").classes("text-xl font-bold text-text")
+        if auth_state.user is None:
+            ui.label(t("auth.adminOnly")).classes("text-[13px] text-subtext")
+            ui.button(t("header.login"), icon="login", on_click=open_login_dialog).props("no-caps unelevated").classes(
+                "rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text"
+            )
+        else:
+            ui.label(t("auth.adminOnly")).classes("text-[13px] text-subtext")
+            ui.label(t("auth.adminOnlyLoggedIn", email=auth_state.user.email)).classes("text-[13px] text-subtext")
+        ui.link(t("auth.backToApp"), "/").classes("text-[13px] text-accent")
+
+
 def register_admin_page() -> None:
     """Registers `@ui.page("/admin")` as a side effect - imported once
     from `app/main.py`, same pattern as `app/ui/pages.py`.
     """
 
     @ui.page("/admin")
-    def admin() -> None:
+    async def admin() -> None:
         register_styles()
+        auth_state = AuthState()
+        await auth_state.refresh()
+        if not auth_state.is_admin:
+            _access_denied(auth_state)
+            return
+
         scraper_state = JobState()
         import_state = JobState()
 

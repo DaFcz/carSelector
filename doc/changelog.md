@@ -21,6 +21,39 @@ to one or more related commits.
 
 ---
 
+## 0.2.33 — 2026-09-21
+
+### Added
+- Passwordless email login (`app/services/auth.py`, `app/ui/auth.py`,
+  `app/ui/components/login_dialog.py`): the header's "Přihlásit se" opens a
+  dialog where a person enters an email, receives a 6-digit code and types it
+  in. Any address can create a regular account this way (the first successful
+  login creates it); the catalog, chat and wizard stay usable without an
+  account. Codes are single-use, expire after 10 minutes, are stored only as a
+  keyed hash, are burned after 5 wrong guesses, and code requests are
+  rate-limited per address and per IP. A session is re-checked against the
+  database on every page load and expires after 30 days.
+- `users` and `login_codes` tables (Alembic migration `a3f1c9d27b40`).
+- Email delivery (`app/services/mailer.py`): `EMAIL_BACKEND=console` (default,
+  prints the code to the server log - development only) or `smtp` (stdlib
+  `smtplib`, `SMTP_*` settings; no new dependency).
+- Admin rights: an address listed in `ADMIN_EMAILS` becomes an admin at its
+  next login (grant-only; `users.is_admin` is the source of truth after that).
+  All new settings are documented in `backend/README.md`'s Login section.
+
+### Changed
+- `/admin` (scraper and catalog-import console) and the header's "AI klíč"
+  button/dialog are now **admin-only**. Previously any visitor could start the
+  scraper subprocesses and replace the process-wide AI key. Anonymous visitors
+  see a login prompt on `/admin`, regular accounts a "no admin rights" note;
+  the page builds no privileged elements for them, and the API-key dialog
+  re-checks admin rights in its handlers rather than relying on a hidden
+  button. A rejected-API-key chat error now tells non-admins to contact the
+  administrator instead of pointing at the button they can't see.
+- `scripts/run.bat` runs `alembic upgrade head` before importing scraper data,
+  so pulling this change picks up the new tables.
+- `/api/*` is unchanged and still unauthenticated; login gates the UI only.
+
 ## 0.2.32 — 2026-09-20
 
 ### Added

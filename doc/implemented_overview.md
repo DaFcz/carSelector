@@ -60,7 +60,11 @@ Two independent services, one shared SQLite dev database for backend + scraper (
   client-side.
 - Requirements drawer showing the requirements extracted so far; vehicle detail modal; car cards.
 - Admin console at `/admin` (`app/ui/admin.py`): run the scraper and the scraper → catalog import
-  as subprocesses from the browser, with live streamed output. No auth (local/dev tool).
+  as subprocesses from the browser, with live streamed output. Admin-only (see login below).
+- Passwordless email login (`app/services/auth.py`, `app/ui/auth.py`): a 6-digit code emailed to any
+  address creates/opens a regular account; admin rights come from `ADMIN_EMAILS` / `users.is_admin`.
+  Anonymous use of the catalog and chat stays open. Admin console and the AI-key dialog are
+  admin-only.
 - All user-facing copy is Czech (`app/ui/i18n.py`'s `STRINGS` dict) per project convention.
 - pytest coverage in `backend/tests/ui/` - the state layer (`ConversationState`/`CatalogState`)
   against the real seeded database, plus the pure-function helpers (`sort_cars`, `format_money`,

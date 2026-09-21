@@ -50,3 +50,13 @@ def test_error_message_is_specific_for_ai_failures_and_generic_otherwise() -> No
         assert error_message(code) == STRINGS["chat"]["errors"][code]
     assert error_message("ai_not_configured") == STRINGS["chat"]["aiNotConfigured"]
     assert error_message("unknown_error") == STRINGS["chat"]["genericError"]
+
+
+def test_invalid_key_error_does_not_point_non_admins_at_the_admin_only_button() -> None:
+    from app.ui.i18n import STRINGS
+    from app.ui.pages import error_message
+
+    assert error_message("ai_invalid_key", is_admin=True) == STRINGS["chat"]["errors"]["ai_invalid_key"]
+    non_admin_text = error_message("ai_invalid_key", is_admin=False)
+    assert non_admin_text == STRINGS["chat"]["errors"]["ai_invalid_key_user"]
+    assert "AI klíč" not in non_admin_text

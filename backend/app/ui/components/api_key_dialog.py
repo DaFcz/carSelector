@@ -15,8 +15,16 @@ from app.ui.i18n import t
 _PROVIDER_LABELS = {"groq": ("Groq", "console.groq.com"), "anthropic": ("Anthropic", "console.anthropic.com")}
 
 
-def api_key_dialog(on_changed: Callable[[], None]) -> Callable[[], None]:
+def api_key_dialog(on_changed: Callable[[], None], is_authorized: Callable[[], bool]) -> Callable[[], None]:
     """Builds the (initially closed) API-key dialog.
+
+    The key is process-wide (every visitor's AI calls use it), so only
+    admins may change it. Every handler that reads or changes it re-checks
+    `is_authorized` rather than trusting that the header only shows the
+    button to admins: this dialog's elements exist on every visitor's page,
+    and a browser can send click/value events for any element on its page
+    over the websocket whether or not the UI ever offered a way to trigger
+    them.
 
     The saved key is never shown back - the input always starts empty; the
     dialog only reports whether a key is currently set.
@@ -25,6 +33,9 @@ def api_key_dialog(on_changed: Callable[[], None]) -> Callable[[], None]:
         on_changed: Called after the key was saved or cleared, so the
             caller (see `app/ui/pages.py`) can refresh whatever depends on
             "is the AI configured" (header button, stale error banner).
+        is_authorized: Returns whether the current user may change the
+            key (i.e. is an admin) - evaluated at click time, not build
+            time, so a login/logout after page load is honored.
 
     Returns:
         A zero-argument function that opens the dialog.
@@ -50,6 +61,8 @@ def api_key_dialog(on_changed: Callable[[], None]) -> Callable[[], None]:
         status = ui.label().classes("text-[12.5px]")
 
         def save() -> None:
+            if not is_authorized():
+                return
             if not key_input.value.strip():
                 status.set_text(t("apiKey.empty"))
                 status.classes(replace="text-[12.5px] text-flag")
@@ -64,6 +77,8 @@ def api_key_dialog(on_changed: Callable[[], None]) -> Callable[[], None]:
             on_changed()
 
         def clear() -> None:
+            if not is_authorized():
+                return
             set_runtime_api_key(None)
             dialog.close()
             on_changed()
@@ -80,6 +95,8 @@ def api_key_dialog(on_changed: Callable[[], None]) -> Callable[[], None]:
             )
 
     def open_() -> None:
+        if not is_authorized():
+            return
         key_input.set_value("")
         if is_configured():
             status.set_text(t("apiKey.configured"))

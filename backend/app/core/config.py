@@ -65,6 +65,48 @@ CORS_ALLOWED_ORIGINS = [
 # deployment.
 NICEGUI_STORAGE_SECRET = os.getenv("NICEGUI_STORAGE_SECRET", "dev-insecure-storage-secret")
 
+# --- Login (passwordless, 6-digit code by email - see app/services/auth.py) ---
+
+# Key for the HMAC that hashes login codes before they're stored. A 6-digit
+# code is only 10^6 possibilities, so a plain hash would be reversible
+# instantly if the table leaked; keying it makes a leaked table useless
+# without this secret. Falls back to the NiceGUI session secret so a
+# deployment only has to configure one secret.
+AUTH_SECRET = os.getenv("AUTH_SECRET") or NICEGUI_STORAGE_SECRET
+
+# Emails that become admins the moment they log in (comma-separated,
+# case-insensitive). Grant-only bootstrap: removing an address here does not
+# demote anyone - `users.is_admin` is the source of truth after that.
+ADMIN_EMAILS = frozenset(
+    email.strip().lower() for email in os.getenv("ADMIN_EMAILS", "").split(",") if email.strip()
+)
+
+LOGIN_CODE_TTL_MINUTES = int(os.getenv("LOGIN_CODE_TTL_MINUTES", "10"))
+LOGIN_CODE_MAX_ATTEMPTS = int(os.getenv("LOGIN_CODE_MAX_ATTEMPTS", "5"))
+# Code requests per rolling hour, per email address and per client IP.
+LOGIN_CODE_MAX_REQUESTS_PER_EMAIL_HOUR = int(os.getenv("LOGIN_CODE_MAX_REQUESTS_PER_EMAIL_HOUR", "5"))
+LOGIN_CODE_MAX_REQUESTS_PER_IP_HOUR = int(os.getenv("LOGIN_CODE_MAX_REQUESTS_PER_IP_HOUR", "20"))
+# How long a login stays valid; enforced server-side against the timestamp
+# stored in the session (app/ui/auth.py), independent of the cookie's own
+# lifetime.
+AUTH_SESSION_DAYS = int(os.getenv("AUTH_SESSION_DAYS", "30"))
+
+# How login codes reach the user: "console" (default - prints the code to
+# the server log, for local development only) or "smtp". Defaults to the
+# safe-for-dev option rather than failing, so the app still starts with no
+# mail server configured; app/services/mailer.py logs a loud warning when
+# "console" is active.
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "console").strip().lower()
+SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+# Envelope/header sender; defaults to SMTP_USER since most providers only
+# accept their own account address.
+SMTP_FROM = os.getenv("SMTP_FROM") or SMTP_USER
+# "starttls" (port 587, default), "ssl" (implicit TLS, port 465) or "none".
+SMTP_SECURITY = os.getenv("SMTP_SECURITY", "starttls").strip().lower()
+
 # Where app.storage.user writes its per-browser JSON files - kept under
 # storage/ with the rest of this project's local data files (see
 # storage/README.md) rather than NiceGUI's own default (.nicegui/ next to
