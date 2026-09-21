@@ -21,6 +21,36 @@ to one or more related commits.
 
 ---
 
+## 0.2.34 — 2026-09-21
+
+### Added
+- Real email delivery for login codes. The SMTP sender from 0.2.33 had never
+  been run against a mail server and, with `EMAIL_BACKEND` defaulting to
+  `console`, nothing was actually emailed. It is now hardened and verified
+  against a real socket (`tests/test_smtp_wire.py`: plain + auth, STARTTLS,
+  implicit SSL, wrong password, rejected recipient, and a certificate that
+  fails verification being refused before any credentials are sent):
+  `Date`/`Message-ID`/`Auto-Submitted` headers, a display name
+  (`SMTP_FROM_NAME`), a plain-text + HTML body, explicit envelope
+  sender/recipient, and error messages that name the failure (never the code
+  or password).
+- `scripts/send_test_email.py you@example.cz`: sends one message through the
+  configured backend to check a setup, with hints for the usual failures.
+- Startup log of how codes are delivered (`log_email_backend_status`): a loud
+  warning for the `console` backend, an error naming the problem for an
+  incomplete `smtp` config, a warning for `SMTP_SECURITY=none` with a password.
+- `backend/.env.example` with provider presets (Seznam, Gmail, transactional
+  providers); README table and deliverability notes (SPF/DKIM).
+
+### Changed
+- The login dialog now says when the `console` backend is active that no
+  email is sent and the code is in the server log, instead of "we sent you a
+  code" for a mail that never arrives.
+- `SMTP_PORT` defaults to the conventional port for `SMTP_SECURITY` (587 /
+  465 / 25) instead of always 587; a blank `SMTP_PORT=` counts as unset.
+- `SMTP_*` settings are validated together (`smtp_config_problem`): missing
+  host/sender, malformed sender, unknown security mode, user without password.
+
 ## 0.2.33 — 2026-09-21
 
 ### Added

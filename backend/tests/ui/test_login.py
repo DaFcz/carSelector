@@ -180,3 +180,20 @@ async def test_logging_in_from_the_admin_page_reveals_the_console(user: User, lo
     await user.should_not_see(ADMIN_CONSOLE_MARKER)
 
     await log_in(user, "boss@example.cz", admin=True, expect=ADMIN_CONSOLE_MARKER)
+
+
+async def test_login_dialog_says_no_email_is_sent_in_console_mode(user: User, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(config, "EMAIL_BACKEND", "console")
+    await user.open("/")
+    user.find("Přihlásit se").click()
+
+    await user.should_see("e-mail se neodesílá")
+
+
+async def test_login_dialog_has_no_dev_notice_when_mail_is_really_sent(user: User, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(config, "EMAIL_BACKEND", "smtp")
+    await user.open("/")
+    user.find("Přihlásit se").click()
+
+    await user.should_see("Přihlášení")
+    await user.should_not_see("e-mail se neodesílá")

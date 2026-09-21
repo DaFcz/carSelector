@@ -28,6 +28,10 @@ STRINGS: dict = {
         "codeLabel": "Kód z e-mailu",
         "verify": "Potvrdit",
         "verifying": "Ověřuji…",
+        "consoleNotice": (
+            "Vývojový režim: e-mail se neodesílá, kód je vypsaný v logu serveru. "
+            "Pro skutečné e-maily nastavte EMAIL_BACKEND=smtp a SMTP_* (viz README)."
+        ),
         "resend": "Poslat nový kód",
         "changeEmail": "Změnit e-mail",
         "cancel": "Zrušit",

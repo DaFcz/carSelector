@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from nicegui import ui
 
-from app.core.config import LOGIN_CODE_TTL_MINUTES
+from app.core import config
 from app.ui.auth import AuthState
 from app.ui.i18n import STRINGS, t
 
@@ -110,7 +110,7 @@ def login_dialog(auth: AuthState, on_logged_in: Callable[[], None]) -> Callable[
                 )
                 email_input.on("keydown.enter", submit_email)
             else:
-                ui.label(t("auth.codeDescription", email=form.email.strip().lower(), minutes=LOGIN_CODE_TTL_MINUTES)).classes(
+                ui.label(t("auth.codeDescription", email=form.email.strip().lower(), minutes=config.LOGIN_CODE_TTL_MINUTES)).classes(
                     "text-[13px] text-subtext"
                 )
                 code_input = (
@@ -121,6 +121,14 @@ def login_dialog(auth: AuthState, on_logged_in: Callable[[], None]) -> Callable[
                     .classes("w-full")
                 )
                 code_input.on("keydown.enter", submit_code)
+
+            # Console backend: nothing is emailed, the code only goes to the
+            # server log. Without this the dialog claims "we sent a code" and
+            # the person waits for a mail that will never arrive.
+            if config.EMAIL_BACKEND == "console":
+                ui.label(t("auth.consoleNotice")).classes(
+                    "w-full rounded-control bg-flag-bg px-3 py-2 text-[12px] text-flag"
+                )
 
             if form.error is not None:
                 message = STRINGS["auth"]["errors"].get(form.error, STRINGS["auth"]["errors"]["unknown_error"])

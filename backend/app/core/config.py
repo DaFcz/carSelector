@@ -98,14 +98,19 @@ AUTH_SESSION_DAYS = int(os.getenv("AUTH_SESSION_DAYS", "30"))
 # "console" is active.
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "console").strip().lower()
 SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 # Envelope/header sender; defaults to SMTP_USER since most providers only
 # accept their own account address.
 SMTP_FROM = os.getenv("SMTP_FROM") or SMTP_USER
-# "starttls" (port 587, default), "ssl" (implicit TLS, port 465) or "none".
+# Display name shown next to the sender address in the recipient's inbox.
+SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "Rovis")
+# "starttls" (default), "ssl" (implicit TLS) or "none" (unencrypted - only for
+# a trusted local relay; the password would travel in clear text).
 SMTP_SECURITY = os.getenv("SMTP_SECURITY", "starttls").strip().lower()
+# Defaults to the conventional port for the chosen security mode (587 / 465 /
+# 25); a blank SMTP_PORT= line counts as unset.
+SMTP_PORT = int(os.getenv("SMTP_PORT") or {"starttls": 587, "ssl": 465, "none": 25}.get(SMTP_SECURITY, 587))
 
 # Where app.storage.user writes its per-browser JSON files - kept under
 # storage/ with the rest of this project's local data files (see

@@ -54,5 +54,10 @@ from app.core.config import NICEGUI_STORAGE_SECRET  # noqa: E402
 from app.ui import pages as _ui_pages  # noqa: E402, F401
 from app.ui.admin import register_admin_page  # noqa: E402
 
+from app.services.mailer import log_email_backend_status  # noqa: E402
+
 register_admin_page()
+# Say at startup how login codes will be delivered (see there) - a forgotten
+# EMAIL_BACKEND=smtp should be visible now, not when someone waits for a mail.
+log_email_backend_status()
 ui.run_with(app, mount_path="/", storage_secret=NICEGUI_STORAGE_SECRET, title="Rovis")

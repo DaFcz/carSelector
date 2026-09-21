@@ -95,16 +95,14 @@ login, grant-only - removing an address from the list does not demote anyone) or
 
 ```
 ADMIN_EMAILS=you@example.cz,colleague@example.cz   # comma-separated; empty = nobody is admin
-
-# How codes are delivered: "console" (default) only prints the code to the server log - development
-# only, anyone who can read the log can log in as anyone. Use "smtp" anywhere else.
-EMAIL_BACKEND=console
+EMAIL_BACKEND=smtp            # "console" (the default) sends NOTHING - see below
 SMTP_HOST=smtp.example.cz
-SMTP_PORT=587                 # default
-SMTP_USER=...
-SMTP_PASSWORD=...
-SMTP_FROM=no-reply@example.cz # defaults to SMTP_USER
-SMTP_SECURITY=starttls        # or "ssl" (port 465) / "none"
+SMTP_SECURITY=starttls        # or "ssl" (implicit TLS) / "none" (unencrypted, trusted local relay only)
+SMTP_PORT=587                 # optional: defaults to 587 / 465 / 25 for starttls / ssl / none
+SMTP_USER=...                 # usually the full address
+SMTP_PASSWORD=...             # an app password where the provider requires one
+SMTP_FROM=no-reply@example.cz # defaults to SMTP_USER; many providers only accept their own address
+SMTP_FROM_NAME=Rovis          # display name in the inbox
 
 # Optional tuning - defaults shown
 AUTH_SECRET=...               # keys the hash codes are stored under; defaults to NICEGUI_STORAGE_SECRET
@@ -114,6 +112,33 @@ LOGIN_CODE_MAX_REQUESTS_PER_EMAIL_HOUR=5
 LOGIN_CODE_MAX_REQUESTS_PER_IP_HOUR=20
 AUTH_SESSION_DAYS=30
 ```
+
+`backend/.env.example` is a ready-to-copy template with these and the provider presets below.
+
+**Sending real email.** Out of the box `EMAIL_BACKEND=console`: the login dialog works, but the code is
+only *printed in the server log* and no email is sent (the dialog says so). To send real mail, use any
+SMTP account:
+
+1. Put `EMAIL_BACKEND=smtp` and the `SMTP_*` settings in `backend/.env` (or the environment).
+2. Check them without going through the login flow:
+   `python scripts/send_test_email.py you@example.cz` - prints what it is using, whether the server
+   accepted the message, and a hint for the common failures (wrong password, wrong TLS mode/port,
+   sender refused, unreachable server).
+3. Restart the app. At startup it logs how codes will be delivered (a loud warning for `console`, an
+   error naming the problem for an incomplete `smtp` config).
+
+| Provider | `SMTP_HOST` | `SMTP_SECURITY` (port) | Notes |
+|---|---|---|---|
+| Seznam.cz | `smtp.seznam.cz` | `ssl` (465) or `starttls` (587) | user = full address; sender must be that address |
+| Gmail | `smtp.gmail.com` | `starttls` (587) | needs 2-step verification + an *app password* |
+| Brevo / Mailgun / Resend / SendGrid | from the provider's SMTP page | usually `starttls` (587) | verify the sender address/domain there |
+
+Connections are always TLS-verified (system trust store, hostname checked) - a server whose
+certificate doesn't verify is refused rather than trusted, and the password is never sent before the
+connection is encrypted. "The server accepted the message" is not "it reached the inbox": mail from
+your own domain also needs SPF and DKIM DNS records (your provider lists them), otherwise the codes
+land in spam. A mailbox provider such as Seznam or Gmail needs none of that but only lets you send
+from that mailbox's own address.
 
 Codes are stored only as a keyed hash, are single-use, and requesting a new one invalidates the
 old. Set a real `NICEGUI_STORAGE_SECRET` (it signs the session cookie) before any shared
