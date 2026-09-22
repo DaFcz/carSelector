@@ -129,9 +129,13 @@ SMTP account:
 
 | Provider | `SMTP_HOST` | `SMTP_SECURITY` (port) | Notes |
 |---|---|---|---|
+| Resend | `smtp.resend.com` | `starttls` (587) | `SMTP_USER=resend`; password is an API key; sandbox sender `onboarding@resend.dev` only reaches your own account email until you verify a domain |
 | Seznam.cz | `smtp.seznam.cz` | `ssl` (465) or `starttls` (587) | user = full address; sender must be that address |
 | Gmail | `smtp.gmail.com` | `starttls` (587) | needs 2-step verification + an *app password* |
-| Brevo / Mailgun / Resend / SendGrid | from the provider's SMTP page | usually `starttls` (587) | verify the sender address/domain there |
+| Brevo / Mailgun / SendGrid | from the provider's SMTP page | usually `starttls` (587) | verify the sender address/domain there |
+
+Switching providers only ever means changing these `SMTP_*` values - `app/services/mailer.py` talks
+plain SMTP and doesn't know which provider it's pointed at.
 
 Connections are always TLS-verified (system trust store, hostname checked) - a server whose
 certificate doesn't verify is refused rather than trusted, and the password is never sent before the

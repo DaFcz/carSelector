@@ -27,6 +27,8 @@ from abc import ABC, abstractmethod
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 
+import certifi
+
 from app.core import config
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,19 @@ logger = logging.getLogger(__name__)
 LOGIN_CODE_SUBJECT = "Váš přihlašovací kód do Rovis"
 SMTP_TIMEOUT_SECONDS = 15
 _SECURITY_MODES = ("starttls", "ssl", "none")
+
+
+def _default_ssl_context() -> ssl.SSLContext:
+    """Builds the TLS context used when a sender isn't given one explicitly.
+
+    Trusts certifi's CA bundle instead of `ssl.create_default_context()`'s
+    own default (the OS trust store). On Windows that default is the
+    system's Certificate Store, which isn't guaranteed to have picked up a
+    newly issued CA - certifi is a pinned, regularly updated dependency, so
+    behavior doesn't depend on how current a given machine's OS store is.
+    Certificate and hostname verification stay fully on either way.
+    """
+    return ssl.create_default_context(cafile=certifi.where())
 
 
 class EmailDeliveryError(Exception):
@@ -198,7 +213,7 @@ class SmtpEmailSender(EmailSender):
                 message names the failure (never the code or password).
         """
         message = self._build_message(to_address, code, ttl_minutes)
-        context = self._ssl_context or ssl.create_default_context()
+        context = self._ssl_context or _default_ssl_context()
 
         try:
             if self._security == "ssl":

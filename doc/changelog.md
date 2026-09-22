@@ -21,6 +21,25 @@ to one or more related commits.
 
 ---
 
+## 0.2.35 — 2026-09-22
+
+### Fixed
+- `SmtpEmailSender` (`app/services/mailer.py`) now trusts `certifi`'s CA
+  bundle instead of `ssl.create_default_context()`'s own default. On Windows
+  that default is the OS Certificate Store, which isn't guaranteed to carry a
+  newly issued CA yet; a login code to a provider that had recently rotated
+  its certificate chain (e.g. Resend, on Let's Encrypt's newer `Root
+  YE`/`ISRG Root X2` chain) failed with `CERTIFICATE_VERIFY_FAILED:
+  certificate has expired` even though the certificate itself was valid.
+  `certifi` is now a direct dependency (`requirements.txt`) rather than an
+  incidental transitive one. Certificate and hostname verification stay on
+  either way - this only changes which trust anchors are consulted.
+
+### Added
+- Resend SMTP preset in `backend/.env.example` and `backend/README.md`'s
+  provider table, for projects that don't want to send login codes from a
+  personal mailbox.
+
 ## 0.2.34 — 2026-09-21
 
 ### Added
