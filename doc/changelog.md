@@ -21,6 +21,33 @@ to one or more related commits.
 
 ---
 
+## 0.2.36 — 2026-09-22
+
+### Fixed
+- `models.category` (body type: Hatchback/Kombi/SUV/MPV, the wizard's exact-
+  match filter) was `NULL` for 167 of 169 imported models - `import_scraper_
+  data.py` never populated it, since the source price lists carry no
+  structured body-type field (only the two hand-seeded fixture models,
+  Mazda CX-5 and VW Tiguan, had it set). In particular every electric model
+  was untagged, so no SUV+electric search could ever match a real result
+  even though electric SUVs (Enyaq, iX3, Q4 e-tron, Model Y, ...) were
+  already in the catalog.
+- `scripts/import_scraper_data.py`: `infer_body_type()` plus a curated
+  `_MODEL_BODY_TYPES` lookup (brand, model name) -> category for ~130
+  models - unlike fuel_type/drivetrain, body type isn't guessable from a
+  generic name pattern ("3 Series Touring" is a wagon, "2 Series Active
+  Tourer" is a compact MPV; both contain "Tourer"), so this is a hand-
+  curated table rather than a regex, plus a literal-"SUV"-in-the-name check
+  for the Audi models that already spell it out ("Q7 SUV", ...). Sedans,
+  coupes, liftbacks (Octavia, Superb) and other body styles the wizard has
+  no filter for are left `NULL` on purpose, same "not derivable from the
+  source" stance as an unlisted model.
+- `get_or_create_model` now backfills `category` on an already-imported
+  model (not just a newly created one), so re-running the import after
+  extending the table fixes existing rows too. Ran once against the local
+  catalog: 133 of 169 models now categorized (77 SUV, 32 Hatchback, 19
+  Kombi, 5 MPV; 36 intentionally left `NULL`).
+
 ## 0.2.35 — 2026-09-22
 
 ### Fixed

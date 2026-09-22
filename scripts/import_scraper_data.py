@@ -30,11 +30,18 @@ directly (no surcharge needed for either).
 
 What it still deliberately does NOT import (documented gaps, not silently
 dropped):
-- model.category (body type), model_year, colors, and most of
-  powertrains' spec columns (transmission, displacement_cc, consumption,
-  co2, ...): none of these are structured fields in scraper's schema, only
-  free text in variant_name/raw_text. Left null, same "not derivable from
-  the source" stance already documented for the hand-seeded fixtures.
+- model_year, colors, and most of powertrains' spec columns (transmission,
+  displacement_cc, consumption, co2, ...): none of these are structured
+  fields in scraper's schema, only free text in variant_name/raw_text. Left
+  null, same "not derivable from the source" stance already documented for
+  the hand-seeded fixtures.
+- model.category (body type) IS inferred, but only for models
+  infer_body_type below has a curated entry for - it isn't guessable from
+  a generic name pattern the way fuel_type/drivetrain are (see that
+  function's own docstring). An unlisted model is left null, same stance
+  as the fields above; get_or_create_model backfills it for an
+  already-imported model too, so re-running this script after extending
+  the table fixes existing rows, not just new ones.
 - fuel_type/drivetrain ARE inferred from variant_name text (see
   infer_fuel_type/infer_drivetrain below) since drivewise requires them
   (NOT NULL) - this is a heuristic, not a parse of a structured field, and
@@ -245,6 +252,175 @@ def infer_drivetrain(variant_name: str) -> Drivetrain:
     return Drivetrain.fwd
 
 
+# The 4 body types drivewise's wizard filters on
+# (app/ui/components/wizard.py's _BODY_TYPE_OPTIONS) - kept as the same
+# plain strings there, since models.category is a free string column, not
+# an enum (app/models/car_model.py; unlike fuel_type/drivetrain, no fixed
+# domain is enforced in the schema).
+BODY_TYPE_HATCHBACK = "Hatchback"
+BODY_TYPE_KOMBI = "Kombi"
+BODY_TYPE_SUV = "SUV"
+BODY_TYPE_MPV = "MPV"
+
+# Curated body type per (brand display name, model display name). Unlike
+# fuel_type/drivetrain, this isn't guessable from a name pattern in
+# general - "3 Series Touring" is a wagon, "2 Series Active Tourer" is a
+# compact MPV, and both contain "Tourer". A handful of Audi names do carry
+# a literal "SUV" marker (e.g. "Q7 SUV") and don't need an entry here - see
+# infer_body_type. Sedans, coupes, cabrios, liftbacks (Octavia, Superb) and
+# other body styles the wizard has no option for are deliberately left out
+# - infer_body_type returns None for them, same "not derivable from the
+# source" stance as an unlisted model. Extend this table as new models
+# appear; re-running the import backfills existing rows too (see
+# get_or_create_model), not just newly created ones.
+_MODEL_BODY_TYPES: dict[tuple[str, str], str] = {
+    ("Audi", "A3 Sportback"): BODY_TYPE_HATCHBACK,
+    ("Audi", "A5 Avant"): BODY_TYPE_KOMBI,
+    ("Audi", "A6 Avant"): BODY_TYPE_KOMBI,
+    ("Audi", "A6 Avant e-tron"): BODY_TYPE_KOMBI,
+    ("Audi", "A6 Sportback e-tron"): BODY_TYPE_HATCHBACK,
+    ("Audi", "A6 allroad"): BODY_TYPE_KOMBI,
+    ("Audi", "Q3"): BODY_TYPE_SUV,
+    ("Audi", "Q3 Sportback"): BODY_TYPE_SUV,
+    ("Audi", "Q4 Sportback e-tron"): BODY_TYPE_SUV,
+    ("Audi", "Q4 e-tron"): BODY_TYPE_SUV,
+    ("Audi", "Q5"): BODY_TYPE_SUV,
+    ("Audi", "Q5 Sportback"): BODY_TYPE_SUV,
+    ("Audi", "Q6 Sportback e-tron"): BODY_TYPE_SUV,
+    ("Audi", "Q6 e-tron"): BODY_TYPE_SUV,
+    ("Audi", "RS 5 Avant"): BODY_TYPE_KOMBI,
+    ("Audi", "RS3 Sportback"): BODY_TYPE_HATCHBACK,
+    ("Audi", "S3 Sportback"): BODY_TYPE_HATCHBACK,
+    ("Audi", "S5 Avant"): BODY_TYPE_KOMBI,
+    ("Audi", "S6 Avant"): BODY_TYPE_KOMBI,
+    ("Audi", "S6 Sportback"): BODY_TYPE_HATCHBACK,
+    ("Audi", "SQ5"): BODY_TYPE_SUV,
+    ("Audi", "SQ5 Sportback"): BODY_TYPE_SUV,
+    ("Audi", "SQ6 e-tron"): BODY_TYPE_SUV,
+    ("Audi", "SQ6 e-tron Sportback"): BODY_TYPE_SUV,
+    ("BMW", "1 Series"): BODY_TYPE_HATCHBACK,
+    ("BMW", "2 Series Active Tourer"): BODY_TYPE_MPV,
+    ("BMW", "3 Series Touring"): BODY_TYPE_KOMBI,
+    ("BMW", "5 Series Touring"): BODY_TYPE_KOMBI,
+    ("BMW", "X1"): BODY_TYPE_SUV,
+    ("BMW", "X2"): BODY_TYPE_SUV,
+    ("BMW", "X3"): BODY_TYPE_SUV,
+    ("BMW", "X5"): BODY_TYPE_SUV,
+    ("BMW", "X6"): BODY_TYPE_SUV,
+    ("BMW", "X7"): BODY_TYPE_SUV,
+    ("BMW", "XM"): BODY_TYPE_SUV,
+    ("BMW", "i5 Touring"): BODY_TYPE_KOMBI,
+    ("BMW", "iX"): BODY_TYPE_SUV,
+    ("BMW", "iX1"): BODY_TYPE_SUV,
+    ("BMW", "iX2"): BODY_TYPE_SUV,
+    ("BMW", "iX3"): BODY_TYPE_SUV,
+    ("CUPRA", "Born"): BODY_TYPE_HATCHBACK,
+    ("CUPRA", "Formentor"): BODY_TYPE_SUV,
+    ("CUPRA", "Leon"): BODY_TYPE_HATCHBACK,
+    ("CUPRA", "Leon Sportstourer"): BODY_TYPE_KOMBI,
+    ("CUPRA", "Raval"): BODY_TYPE_HATCHBACK,
+    ("CUPRA", "Terramar"): BODY_TYPE_SUV,
+    ("Dacia", "Bigster"): BODY_TYPE_SUV,
+    ("Dacia", "Duster"): BODY_TYPE_SUV,
+    ("Dacia", "Jogger"): BODY_TYPE_MPV,
+    ("Dacia", "Sandero"): BODY_TYPE_HATCHBACK,
+    ("Dacia", "Sandero Stepway"): BODY_TYPE_HATCHBACK,
+    ("Dacia", "Spring"): BODY_TYPE_HATCHBACK,
+    ("Ford", "Bronco"): BODY_TYPE_SUV,
+    ("Ford", "Kuga"): BODY_TYPE_SUV,
+    ("Ford", "Puma"): BODY_TYPE_SUV,
+    ("Hyundai", "Kona"): BODY_TYPE_SUV,
+    ("Hyundai", "Santa Fe"): BODY_TYPE_SUV,
+    ("Hyundai", "Tucson"): BODY_TYPE_SUV,
+    ("Hyundai", "i20"): BODY_TYPE_HATCHBACK,
+    ("Hyundai", "i30"): BODY_TYPE_HATCHBACK,
+    ("Kia", "Ceed SW"): BODY_TYPE_KOMBI,
+    ("Kia", "Niro"): BODY_TYPE_SUV,
+    ("Kia", "Sportage"): BODY_TYPE_SUV,
+    ("MG", "3"): BODY_TYPE_HATCHBACK,
+    ("MG", "4 EV Urban"): BODY_TYPE_HATCHBACK,
+    ("MG", "HS"): BODY_TYPE_SUV,
+    ("MG", "S5 EV"): BODY_TYPE_SUV,
+    ("MG", "S9 PHEV"): BODY_TYPE_SUV,
+    ("MG", "ZS"): BODY_TYPE_SUV,
+    ("Mazda", "3"): BODY_TYPE_HATCHBACK,
+    ("Mazda", "CX-30"): BODY_TYPE_SUV,
+    ("Mercedes-Benz", "C-Class Estate"): BODY_TYPE_KOMBI,
+    ("Mercedes-Benz", "E-Class Estate"): BODY_TYPE_KOMBI,
+    ("Opel", "Astra"): BODY_TYPE_HATCHBACK,
+    ("Opel", "Corsa"): BODY_TYPE_HATCHBACK,
+    ("Opel", "Frontera"): BODY_TYPE_SUV,
+    ("Opel", "Grandland"): BODY_TYPE_SUV,
+    ("Opel", "Mokka"): BODY_TYPE_SUV,
+    ("Peugeot", "2008"): BODY_TYPE_SUV,
+    ("Peugeot", "208"): BODY_TYPE_HATCHBACK,
+    ("Peugeot", "3008"): BODY_TYPE_SUV,
+    ("Peugeot", "308 SW"): BODY_TYPE_KOMBI,
+    ("Peugeot", "5008"): BODY_TYPE_SUV,
+    ("Peugeot", "Rifter"): BODY_TYPE_MPV,
+    ("Peugeot", "Rifter LONG"): BODY_TYPE_MPV,
+    ("Renault", "4"): BODY_TYPE_SUV,
+    ("Renault", "5"): BODY_TYPE_HATCHBACK,
+    ("Renault", "Arkana"): BODY_TYPE_SUV,
+    ("Renault", "Austral"): BODY_TYPE_SUV,
+    ("Renault", "Captur"): BODY_TYPE_SUV,
+    ("Renault", "Clio"): BODY_TYPE_HATCHBACK,
+    ("Renault", "Espace"): BODY_TYPE_SUV,
+    ("Renault", "Megane"): BODY_TYPE_HATCHBACK,
+    ("Renault", "Rafale"): BODY_TYPE_SUV,
+    ("Renault", "Scenic"): BODY_TYPE_SUV,
+    ("Renault", "Symbioz"): BODY_TYPE_SUV,
+    ("Renault", "Twingo"): BODY_TYPE_HATCHBACK,
+    ("Tesla", "Model Y"): BODY_TYPE_SUV,
+    ("Toyota", "C-HR"): BODY_TYPE_SUV,
+    ("Toyota", "Corolla Hatchback"): BODY_TYPE_HATCHBACK,
+    ("Toyota", "Corolla Touring Sports"): BODY_TYPE_KOMBI,
+    ("Toyota", "RAV4"): BODY_TYPE_SUV,
+    ("Toyota", "Yaris"): BODY_TYPE_HATCHBACK,
+    ("Toyota", "Yaris Cross"): BODY_TYPE_SUV,
+    ("Volkswagen", "Golf"): BODY_TYPE_HATCHBACK,
+    ("Volkswagen", "Golf Variant"): BODY_TYPE_KOMBI,
+    ("Volkswagen", "ID. Polo"): BODY_TYPE_HATCHBACK,
+    ("Volkswagen", "ID.3 Neo"): BODY_TYPE_HATCHBACK,
+    ("Volkswagen", "ID.4"): BODY_TYPE_SUV,
+    ("Volkswagen", "ID.7 Tourer"): BODY_TYPE_KOMBI,
+    ("Volkswagen", "Passat"): BODY_TYPE_KOMBI,
+    ("Volkswagen", "Polo"): BODY_TYPE_HATCHBACK,
+    ("Volkswagen", "T-Cross"): BODY_TYPE_SUV,
+    ("Volkswagen", "T-Roc"): BODY_TYPE_SUV,
+    ("Volkswagen", "Taigo"): BODY_TYPE_SUV,
+    ("Volkswagen", "Tayron"): BODY_TYPE_SUV,
+    ("Volkswagen", "Touran"): BODY_TYPE_MPV,
+    ("Škoda", "Elroq"): BODY_TYPE_SUV,
+    ("Škoda", "Enyaq"): BODY_TYPE_SUV,
+    ("Škoda", "Epiq"): BODY_TYPE_SUV,
+    ("Škoda", "Fabia"): BODY_TYPE_HATCHBACK,
+    ("Škoda", "Kamiq"): BODY_TYPE_SUV,
+    ("Škoda", "Karoq"): BODY_TYPE_SUV,
+    ("Škoda", "Kodiaq"): BODY_TYPE_SUV,
+    ("Škoda", "Peaq"): BODY_TYPE_SUV,
+    ("Škoda", "Scala"): BODY_TYPE_HATCHBACK,
+}
+
+
+def infer_body_type(brand_name: str, model_name: str) -> str | None:
+    """Args:
+        brand_name: The model's brand display name (`Brand.name`), e.g.
+            `"Škoda"`.
+        model_name: The model's display name, e.g. `"Enyaq"`.
+
+    Returns:
+        `BODY_TYPE_SUV` if `model_name` itself says so (e.g. Audi's own
+        "Q7 SUV", "RS Q8 SUV"), else the curated `_MODEL_BODY_TYPES` entry
+        for `(brand_name, model_name)`, else `None` for a body style the
+        wizard has no filter for (sedan, coupe, ...) or a model that table
+        hasn't been extended to yet.
+    """
+    if "SUV" in model_name:
+        return BODY_TYPE_SUV
+    return _MODEL_BODY_TYPES.get((brand_name, model_name))
+
+
 def extract_power_kw(text: str) -> int | None:
     """Args:
         text: Free text to search for a "NNN kW" substring.
@@ -376,7 +552,10 @@ class ScraperDataImporter:
 
         Returns:
             The existing `CarModel` row for `(brand, slugify(name))`, or a
-            newly created one.
+            newly created one. Either way, `category` is backfilled from
+            `infer_body_type` if it's currently unset - so extending
+            `_MODEL_BODY_TYPES` and re-running this script fixes an
+            already-imported model's category too, not just new ones.
         """
         slug = slugify(name)
         key = (brand.id, slug)
@@ -386,9 +565,11 @@ class ScraperDataImporter:
             select(CarModel).where(CarModel.brand_id == brand.id, CarModel.slug == slug)
         )
         if model is None:
-            model = CarModel(brand_id=brand.id, slug=slug, name=name)
+            model = CarModel(brand_id=brand.id, slug=slug, name=name, category=infer_body_type(brand.name, name))
             self._db.add(model)
             self._db.flush()
+        elif model.category is None:
+            model.category = infer_body_type(brand.name, name)
         self._model_cache[key] = model
         return model
 
