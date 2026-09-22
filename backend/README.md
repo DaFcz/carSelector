@@ -156,6 +156,13 @@ The `users` / `login_codes` tables come from an Alembic migration - run `alembic
 pulling (`scripts/run.bat` does it for you). The REST API (`/api/*`) is unchanged and still
 unauthenticated; login only gates the UI.
 
+**Saved requirements.** For a logged-in user, the "Technické požadavky" drawer survives a page
+reload or a new login session: `app/services/saved_requirements.py` keeps one JSON snapshot of
+`StructuredRequirements` per user (`saved_requirements` table), restored on `ConversationState.
+begin()` and overwritten after every chat/wizard turn. Logged-out browsing is unaffected - nothing
+is saved, and `ConversationState.restart()` (the header's "Restartovat") also deletes the saved
+snapshot server-side rather than leaving a reload silently bring it back.
+
 **The AI layer (`app/ai/requirement_interpreter.py`, `app/ai/explanation_generator.py`) was
 written without access to a live API key and has not been exercised against either real provider.**
 Verify prompt behavior before relying on it: does it reliably return JSON-only, is the

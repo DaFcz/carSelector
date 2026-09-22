@@ -21,6 +21,39 @@ to one or more related commits.
 
 ---
 
+## 0.2.37 — 2026-09-22
+
+### Added
+- Saved requirements for logged-in users: the "Technické požadavky" drawer
+  no longer resets to empty on every reload or new login session.
+  `app/services/conversation.py`'s conversation state is purely in-memory
+  per `conversation_id`, which a fresh page load always replaces, so
+  there was nothing to restore from before this.
+- `saved_requirements` table (migration `e4c033fa27c0`) and
+  `app/services/saved_requirements.py` (`load`/`save`/`clear`): one JSON
+  snapshot of `StructuredRequirements` per user, overwritten on each
+  save rather than kept as history.
+- `ConversationState` (`app/ui/state.py`) now: restores the saved
+  snapshot on `begin()` for a logged-in user - re-running the same
+  recommend/explain pipeline a real turn would, so the results grid
+  matches what the drawer shows, with a synthetic "Moje uložené
+  požadavky z minulé relace." chat turn marking the restore; saves after
+  every `send`/`send_wizard_answers` turn that has anything populated
+  yet; clears the saved snapshot on `restart()`, so starting over isn't
+  silently undone by the next reload.
+- A mid-session login (`app/ui/pages.py`'s `on_logged_in`, via the new
+  `ConversationState.on_login`) either persists whatever requirements
+  were already built up anonymously this session under the account that
+  just logged in, or - if this session doesn't have any yet, e.g. a
+  reload while logged out landed on a fresh conversation just before
+  logging back in - restores that account's previously saved ones
+  instead, the same as `begin()` does for an already-logged-in page
+  load. Without the second branch, that reload-then-log-back-in sequence
+  looked like saving had silently failed: nothing to persist (already
+  empty) and nothing ever loaded it back either. Logging out clears
+  `ConversationState.user_id` so a now-anonymous session stops saving to
+  the account that just logged out.
+
 ## 0.2.36 — 2026-09-22
 
 ### Fixed

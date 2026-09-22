@@ -114,6 +114,7 @@ async def index() -> None:
     await auth_state.refresh()
 
     conv = ConversationState()
+    conv.user_id = auth_state.user.id if auth_state.is_logged_in else None
     catalog_state = CatalogState()
     wizard_state = WizardState()
     sort_state = _SortState()
@@ -181,12 +182,32 @@ async def index() -> None:
     open_api_key_dialog = api_key_dialog(on_api_key_changed, lambda: auth_state.is_admin)
 
     def on_logged_in() -> None:
+        # Either saves whatever's already been built up anonymously this
+        # session under the account that just logged in, or - if nothing
+        # has been gathered yet this session - restores that account's
+        # previously saved requirements. See ConversationState.on_login.
+        conv.user_id = auth_state.user.id if auth_state.user else None
+        if conv.user_id is not None:
+
+            async def _apply_login() -> None:
+                await conv.on_login()
+                # Only the restore branch can actually change cars/
+                # messages/requirements (persisting saves what's already
+                # on screen, unchanged) - refreshing regardless is
+                # harmless and keeps this from silently missing a case.
+                narrowed_paging.reset()
+                refresh_all()
+
+            asyncio.ensure_future(_apply_login())
         chrome.refresh()
 
     open_login_dialog = login_dialog(auth_state, on_logged_in)
 
     def logout() -> None:
         auth_state.logout()
+        # Stops this (now-anonymous) session from continuing to save its
+        # requirements under the account that just logged out.
+        conv.user_id = None
         chrome.refresh()
 
     def open_wizard() -> None:

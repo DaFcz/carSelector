@@ -23,7 +23,7 @@ from app.schemas.catalog import BrandRead
 from app.schemas.common import Money
 from app.schemas.requirement import StructuredRequirements, UserRequirement
 from app.schemas.vehicle import VehicleDetail, VehicleSummary
-from app.services import catalog
+from app.services import catalog, saved_requirements
 from app.services.conversation import orchestrator
 from app.ui import db as ui_db
 
@@ -33,6 +33,14 @@ ChatMessage = tuple[str, str]  # (role, text) - role is "user" | "assistant"
 logger = logging.getLogger(__name__)
 
 PAGE_SIZE = 20
+
+# Stands in for a real chat message when restoring a logged-in user's
+# saved requirements (see `ConversationState._restore_saved_requirements`)
+# - shown as the "user" bubble right before the assistant's reply, the
+# same way a wizard-answer summary does, since `orchestrator.
+# handle_wizard_answers` needs *some* source_message to attribute the
+# turn to.
+RESTORE_SUMMARY_MESSAGE = "Moje uložené požadavky z minulé relace."
 
 
 @dataclass
@@ -50,6 +58,15 @@ class ConversationState:
     conversation_id: str | None = None
     messages: list[ChatMessage] = field(default_factory=list)
     requirements: list[UserRequirement] = field(default_factory=list)
+    # The same requirements as `requirements` above, but the raw schema
+    # rather than its display cards - `UserRequirement` only carries a
+    # formatted string per populated field, which isn't reliably
+    # reconstructible back into a `StructuredRequirements` (e.g. an enum's
+    # `.value`, or several notes concatenated into one string). Kept
+    # alongside it purely so a logged-in user's requirements can be
+    # persisted (see `_persist_saved_requirements`) without that lossy
+    # round-trip.
+    structured_requirements: StructuredRequirements = field(default_factory=StructuredRequirements)
     cars: list[VehicleSummary] = field(default_factory=list)
     # True once the recommendation engine has actually run at least once
     # (a turn's `searched=True`). Distinguishes "AI hasn't narrowed
@@ -60,12 +77,19 @@ class ConversationState:
     is_loading: bool = False
     is_sending: bool = False
     error: str | None = None
+    # Whose account to persist requirements under - `None` while
+    # logged out. Set by `app/ui/pages.py` from `AuthState`, both at page
+    # load and on a mid-session login/logout; `ConversationState` itself
+    # never reads `AuthState` to stay decoupled from the auth layer.
+    user_id: int | None = None
 
     async def begin(self) -> None:
         """Starts a new conversation and seeds the transcript with its
-        opening message. `start_conversation` is pure in-memory
-        (uuid + dict), so this calls it directly rather than through
-        `run.io_bound`.
+        opening message, then - if `user_id` is set - restores that
+        user's saved requirements (see `_restore_saved_requirements`) so
+        a logged-in user doesn't start from a blank slate on every reload.
+        `start_conversation` is pure in-memory (uuid + dict), so that part
+        is called directly rather than through `run.io_bound`.
         """
         self.is_loading = True
         self.error = None
@@ -73,10 +97,120 @@ class ConversationState:
             conversation_id, intro_message = orchestrator.start_conversation()
             self.conversation_id = conversation_id
             self.messages = [("assistant", intro_message)]
+            if self.user_id is not None:
+                await self._restore_saved_requirements()
         except Exception:
             self.error = "unknown_error"
         finally:
             self.is_loading = False
+
+    async def _restore_saved_requirements(self) -> None:
+        """Loads `self.user_id`'s saved requirements, if any, and applies
+        them to this freshly-started conversation - same effect as the
+        user re-submitting the wizard with those answers, so the results
+        grid ends up matching what the drawer shows. A failure here is
+        logged and otherwise swallowed: it would be worse to fail the
+        whole page load over a saved-requirements hiccup than to just
+        start from a blank conversation, same reasoning as
+        `CatalogState.load_brands`'s empty-on-failure fallback.
+        """
+        user_id = self.user_id
+
+        def _load() -> StructuredRequirements | None:
+            with ui_db.get_session() as db:
+                return saved_requirements.load(db, user_id)
+
+        try:
+            saved = await run.io_bound(_load)
+            if saved is None:
+                return
+            conversation_id = self.conversation_id
+
+            def _restore() -> object:
+                with ui_db.get_session() as db:
+                    return orchestrator.handle_wizard_answers(db, conversation_id, saved, RESTORE_SUMMARY_MESSAGE)
+
+            self.messages.append(("user", RESTORE_SUMMARY_MESSAGE))
+            result = await run.io_bound(_restore)
+            self.messages.append(("assistant", result.assistant_text))
+            self.requirements = result.requirements
+            self.structured_requirements = result.structured_requirements
+            self.cars = result.vehicles
+            self.has_narrowed = True
+        except Exception:
+            logger.exception("Restoring saved requirements for user %s failed", user_id)
+
+    async def _persist_saved_requirements(self) -> None:
+        """Saves `self.structured_requirements` under `self.user_id`, if
+        logged in and there's actually something populated to save yet
+        (skips the early turns of a conversation, where every field is
+        still unset). Called after every turn that could have changed
+        the requirements (`send`, `send_wizard_answers`) and once
+        immediately after a mid-session login (see
+        `app/ui/pages.py`'s `on_logged_in`) so answers already given
+        anonymously this session start being remembered right away
+        rather than only from the next turn onward. A failure here is
+        logged and swallowed - losing the save shouldn't surface as a
+        chat error, since the turn itself already succeeded.
+        """
+        if self.user_id is None or self.structured_requirements == StructuredRequirements():
+            return
+        user_id = self.user_id
+        requirements = self.structured_requirements
+
+        def _save() -> None:
+            with ui_db.get_session() as db:
+                saved_requirements.save(db, user_id, requirements)
+
+        try:
+            await run.io_bound(_save)
+        except Exception:
+            logger.exception("Saving requirements for user %s failed", user_id)
+
+    async def on_login(self) -> None:
+        """Public entry point for `app/ui/pages.py`'s `on_logged_in`,
+        called right after `self.user_id` is set to the account that just
+        logged in mid-session (not the initial-page-load case - that one
+        goes through `begin()` instead, since a fresh conversation only
+        exists there):
+
+        - If this session already has requirements gathered anonymously
+          (`self.structured_requirements` is non-empty), saves them under
+          the new account right away rather than waiting for the next
+          chat/wizard turn - see `_persist_saved_requirements`.
+        - Otherwise (nothing gathered yet this session - e.g. the page
+          was reloaded while logged out, landing on a blank conversation,
+          before logging back in), restores that account's previously
+          saved requirements instead, same as `begin()` does for an
+          already-logged-in page load - see
+          `_restore_saved_requirements`. Without this branch, logging
+          back in on a fresh conversation looked like the save had
+          silently failed: nothing to persist (already empty) and
+          nothing ever loaded it back either.
+        """
+        if self.structured_requirements != StructuredRequirements():
+            await self._persist_saved_requirements()
+        else:
+            await self._restore_saved_requirements()
+
+    async def _clear_saved_requirements(self) -> None:
+        """Deletes `self.user_id`'s saved requirements, if logged in -
+        called by `restart()` so starting over also forgets the old
+        requirements server-side. Same swallow-and-log failure handling
+        as `_persist_saved_requirements`.
+        """
+        if self.user_id is None:
+            return
+        user_id = self.user_id
+
+        def _clear() -> None:
+            with ui_db.get_session() as db:
+                saved_requirements.clear(db, user_id)
+
+        try:
+            await run.io_bound(_clear)
+        except Exception:
+            logger.exception("Clearing saved requirements for user %s failed", user_id)
 
     async def send(self, text: str) -> None:
         """Sends `text` as the user's next message and applies the
@@ -103,8 +237,10 @@ class ConversationState:
             result = await run.io_bound(_send)
             self.messages.append(("assistant", result.assistant_text))
             self.requirements = result.requirements
+            self.structured_requirements = result.structured_requirements
             self.cars = result.vehicles
             self.has_narrowed = self.has_narrowed or result.searched
+            await self._persist_saved_requirements()
         except RuntimeError:
             # AI layer not configured (missing ANTHROPIC_API_KEY) - see
             # app/ai/client.py.
@@ -149,8 +285,10 @@ class ConversationState:
             result = await run.io_bound(_send)
             self.messages.append(("assistant", result.assistant_text))
             self.requirements = result.requirements
+            self.structured_requirements = result.structured_requirements
             self.cars = result.vehicles
             self.has_narrowed = True
+            await self._persist_saved_requirements()
         except AiProviderError as exc:
             # Only the explanation step calls the AI here (no free text to
             # interpret), but it can still be rejected - e.g. a bad key.
@@ -163,10 +301,17 @@ class ConversationState:
             self.is_sending = False
 
     async def restart(self) -> None:
-        """Abandons the current conversation and starts a fresh one."""
+        """Abandons the current conversation and starts a fresh one - for
+        a logged-in user, also forgets their saved requirements
+        server-side (`_clear_saved_requirements`), so "starting over"
+        doesn't just get silently undone by `begin()` restoring the old
+        ones again on the very next reload.
+        """
+        await self._clear_saved_requirements()
         self.conversation_id = None
         self.messages = []
         self.requirements = []
+        self.structured_requirements = StructuredRequirements()
         self.cars = []
         self.has_narrowed = False
         self.drawer_open = False

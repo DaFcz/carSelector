@@ -11,10 +11,24 @@ talks to the database/orchestrator and carries the real risk, independent
 of how the DOM ends up rendering it.
 """
 
+from datetime import datetime, timezone
+
+import pytest
+
 from app.models.enums import Drivetrain
+from app.models.user import User
 from app.schemas.requirement import StructuredRequirements
+from app.services import saved_requirements
 from app.ui.state import CatalogState, ConversationState, WizardState
 from tests.conftest import SeededData
+
+
+@pytest.fixture()
+def user(seeded_session: SeededData) -> User:
+    row = User(email="driver@example.cz", is_admin=False, is_active=True, created_at=datetime.now(timezone.utc))
+    seeded_session.session.add(row)
+    seeded_session.session.commit()
+    return row
 
 
 async def test_catalog_state_loads_brands(patch_ui_session, seeded_session: SeededData) -> None:
@@ -143,6 +157,119 @@ async def test_conversation_state_send_wizard_answers_works_without_api_key(
     assert state.cars[0].configuration_id == seeded_session.config_centre_awd_id
     assert state.messages[-2] == ("user", "Vyplnil(a) jsem průvodce: ...")
     assert state.messages[-1][0] == "assistant"
+
+
+async def test_conversation_state_send_wizard_answers_persists_when_logged_in(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    state = ConversationState(user_id=user.id)
+    await state.begin()
+
+    wizard = WizardState()
+    wizard.open_wizard()
+    wizard.body_type = "SUV"
+    await state.send_wizard_answers(wizard.to_structured_requirements(), "Vyplnil(a) jsem průvodce: ...")
+
+    assert saved_requirements.load(seeded_session.session, user.id) == StructuredRequirements(body_type="SUV")
+
+
+async def test_conversation_state_send_wizard_answers_does_not_persist_when_logged_out(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    state = ConversationState()  # user_id defaults to None - logged out
+    await state.begin()
+
+    wizard = WizardState()
+    wizard.open_wizard()
+    wizard.body_type = "SUV"
+    await state.send_wizard_answers(wizard.to_structured_requirements(), "Vyplnil(a) jsem průvodce: ...")
+
+    assert saved_requirements.load(seeded_session.session, user.id) is None
+
+
+async def test_conversation_state_begin_restores_saved_requirements_when_logged_in(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    saved_requirements.save(seeded_session.session, user.id, StructuredRequirements(body_type="SUV"))
+
+    state = ConversationState(user_id=user.id)
+    await state.begin()
+
+    assert state.has_narrowed is True
+    assert state.structured_requirements == StructuredRequirements(body_type="SUV")
+    # Same 4 seeded SUV configs the wizard-driven search above matches -
+    # restoring is meant to reproduce exactly that outcome.
+    assert len(state.cars) == 4
+    assert any(card.value == "SUV" for card in state.requirements)
+    # Intro message, then the synthetic restore turn (user + assistant).
+    assert len(state.messages) == 3
+
+
+async def test_conversation_state_begin_does_not_restore_when_nothing_saved(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    state = ConversationState(user_id=user.id)
+    await state.begin()
+
+    assert state.has_narrowed is False
+    assert len(state.messages) == 1  # just the intro message
+
+
+async def test_conversation_state_restart_clears_saved_requirements_when_logged_in(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    saved_requirements.save(seeded_session.session, user.id, StructuredRequirements(body_type="SUV"))
+    state = ConversationState(user_id=user.id)
+    await state.begin()
+    assert state.has_narrowed is True  # sanity check: it did restore first
+
+    await state.restart()
+
+    assert saved_requirements.load(seeded_session.session, user.id) is None
+    assert state.has_narrowed is False  # restart's own begin() found nothing left to restore
+
+
+async def test_conversation_state_on_login_restores_when_session_has_nothing_yet(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    # Reproduces "log in, set requirements, log out, log back in and
+    # they're gone": logging back in happens on a conversation that
+    # began logged out (e.g. a reload while logged out landed on a fresh
+    # one) - begin() itself never had a user_id to restore from.
+    saved_requirements.save(seeded_session.session, user.id, StructuredRequirements(body_type="SUV"))
+    state = ConversationState()
+    await state.begin()
+    assert state.has_narrowed is False  # sanity check: this is the bug's starting point
+
+    state.user_id = user.id  # mid-session login
+    await state.on_login()
+
+    assert state.has_narrowed is True
+    assert state.structured_requirements == StructuredRequirements(body_type="SUV")
+    assert len(state.cars) == 4
+
+
+async def test_conversation_state_on_login_persists_current_over_an_older_saved_snapshot(
+    patch_ui_session, seeded_session: SeededData, user: User
+) -> None:
+    # An older snapshot already saved under this account from a previous
+    # session.
+    saved_requirements.save(seeded_session.session, user.id, StructuredRequirements(body_type="Kombi"))
+
+    state = ConversationState()  # starts logged out
+    await state.begin()
+    wizard = WizardState()
+    wizard.open_wizard()
+    wizard.body_type = "SUV"
+    await state.send_wizard_answers(wizard.to_structured_requirements(), "Vyplnil(a) jsem průvodce: ...")
+
+    state.user_id = user.id  # mid-session login
+    await state.on_login()
+
+    # This session's own (newer) answer wins over the old saved one -
+    # on_login must not blindly restore and clobber it.
+    assert saved_requirements.load(seeded_session.session, user.id) == StructuredRequirements(body_type="SUV")
+    assert state.structured_requirements == StructuredRequirements(body_type="SUV")
 
 
 async def test_conversation_state_send_wizard_answers_noop_before_begin(patch_ui_session) -> None:
