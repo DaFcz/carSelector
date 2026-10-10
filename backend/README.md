@@ -79,8 +79,11 @@ all, regardless of provider.
 The UI additionally uses:
 
 ```
-NICEGUI_STORAGE_SECRET=...   # optional locally - see app/core/config.py; set a real value before
-                              # any shared/public deployment
+NICEGUI_STORAGE_SECRET=...   # optional - unset, a random one is generated into storage/secret_key
+                              # (see app/core/config.py); set it where several processes/hosts
+                              # must share it or storage/ isn't persistent
+SESSION_COOKIE_HTTPS_ONLY=... # session cookie over HTTPS only; defaults to on when
+                              # PUBLIC_BASE_URL is https://
 ```
 
 ### Login (email code) and admins
@@ -145,8 +148,9 @@ land in spam. A mailbox provider such as Seznam or Gmail needs none of that but 
 from that mailbox's own address.
 
 Codes are stored only as a keyed hash, are single-use, and requesting a new one invalidates the
-old. Set a real `NICEGUI_STORAGE_SECRET` (it signs the session cookie) before any shared
-deployment. The per-IP limit uses the connection's address; behind a reverse proxy, make uvicorn
+old. The session cookie is signed with `NICEGUI_STORAGE_SECRET` (generated into
+`storage/secret_key` if unset - there is no fixed fallback); serve a public deployment over HTTPS
+with `PUBLIC_BASE_URL=https://...` so the cookie is marked `Secure`. The per-IP limit uses the connection's address; behind a reverse proxy, make uvicorn
 trust its forwarded headers (`--forwarded-allow-ips`), otherwise every visitor shares the proxy's
 address and its limit. A session is checked against the database on every page load, so
 deactivating an account (`users.is_active = false`) or removing `is_admin` takes effect on the

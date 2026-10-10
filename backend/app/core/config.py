@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -50,6 +51,21 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 # are lost on restart. 0 turns tracing off.
 LLM_TRACE_MAX_ENTRIES = int(os.getenv("LLM_TRACE_MAX_ENTRIES", "200"))
 
+# --- Chat abuse limits (app/services/conversation.py) ---
+# Every chat message and wizard search costs paid LLM calls, and
+# conversations live in process memory, so both are capped. "Client" is
+# the caller's IP (behind a reverse proxy, see app/ui/auth.py's
+# client_ip on --forwarded-allow-ips); calls with no known IP are limited
+# per conversation instead. 0 disables a limit.
+CHAT_MAX_MESSAGE_LENGTH = int(os.getenv("CHAT_MAX_MESSAGE_LENGTH", "2000"))
+CHAT_MAX_MESSAGES_PER_CLIENT_HOUR = int(os.getenv("CHAT_MAX_MESSAGES_PER_CLIENT_HOUR", "60"))
+CHAT_MAX_CONVERSATIONS_PER_CLIENT_HOUR = int(os.getenv("CHAT_MAX_CONVERSATIONS_PER_CLIENT_HOUR", "60"))
+CHAT_MAX_MESSAGES_PER_CONVERSATION = int(os.getenv("CHAT_MAX_MESSAGES_PER_CONVERSATION", "50"))
+# Conversations untouched this long are dropped; past MAX_CONVERSATIONS the
+# least recently used one is dropped to make room.
+CHAT_CONVERSATION_IDLE_MINUTES = int(os.getenv("CHAT_CONVERSATION_IDLE_MINUTES", "120"))
+CHAT_MAX_CONVERSATIONS = int(os.getenv("CHAT_MAX_CONVERSATIONS", "5000"))
+
 # Origins an external client (not the bundled UI, which is served from this
 # same origin - see app/ui/ - and never needs CORS) can call this API from.
 # Kept, unchanged, for anything that hits /api/* directly (tooling, a
@@ -62,12 +78,39 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
-# Signs NiceGUI's session cookie and is required for app.storage.user (used
-# to persist the "custom sort order" drag result across reloads - see
-# app/ui/state.py). The fallback is fine for local dev (nothing sensitive
-# is stored - just a drag order); set a real secret before any shared/public
-# deployment.
-NICEGUI_STORAGE_SECRET = os.getenv("NICEGUI_STORAGE_SECRET", "dev-insecure-storage-secret")
+_LOCAL_SECRET_PATH = Path(__file__).resolve().parents[3] / "storage" / "secret_key"
+
+
+def _local_secret() -> str:
+    """A random secret generated on first use and kept in
+    `storage/secret_key` (gitignored), for when `NICEGUI_STORAGE_SECRET`
+    isn't set. Never a fixed default: a value published in the repo would
+    let anyone forge session cookies and reverse stored login codes.
+
+    Created with exclusive mode, so two processes starting at once (e.g.
+    uvicorn's --reload parent and child) end up with the same secret.
+
+    Returns:
+        The secret.
+    """
+    try:
+        with _LOCAL_SECRET_PATH.open("x", encoding="utf-8") as file:
+            secret = secrets.token_urlsafe(48)
+            file.write(secret)
+            return secret
+    except FileExistsError:
+        secret = _LOCAL_SECRET_PATH.read_text(encoding="utf-8").strip()
+        if not secret:
+            raise RuntimeError(f"{_LOCAL_SECRET_PATH} is empty - delete it to generate a new secret") from None
+        return secret
+
+
+# Signs NiceGUI's session cookie (which carries the login - see
+# app/ui/auth.py) and is required for app.storage.user. Unset, a random
+# per-checkout secret is generated (see _local_secret) - fine for one
+# machine; set it explicitly where several processes/hosts must agree, or
+# where storage/ isn't persistent (e.g. a container without that volume).
+NICEGUI_STORAGE_SECRET = os.getenv("NICEGUI_STORAGE_SECRET") or _local_secret()
 
 # --- Login (passwordless, 6-digit code by email - see app/services/auth.py) ---
 
@@ -141,3 +184,11 @@ SHARE_TTL_DAYS = int(os.getenv("SHARE_TTL_DAYS", "30"))
 # https://rovis.example.cz. Unset: taken from the incoming request, which
 # is right for local runs but may be an internal address behind a proxy.
 PUBLIC_BASE_URL = (os.getenv("PUBLIC_BASE_URL") or "").rstrip("/") or None
+
+# Marks the session cookie `Secure` (sent over HTTPS only), so the login
+# can't leak over plain HTTP. Defaults to on when PUBLIC_BASE_URL is https;
+# keep it off for local http://localhost runs, where the browser would
+# otherwise drop the cookie.
+SESSION_COOKIE_HTTPS_ONLY = os.getenv(
+    "SESSION_COOKIE_HTTPS_ONLY", "true" if (PUBLIC_BASE_URL or "").startswith("https://") else "false"
+).strip().lower() in ("1", "true", "yes")

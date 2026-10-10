@@ -4,6 +4,7 @@ from collections.abc import Awaitable, Callable
 
 from nicegui import ui
 
+from app.core.config import CHAT_MAX_MESSAGE_LENGTH
 from app.ui.i18n import t
 from app.ui.state import ConversationState
 
@@ -64,7 +65,12 @@ def chat_column(state: ConversationState, on_send: Callable[[str], Awaitable[Non
                 .classes(
                     "min-w-0 grow rounded-full border border-border bg-ai-bubble px-4 py-2.5 text-[13px] text-text"
                 )
-                .props("borderless dense")
+                # Convenience only - the orchestrator enforces the limit.
+                .props(
+                    f"borderless dense maxlength={CHAT_MAX_MESSAGE_LENGTH}"
+                    if CHAT_MAX_MESSAGE_LENGTH > 0
+                    else "borderless dense"
+                )
             )
             send_button = (
                 ui.button(t("chat.send"), on_click=lambda: _submit())

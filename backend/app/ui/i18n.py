@@ -367,6 +367,11 @@ STRINGS: dict = {
             ),
             "ai_unreachable": "Nepodařilo se spojit s AI službou. Zkontrolujte připojení k internetu.",
             "ai_error": "AI služba vrátila chybu. Zkuste to prosím znovu.",
+            # ConversationLimitError codes (app/services/conversation.py).
+            "message_too_long": "Zpráva je příliš dlouhá. Zkraťte ji prosím.",
+            "rate_limited": "Poslali jste v krátké době příliš mnoho zpráv. Zkuste to prosím později.",
+            "conversation_too_long": "Konverzace je už příliš dlouhá. Začněte prosím novou.",
+            "conversation_expired": "Konverzace vypršela. Načtěte prosím stránku znovu.",
         },
     },
     "wizard": {

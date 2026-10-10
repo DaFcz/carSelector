@@ -340,6 +340,11 @@ STRINGS_EN: dict = {
             ),
             "ai_unreachable": "Couldn't connect to the AI service. Check your internet connection.",
             "ai_error": "The AI service returned an error. Please try again.",
+            # ConversationLimitError codes (app/services/conversation.py).
+            "message_too_long": "Your message is too long. Please shorten it.",
+            "rate_limited": "You've sent too many messages in a short time. Please try again later.",
+            "conversation_too_long": "This conversation is too long. Please start a new one.",
+            "conversation_expired": "This conversation has expired. Please reload the page.",
         },
     },
     "wizard": {

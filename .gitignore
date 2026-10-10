@@ -228,3 +228,7 @@ __marimo__/
 # backend/app/core/config.py). Local session data, not a data baseline.
 /storage/nicegui/
 
+# Generated session/login secret when NICEGUI_STORAGE_SECRET is unset - see
+# backend/app/core/config.py's _local_secret. Never commit it.
+/storage/secret_key
+

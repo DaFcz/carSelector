@@ -26,7 +26,7 @@ from app.schemas.requirement import StructuredRequirements, UserRequirement
 from app.schemas.sharing import SharedSnapshot
 from app.schemas.vehicle import VehicleDetail, VehicleSummary
 from app.services import catalog, liked_models, saved_requirements, sharing
-from app.services.conversation import orchestrator
+from app.services.conversation import ConversationLimitError, UnknownConversationError, orchestrator
 from app.ui import db as ui_db
 from app.ui.compare import MAX_COMPARE
 from app.ui.i18n import DEFAULT_LANGUAGE, t
@@ -161,7 +161,9 @@ class ConversationState:
     Mirrors `conversationStore` + `useConversation`'s combined state and
     behavior. `error` is one of `"ai_not_configured"` |
     an `AiProviderError.code` (`"ai_invalid_key"`, `"ai_rate_limited"`, ...)
-    | `"unknown_error"` | `None` - there's no `"network_error"` case here (unlike the old
+    | a `ConversationLimitError.code` (`"rate_limited"`, ...) |
+    `"conversation_expired"` | `"unknown_error"` | `None` - there's no
+    `"network_error"` case here (unlike the old
     frontend's `ApiError`), since calling the orchestrator in-process has
     no network hop to fail.
     """
@@ -201,6 +203,9 @@ class ConversationState:
     # `app/ui/i18n.py`'s `current_language`). Fixed for one conversation:
     # switching language reloads the page, which starts a new one.
     language: str = DEFAULT_LANGUAGE
+    # The browser's IP, for the orchestrator's per-client chat limits - set
+    # by `app/ui/pages.py`; `None` if unknown (then limited per conversation).
+    client_ip: str | None = None
 
     async def begin(self) -> None:
         """Starts a new conversation and seeds the transcript with its
@@ -213,11 +218,13 @@ class ConversationState:
         self.is_loading = True
         self.error = None
         try:
-            conversation_id, intro_message = orchestrator.start_conversation(self.language)
+            conversation_id, intro_message = orchestrator.start_conversation(self.language, client_key=self.client_ip)
             self.conversation_id = conversation_id
             self.messages = [("assistant", intro_message)]
             if self.user_id is not None:
                 await self._restore_saved_requirements()
+        except ConversationLimitError as exc:
+            self.error = exc.code
         except Exception:
             self.error = "unknown_error"
         finally:
@@ -245,6 +252,7 @@ class ConversationState:
                 return
             conversation_id = self.conversation_id
             liked_ids = _liked_ids(self.liked)
+            client_ip = self.client_ip
             # Stands in for a real chat message - shown as the "user" bubble
             # right before the assistant's reply, the same way a wizard-answer
             # summary does, since `orchestrator.handle_wizard_answers` needs
@@ -254,7 +262,7 @@ class ConversationState:
             def _restore() -> object:
                 with ui_db.get_session() as db:
                     return orchestrator.handle_wizard_answers(
-                        db, conversation_id, saved, summary_message, liked_model_ids=liked_ids
+                        db, conversation_id, saved, summary_message, liked_model_ids=liked_ids, client_key=client_ip
                     )
 
             self.messages.append(("user", summary_message))
@@ -356,10 +364,13 @@ class ConversationState:
         self.error = None
         conversation_id = self.conversation_id
         liked_ids = _liked_ids(self.liked)
+        client_ip = self.client_ip
 
         def _send() -> object:
             with ui_db.get_session() as db:
-                return orchestrator.handle_message(db, conversation_id, trimmed, liked_model_ids=liked_ids)
+                return orchestrator.handle_message(
+                    db, conversation_id, trimmed, liked_model_ids=liked_ids, client_key=client_ip
+                )
 
         try:
             result = await run.io_bound(_send)
@@ -369,6 +380,12 @@ class ConversationState:
             self.cars = result.vehicles
             self.has_narrowed = self.has_narrowed or result.searched
             await self._persist_saved_requirements()
+        except ConversationLimitError as exc:
+            self.error = exc.code
+        except UnknownConversationError:
+            # Idle past CHAT_CONVERSATION_IDLE_MINUTES and dropped - a reload
+            # starts a new one.
+            self.error = "conversation_expired"
         except RuntimeError:
             # AI layer not configured (missing ANTHROPIC_API_KEY) - see
             # app/ai/client.py.
@@ -405,11 +422,12 @@ class ConversationState:
         self.error = None
         conversation_id = self.conversation_id
         liked_ids = _liked_ids(self.liked)
+        client_ip = self.client_ip
 
         def _send() -> object:
             with ui_db.get_session() as db:
                 return orchestrator.handle_wizard_answers(
-                    db, conversation_id, requirements, summary_message, liked_model_ids=liked_ids
+                    db, conversation_id, requirements, summary_message, liked_model_ids=liked_ids, client_key=client_ip
                 )
 
         try:
@@ -420,6 +438,10 @@ class ConversationState:
             self.cars = result.vehicles
             self.has_narrowed = True
             await self._persist_saved_requirements()
+        except ConversationLimitError as exc:
+            self.error = exc.code
+        except UnknownConversationError:
+            self.error = "conversation_expired"
         except AiProviderError as exc:
             # Only the explanation step calls the AI here (no free text to
             # interpret), but it can still be rejected - e.g. a bad key.

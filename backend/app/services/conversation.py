@@ -7,10 +7,20 @@ is a deliberate placeholder, not persisted, lost on restart, and won't
 work past a single worker process - the DB schema doesn't have
 conversation/message tables yet; adding them is a separate design
 decision (see doc/api-contract.md "open items").
+
+Because every turn costs paid LLM calls and every conversation costs
+memory, both are capped (`app/core/config.py`'s `CHAT_*` settings): message
+length, messages per client per hour, conversations started per client per
+hour, messages per conversation, and how many conversations are kept (idle
+ones expire, the least recently used is dropped when full). A capped call
+raises `ConversationLimitError`.
 """
 
+import threading
+import time
 import uuid
-from collections.abc import Collection
+from collections import OrderedDict
+from collections.abc import Callable, Collection
 from dataclasses import dataclass, field
 
 from sqlalchemy.orm import Session
@@ -19,8 +29,10 @@ from app.ai.explanation_generator import ExplanationGenerator
 from app.ai.explanation_generator import generator as default_generator
 from app.ai.requirement_interpreter import RequirementInterpreter
 from app.ai.requirement_interpreter import interpreter as default_interpreter
+from app.core import config
 from app.schemas.conversation import ChatMessage, MessageResponse
 from app.schemas.requirement import StructuredRequirements, UserRequirement
+from app.services.rate_limit import SlidingWindowLimiter
 from app.services.recommendation_engine import RecommendationEngine
 from app.services.recommendation_engine import engine as default_engine
 
@@ -81,10 +93,34 @@ class _ConversationState:
     history: list[ChatMessage] = field(default_factory=list)
     requirements: StructuredRequirements = field(default_factory=StructuredRequirements)
     language: str = DEFAULT_LANGUAGE
+    # The starting client's key (IP), used for per-client limits when a
+    # later call doesn't name one; `None` if unknown.
+    client_key: str | None = None
+    # Monotonic time of the last start/turn - see `_evict`.
+    last_active: float = 0.0
+    # Turns taken so far (chat messages and wizard submissions).
+    turns: int = 0
 
 
 class UnknownConversationError(KeyError):
     pass
+
+
+class ConversationLimitError(Exception):
+    """A call was refused by one of the chat abuse limits (see the module
+    docstring).
+
+    Attributes:
+        code: `"message_too_long"` | `"rate_limited"` |
+            `"conversation_too_long"` - stable, safe to show to users.
+    """
+
+    def __init__(self, code: str) -> None:
+        """Args:
+        code: See `code` above.
+        """
+        super().__init__(code)
+        self.code = code
 
 
 class ConversationOrchestrator:
@@ -114,6 +150,7 @@ class ConversationOrchestrator:
         requirement_interpreter: RequirementInterpreter | None = None,
         recommendation_engine: RecommendationEngine | None = None,
         explanation_generator: ExplanationGenerator | None = None,
+        clock: Callable[[], float] = time.monotonic,
     ) -> None:
         """Args:
         requirement_interpreter: Turns conversation text into
@@ -125,31 +162,103 @@ class ConversationOrchestrator:
         explanation_generator: Generates per-vehicle explanations.
             Defaults to the shared
             `app.ai.explanation_generator.generator` singleton.
+        clock: Monotonic time source for expiry and rate limits (a
+            parameter so tests control it).
         """
         self._requirement_interpreter = requirement_interpreter or default_interpreter
         self._recommendation_engine = recommendation_engine or default_engine
         self._explanation_generator = explanation_generator or default_generator
-        self._conversations: dict[str, _ConversationState] = {}
+        self._clock = clock
+        # Least recently used first (see `_begin_turn`), which is what
+        # `_evict` relies on.
+        self._conversations: OrderedDict[str, _ConversationState] = OrderedDict()
+        self._lock = threading.Lock()
+        self._message_limiter = SlidingWindowLimiter(config.CHAT_MAX_MESSAGES_PER_CLIENT_HOUR, 3600, clock)
+        self._start_limiter = SlidingWindowLimiter(config.CHAT_MAX_CONVERSATIONS_PER_CLIENT_HOUR, 3600, clock)
 
-    def start_conversation(self, language: str = DEFAULT_LANGUAGE) -> tuple[str, str]:
+    def start_conversation(self, language: str = DEFAULT_LANGUAGE, client_key: str | None = None) -> tuple[str, str]:
         """Creates a new, empty conversation.
 
         Args:
             language: `"cs"` or `"en"` - the language of every assistant
                 reply in this conversation, AI-generated text included.
                 Anything else falls back to `DEFAULT_LANGUAGE`.
+            client_key: Who is starting it (the client's IP), for the
+                per-client limits; `None` if unknown.
 
         Returns:
             A `(conversation_id, intro_message)` pair - `conversation_id`
             identifies this conversation for subsequent `handle_message`
             calls, `intro_message` is the assistant's opening line to
             show the user immediately.
+
+        Raises:
+            ConversationLimitError: `"rate_limited"` - this client started
+                too many conversations in the last hour.
         """
+        if client_key is not None and not self._start_limiter.hit(client_key):
+            raise ConversationLimitError("rate_limited")
         conversation_id = str(uuid.uuid4())
         if language not in _MESSAGES:
             language = DEFAULT_LANGUAGE
-        self._conversations[conversation_id] = _ConversationState(language=language)
+        now = self._clock()
+        with self._lock:
+            self._evict(now)
+            self._conversations[conversation_id] = _ConversationState(
+                language=language, client_key=client_key, last_active=now
+            )
         return conversation_id, _MESSAGES[language]["intro"]
+
+    def _evict(self, now: float) -> None:
+        """Drops idle conversations, then the least recently used ones
+        until there is room for one more. Caller holds `_lock`.
+
+        Args:
+            now: Current monotonic time.
+        """
+        idle_cutoff = now - config.CHAT_CONVERSATION_IDLE_MINUTES * 60
+        while self._conversations and next(iter(self._conversations.values())).last_active <= idle_cutoff:
+            self._conversations.popitem(last=False)
+        if config.CHAT_MAX_CONVERSATIONS > 0:
+            while len(self._conversations) >= config.CHAT_MAX_CONVERSATIONS:
+                self._conversations.popitem(last=False)
+
+    def _begin_turn(self, conversation_id: str, client_key: str | None, text: str | None) -> _ConversationState:
+        """Looks up the conversation and checks every per-turn limit -
+        length and conversation size first, so a refused call doesn't use
+        up the client's hourly budget.
+
+        Args:
+            conversation_id: The conversation to take a turn in.
+            client_key: The caller (client IP), if known; otherwise the
+                key the conversation was started with is used, and failing
+                that the conversation itself.
+            text: The user's free text to length-check, or `None` when the
+                turn carries none (wizard answers are built server-side).
+
+        Returns:
+            The conversation's state, marked as just used.
+
+        Raises:
+            UnknownConversationError: No such conversation, or it expired.
+            ConversationLimitError: See `ConversationLimitError.code`.
+        """
+        now = self._clock()
+        with self._lock:
+            state = self._conversations.get(conversation_id)
+            if state is None or state.last_active <= now - config.CHAT_CONVERSATION_IDLE_MINUTES * 60:
+                self._conversations.pop(conversation_id, None)
+                raise UnknownConversationError(conversation_id)
+            if text is not None and 0 < config.CHAT_MAX_MESSAGE_LENGTH < len(text):
+                raise ConversationLimitError("message_too_long")
+            if 0 < config.CHAT_MAX_MESSAGES_PER_CONVERSATION <= state.turns:
+                raise ConversationLimitError("conversation_too_long")
+            if not self._message_limiter.hit(client_key or state.client_key or f"conversation:{conversation_id}"):
+                raise ConversationLimitError("rate_limited")
+            state.turns += 1
+            state.last_active = now
+            self._conversations.move_to_end(conversation_id)
+            return state
 
     @staticmethod
     def _merge_requirements(
@@ -226,7 +335,13 @@ class ConversationOrchestrator:
         return cards
 
     def handle_message(
-        self, db: Session, conversation_id: str, text: str, *, liked_model_ids: Collection[int] = ()
+        self,
+        db: Session,
+        conversation_id: str,
+        text: str,
+        *,
+        liked_model_ids: Collection[int] = (),
+        client_key: str | None = None,
     ) -> MessageResponse:
         """Processes one user message: extracts/merges requirements, then
         (once there's enough to search on) filters, ranks, and explains
@@ -239,6 +354,8 @@ class ConversationOrchestrator:
             text: The user's new message.
             liked_model_ids: The user's liked models - a ranking boost,
                 see `RecommendationEngine.recommend`.
+            client_key: The caller (client IP) for the per-client limit,
+                if known - see `_begin_turn`.
 
         Returns:
             The assistant's reply for this turn: either a follow-up
@@ -253,10 +370,10 @@ class ConversationOrchestrator:
                 conversation started via `start_conversation` (e.g. it
                 expired, or the process restarted - state isn't
                 persisted, see the module docstring).
+            ConversationLimitError: A chat abuse limit refused the turn -
+                see the module docstring.
         """
-        state = self._conversations.get(conversation_id)
-        if state is None:
-            raise UnknownConversationError(conversation_id)
+        state = self._begin_turn(conversation_id, client_key, text)
 
         extraction = self._requirement_interpreter.interpret(state.history, text, language=state.language)
 
@@ -282,6 +399,7 @@ class ConversationOrchestrator:
         summary_message: str,
         *,
         liked_model_ids: Collection[int] = (),
+        client_key: str | None = None,
     ) -> MessageResponse:
         """Applies requirements captured directly by the step-by-step
         wizard (see `app/ui/components/wizard.py`), skipping the AI
@@ -303,6 +421,8 @@ class ConversationOrchestrator:
                 no free-text message to store instead).
             liked_model_ids: The user's liked models - a ranking boost,
                 see `RecommendationEngine.recommend`.
+            client_key: The caller (client IP) for the per-client limit,
+                if known - see `_begin_turn`.
 
         Returns:
             Same shape as `handle_message`'s narrowed-search branch:
@@ -310,11 +430,12 @@ class ConversationOrchestrator:
 
         Raises:
             UnknownConversationError: `conversation_id` doesn't match any
-                conversation started via `start_conversation`.
+                conversation started via `start_conversation`, or it
+                expired.
+            ConversationLimitError: `"rate_limited"` or
+                `"conversation_too_long"` - see the module docstring.
         """
-        state = self._conversations.get(conversation_id)
-        if state is None:
-            raise UnknownConversationError(conversation_id)
+        state = self._begin_turn(conversation_id, client_key, None)
 
         return self._apply_requirements(db, state, requirements, summary_message, liked_model_ids)
 

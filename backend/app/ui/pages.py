@@ -14,7 +14,7 @@ from app.ai.client import is_configured
 from app.models.enums import Drivetrain, FuelType
 from app.schemas.requirement import StructuredRequirements
 from app.schemas.vehicle import VehicleSummary
-from app.ui.auth import AuthState
+from app.ui.auth import AuthState, client_ip
 from app.ui.compare import MAX_COMPARE, MIN_COMPARE
 from app.ui.components.api_key_dialog import api_key_dialog
 from app.ui.components.author_request_dialog import author_request_dialog
@@ -165,6 +165,7 @@ async def index() -> None:
 
     conv = ConversationState(language=current_language())
     conv.user_id = auth_state.user.id if auth_state.is_logged_in else None
+    conv.client_ip = client_ip()
     # Loaded before anything is built, like `auth_state`, so the first
     # catalog page and the first render already know the user's likes.
     liked = LikedModelsState(user_id=conv.user_id)

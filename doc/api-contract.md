@@ -25,7 +25,7 @@ option_availability / prices / source_documents` (see conversation history / fut
 - List endpoints are paginated: `?page=1&page_size=20`, response wrapped as
   `{ "items": [...], "page": 1, "page_size": 20, "total": 137 }`
 - Errors: `{ "error": { "code": "string", "message": "string", "details": {} } }` with a matching
-  HTTP status (400 validation, 404 not found, 422 unprocessable, 500 server error)
+  HTTP status (400 validation, 404 not found, 422 unprocessable, 429 rate limited, 500 server error)
 - No auth on `/api/*` in v1 (see architecture doc's bonus features) — endpoints are unauthenticated.
   The bundled UI has its own email-code login (admin console, API-key dialog; see
   `backend/README.md`'s Login section), but it calls the service layer in-process and does not
@@ -164,6 +164,10 @@ Start a new conversation. No body required.
 { "conversation_id": "uuid", "intro_message": "string" }
 ```
 
+**Errors:** `429 rate_limited` - this client (IP) started too many conversations in the last hour
+(`CHAT_MAX_CONVERSATIONS_PER_CLIENT_HOUR`). Conversations are dropped after
+`CHAT_CONVERSATION_IDLE_MINUTES` without a message (later calls get `404 conversation_not_found`).
+
 ### `POST /api/conversations/{conversation_id}/messages`
 
 Send a user message; get back the assistant's reply plus the updated structured requirements and
@@ -193,6 +197,12 @@ actually ran this turn (`vehicles` can still legitimately be `[]` there - a real
 nothing). A client falling back to an unfiltered catalog browse before the first real search (see
 `backend/app/ui/state.py`'s `ConversationState.has_narrowed`) needs this to tell "haven't searched
 yet" apart from "searched, found nothing" - both leave `vehicles` empty.
+
+**Errors:** `404 conversation_not_found` (unknown or expired); `422 message_too_long` (`text` over
+`CHAT_MAX_MESSAGE_LENGTH`, default 2000 characters); `422 conversation_too_long` (over
+`CHAT_MAX_MESSAGES_PER_CONVERSATION` turns - start a new one); `429 rate_limited` (over
+`CHAT_MAX_MESSAGES_PER_CLIENT_HOUR` messages from this IP); `502` AI provider error; `503
+ai_not_configured`. Every message costs paid AI calls, hence the limits (`backend/app/core/config.py`).
 
 ### `GET /api/vehicles`
 

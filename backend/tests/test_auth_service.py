@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.core import config
@@ -150,6 +150,32 @@ def test_code_is_burned_after_max_wrong_attempts_even_if_the_right_one_follows(
         service.verify_code(db_session, "jana@example.cz", wrong)
     assert exc_info.value.code == "too_many_attempts"
 
+    with pytest.raises(AuthError) as exc_info:
+        service.verify_code(db_session, "jana@example.cz", code)
+    assert exc_info.value.code == "invalid_code"
+
+
+def test_attempts_are_counted_in_the_database_not_from_a_stale_read(
+    db_session: Session, service: AuthService, sender: RecordingSender
+) -> None:
+    # Simulates parallel guesses: other requests have already used up all
+    # but one attempt, but this session still holds the row as it was
+    # before them (attempts=0). Counting from that stale value would write
+    # back attempts=1 and hand out more tries than the cap.
+    service.request_code(db_session, "jana@example.cz")
+    code = sender.last_code
+    row = db_session.scalars(select(LoginCode)).one()
+    assert row.attempts == 0
+    db_session.execute(
+        update(LoginCode)
+        .where(LoginCode.id == row.id)
+        .values(attempts=config.LOGIN_CODE_MAX_ATTEMPTS - 1)
+        .execution_options(synchronize_session=False)
+    )
+
+    with pytest.raises(AuthError) as exc_info:
+        service.verify_code(db_session, "jana@example.cz", _wrong_code(code))
+    assert exc_info.value.code == "too_many_attempts"
     with pytest.raises(AuthError) as exc_info:
         service.verify_code(db_session, "jana@example.cz", code)
     assert exc_info.value.code == "invalid_code"

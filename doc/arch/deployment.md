@@ -48,9 +48,11 @@ the root `README.md` and `storage/README.md`, not part of the live request path.
   connection, local closures as the per-connection store). This means: one `web` replica, or a
   platform/load balancer with session affinity. Do **not** put it behind plain round-robin
   load balancing.
-- **`NICEGUI_STORAGE_SECRET`** defaults to an insecure dev value
-  (`app/core/config.py`) — must be set to a real secret in any deployed container, and needs a
-  writable mount for the JSON session files it writes under `NICEGUI_STORAGE_PATH`.
+- **`NICEGUI_STORAGE_SECRET`**: unset, a random one is generated into `storage/secret_key`
+  (`app/core/config.py`) — set it explicitly in any deployed container (the file would be lost
+  with the container, logging everyone out), and give the app a writable mount for the JSON
+  session files it writes under `NICEGUI_STORAGE_PATH`. Set `PUBLIC_BASE_URL=https://...` (or
+  `SESSION_COOKIE_HTTPS_ONLY=true`) so the session cookie is HTTPS-only.
 - **Exclude `storage/` from the build context.** `storage/scraper/` alone is ~220 MB of PDFs
   (`storage/README.md`) and would otherwise bloat every image build; a `.dockerignore` is required
   before writing the `Dockerfile`.

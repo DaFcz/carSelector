@@ -224,21 +224,51 @@ class AuthService:
         if row is None:
             raise AuthError("invalid_code")
 
-        row.attempts += 1
+        # Count the attempt in the database itself (`attempts + 1`, guarded
+        # by the cap) rather than as `row.attempts += 1`: the latter writes
+        # back the number this request read, so parallel guesses from many
+        # connections would overwrite each other's count and get far more
+        # than LOGIN_CODE_MAX_ATTEMPTS tries at one code.
+        counted = db.execute(
+            update(LoginCode)
+            .where(
+                LoginCode.id == row.id,
+                LoginCode.consumed_at.is_(None),
+                LoginCode.attempts < config.LOGIN_CODE_MAX_ATTEMPTS,
+            )
+            .values(attempts=LoginCode.attempts + 1)
+            .execution_options(synchronize_session=False)
+        )
+        if counted.rowcount != 1:
+            # Burned or used by a parallel request since the read above.
+            db.commit()
+            raise AuthError("invalid_code")
+        attempts = db.scalar(select(LoginCode.attempts).where(LoginCode.id == row.id))
+
         matches = (
             len(entered) == _CODE_LENGTH
             and entered.isascii()
             and entered.isdigit()
             and hmac.compare_digest(self._hash_code(address, entered), row.code_hash)
         )
+        # Spending the code is equally conditional, so it is spent exactly
+        # once even if parallel requests got this far.
+        spend = (
+            update(LoginCode)
+            .where(LoginCode.id == row.id, LoginCode.consumed_at.is_(None))
+            .values(consumed_at=now)
+            .execution_options(synchronize_session=False)
+        )
         if not matches:
-            burned = row.attempts >= config.LOGIN_CODE_MAX_ATTEMPTS
+            burned = attempts >= config.LOGIN_CODE_MAX_ATTEMPTS
             if burned:
-                row.consumed_at = now
+                db.execute(spend)
             db.commit()
             raise AuthError("too_many_attempts" if burned else "invalid_code")
 
-        row.consumed_at = now
+        if db.execute(spend).rowcount != 1:
+            db.commit()
+            raise AuthError("invalid_code")
         user = db.scalar(select(User).where(User.email == address))
         if user is None:
             # is_active set explicitly: the column's Python-side default only

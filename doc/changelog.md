@@ -24,6 +24,24 @@ to one or more related commits.
 
 ---
 
+## 0.3.5 — 2026-10-10
+
+### Security
+- Chat abuse limits: each chat message and wizard search makes paid AI calls,
+  so the chat (UI and `/api/conversations`) now caps message length (2000
+  characters), messages per client IP per hour (60), conversations started
+  per IP per hour (60) and turns per conversation (50). Idle conversations
+  expire after 2 hours, and at most 5000 are kept in memory. All limits are
+  configurable via `CHAT_*` settings; the API answers `429 rate_limited` or
+  `422 message_too_long` / `conversation_too_long`.
+- Login codes: wrong guesses are now counted atomically in the database, so
+  parallel guesses can no longer get past the 5-attempt limit; a code is also
+  spent exactly once.
+- No more built-in fallback secret: without `NICEGUI_STORAGE_SECRET`, a
+  random secret is generated into `storage/secret_key` (gitignored). Existing
+  local sessions are logged out once. The session cookie is HTTPS-only when
+  `PUBLIC_BASE_URL` is `https://` (or `SESSION_COOKIE_HTTPS_ONLY=true`).
+
 ## 0.3.4 — 2026-10-09
 
 ### Added

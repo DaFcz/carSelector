@@ -35,11 +35,11 @@ USER_ID_KEY = "auth_user_id"
 ISSUED_AT_KEY = "auth_issued_at"
 
 
-def _client_ip() -> str | None:
-    """The requesting client's IP, for per-IP rate limiting of code
-    requests. Behind a reverse proxy this is the proxy's address unless
-    uvicorn trusts its forwarded headers (`--forwarded-allow-ips`), in
-    which case it is the real client's.
+def client_ip() -> str | None:
+    """The requesting client's IP, for per-IP rate limiting (login codes,
+    chat - see `ConversationState.client_ip`). Behind a reverse proxy this
+    is the proxy's address unless uvicorn trusts its forwarded headers
+    (`--forwarded-allow-ips`), in which case it is the real client's.
 
     Returns:
         The address, or `None` if the client has no request attached.
@@ -119,7 +119,7 @@ class AuthState:
             `AuthError.code`, `"email_not_configured"` (the selected
             `EMAIL_BACKEND` is misconfigured) or `"unknown_error"`.
         """
-        ip = _client_ip()
+        ip = client_ip()
         language = current_language()
 
         def _request() -> None:
