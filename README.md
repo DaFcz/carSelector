@@ -49,6 +49,7 @@ no separate frontend step.
    python -m venv .venv
    .venv/Scripts/activate    # Windows; `source .venv/bin/activate` elsewhere
    pip install -r requirements-dev.txt
+   pre-commit install        # Ruff lint/format on every commit, see "Lint & format" below
    ```
 2. Backend + UI — see [`backend/README.md`](backend/README.md) (SQLite by default, no server to
    install; needs `ANTHROPIC_API_KEY` for the AI layer to do more than degrade gracefully)
@@ -66,7 +67,15 @@ ruff check --fix .
 ruff format .
 ```
 
-`ruff check .` and `ruff format --check .` must both pass before a change is done. The bulk
+`ruff check .` and `ruff format --check .` must both pass before a change is done. To have git
+run both on staged files automatically, install the pre-commit hook once per clone
+(`.pre-commit-config.yaml`; a commit Ruff had to fix is stopped - re-`git add` and commit again):
+
+```bash
+pre-commit install
+```
+
+The bulk
 reformat commit is listed in `.git-blame-ignore-revs`; to have `git blame` skip it, run once:
 `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 

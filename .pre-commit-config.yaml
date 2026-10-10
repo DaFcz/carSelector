@@ -1,0 +1,11 @@
+# Git pre-commit hooks - install once per clone (after `pip install -r
+# requirements-dev.txt`) with `pre-commit install`. Runs Ruff on the staged
+# Python files with the same config as `ruff check .` / `ruff format .`
+# (root pyproject.toml). Keep `rev` in sync with ruff in requirements-dev.txt.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
