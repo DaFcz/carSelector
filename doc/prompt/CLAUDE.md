@@ -79,6 +79,8 @@ ostatní):
 ### Testy
 - Ke každé nové komponentě/endpointu vznikne aspoň smoke test (render / 200 response)
 - Testy spouštět a musí procházet před tím, než je úkol označen za hotový
+- Stejně tak lint/format: `ruff check .` a `ruff format --check .` (z rootu, config v root
+  `pyproject.toml`) musí projít — nový kód rovnou formátovat přes `ruff format`
 
 ### Git
 - Commit messages v angličtině, konvence `feat:`, `fix:`, `refactor:`, `test:`, `docs:`

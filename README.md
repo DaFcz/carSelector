@@ -56,6 +56,20 @@ no separate frontend step.
    from `backend/` for just the small hand-verified demo dataset)
 4. Scraper (optional, populates its own DB independently) — see [`scraper/README.md`](scraper/README.md)
 
+## Lint & format
+
+[Ruff](https://docs.astral.sh/ruff/) lints and formats all Python in the repo (backend/, scraper/,
+scripts/) from one config in the root `pyproject.toml`. Run from the repo root:
+
+```bash
+ruff check --fix .
+ruff format .
+```
+
+`ruff check .` and `ruff format --check .` must both pass before a change is done. The bulk
+reformat commit is listed in `.git-blame-ignore-revs`; to have `git blame` skip it, run once:
+`git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+
 ## Documentation
 
 Start at [`doc/README.md`](doc/README.md) for an index of what's a current source of truth versus
