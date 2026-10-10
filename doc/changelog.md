@@ -41,6 +41,15 @@ to one or more related commits.
   random secret is generated into `storage/secret_key` (gitignored). Existing
   local sessions are logged out once. The session cookie is HTTPS-only when
   `PUBLIC_BASE_URL` is `https://` (or `SESSION_COOKIE_HTTPS_ONLY=true`).
+- Security headers on every response (UI and API): a Content-Security-Policy
+  limiting framing to the app itself, plugins, `<base>` and form targets,
+  plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` and
+  `Permissions-Policy`, and HSTS when served over HTTPS. Scripts and styles
+  aren't restricted (NiceGUI needs inline ones).
+- Admin console: the scraper/import buttons and the "AI komunikace" tab's
+  refreshes re-check admin rights in the database, so an admin who is
+  demoted or deactivated while the page is open can no longer start jobs or
+  receive new AI traces - the page reloads into the "no rights" view.
 
 ## 0.3.4 — 2026-10-09
 

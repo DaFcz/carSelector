@@ -26,7 +26,11 @@ rights" message otherwise. That matters more than hiding a link - the job
 buttons' handlers only exist on the pages of users who passed the check, so
 there is nothing for a non-admin's browser to send events to. The console
 lets whoever reaches it trigger outbound network requests and write to the
-DB, hence the wall.
+DB, hence the wall. Because an open page outlives that check, the job
+buttons and the AI trace's refreshes re-check admin rights against the
+database when they act (`still_admin` in `admin`): an admin demoted or
+deactivated meanwhile gets the page reloaded into the "no rights" view
+instead.
 """
 
 import asyncio
@@ -37,7 +41,7 @@ import subprocess
 import sys
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -319,7 +323,14 @@ def _save_duration(job_key: str, seconds: float) -> None:
     app.storage.general[LAST_DURATIONS_KEY] = durations
 
 
-def _job_section(job_key: str, title: str, description: str, state: JobState, command: list[str]) -> None:
+def _job_section(
+    job_key: str,
+    title: str,
+    description: str,
+    state: JobState,
+    command: list[str],
+    is_authorized: Callable[[], Awaitable[bool]],
+) -> None:
     """Builds one job's UI: a button, a progress bar with elapsed time and
     an estimate of the time left, and a scrollable, live output log.
 
@@ -329,6 +340,8 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
         description: One-line explanation of what running this does.
         state: The job's `JobState` - fresh per page load (see `admin`).
         command: Argv to run when the button is clicked.
+        is_authorized: Re-checks admin rights at click time - see the
+            module docstring.
     """
     with ui.column().classes("w-full gap-2.5 rounded-card border border-border bg-panel p-4 shadow-card"):
         ui.label(title).classes("text-[15px] font-bold text-text")
@@ -339,6 +352,8 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
             content.refresh()
 
         async def start() -> None:
+            if not await is_authorized():
+                return
             await state.run(command, on_output)
             if state.return_code == 0 and state.duration is not None:
                 _save_duration(job_key, state.duration)
@@ -389,6 +404,7 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
                     )
                     .props("no-caps unelevated")
                     .classes("rounded-control bg-accent px-4 py-2 text-[13px] font-semibold text-accent-text")
+                    .mark(f"run-{job_key}")
                 )
                 button.set_enabled(not state.is_running)
                 if state.return_code is not None:
@@ -457,6 +473,21 @@ def register_admin_page() -> None:
 
         scraper_state = JobState()
         import_state = JobState()
+        client = ui.context.client
+        # One check at a time per page: the trace tab's timer and a click can
+        # ask at the same moment, and both would refresh `auth_state`.
+        admin_check = asyncio.Lock()
+
+        async def still_admin() -> bool:
+            """Re-reads the session's user from the database (see the module
+            docstring); on "no", reloads the page into the "no rights" view."""
+            async with admin_check:
+                await auth_state.refresh()
+            if auth_state.is_admin:
+                return True
+            with client:
+                ui.navigate.reload()
+            return False
 
         with ui.column().classes("min-h-screen w-full bg-bg text-text gap-6 p-8"):
             with ui.row().classes("w-full items-center justify-between"):
@@ -479,10 +510,10 @@ def register_admin_page() -> None:
                 with ui.tab_panel(data_tab).classes("p-0"):
                     _data_panel()
                 with ui.tab_panel(controls_tab).classes("p-0"):
-                    _controls_panel(scraper_state, import_state)
+                    _controls_panel(scraper_state, import_state, still_admin)
                 with ui.tab_panel(trace_tab).classes("p-0"):
                     with ui.column().classes("w-full max-w-[1100px]"):
-                        llm_trace_panel()
+                        llm_trace_panel(still_admin)
                 with ui.tab_panel(authors_tab).classes("p-0"):
                     await authors_admin_panel(auth_state.user.id)
                 with ui.tab_panel(feedback_tab).classes("p-0"):
@@ -495,12 +526,16 @@ def _data_panel() -> None:
         _sources_table()
 
 
-def _controls_panel(scraper_state: JobState, import_state: JobState) -> None:
+def _controls_panel(
+    scraper_state: JobState, import_state: JobState, is_authorized: Callable[[], Awaitable[bool]]
+) -> None:
     """The "Ovládání" (Controls) tab: the scraper and import jobs.
 
     Args:
         scraper_state: State of the scraper job (fresh per page load).
         import_state: State of the catalog import job (fresh per page load).
+        is_authorized: Re-checks admin rights at click time - see the
+            module docstring.
     """
     with ui.column().classes("w-full max-w-[720px] gap-6"):
         _job_section(
@@ -509,6 +544,7 @@ def _controls_panel(scraper_state: JobState, import_state: JobState) -> None:
             t("admin.jobs.scraper.description"),
             scraper_state,
             SCRAPER_COMMAND,
+            is_authorized,
         )
         _job_section(
             "import",
@@ -516,4 +552,5 @@ def _controls_panel(scraper_state: JobState, import_state: JobState) -> None:
             t("admin.jobs.import.description"),
             import_state,
             IMPORT_COMMAND,
+            is_authorized,
         )

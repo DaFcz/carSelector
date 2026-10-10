@@ -12,6 +12,7 @@ ship megabytes to the browser.
 """
 
 import json
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from nicegui import ui
@@ -134,11 +135,18 @@ def _entry_row(entry: LlmTraceEntry, open_ids: set[int]) -> None:
         build()
 
 
-def llm_trace_panel() -> None:
+def llm_trace_panel(is_authorized: Callable[[], Awaitable[bool]]) -> None:
     """Builds the "AI komunikace" tab content: header with summary and
     controls, then the entry list, refreshed every
     `REFRESH_INTERVAL_SECONDS` while "Živě obnovovat" is on and something
     changed.
+
+    Args:
+        is_authorized: Re-checks, against the database, that the viewer is
+            still an admin - awaited before every refresh and before
+            clearing, so an admin demoted while the tab is open stops
+            receiving new entries (they contain users' chat text). It
+            handles a "no" itself (see `app/ui/admin.py`).
     """
     open_ids: set[int] = set()
     rendered_version = -1
@@ -154,7 +162,7 @@ def llm_trace_panel() -> None:
             summary = ui.label().classes("text-[12.5px] font-semibold text-text")
             ui.space()
             auto_refresh = ui.switch(t("admin.trace.autoRefresh"), value=True).classes("text-[12.5px]")
-            ui.button(t("admin.trace.refresh"), icon="refresh", on_click=lambda: entries_list.refresh()).props(
+            ui.button(t("admin.trace.refresh"), icon="refresh", on_click=lambda: refresh()).props(
                 "no-caps flat"
             ).classes("rounded-control text-[13px] text-accent")
             ui.button(t("admin.trace.clear"), icon="delete_sweep", on_click=lambda: clear()).props(
@@ -181,13 +189,21 @@ def llm_trace_panel() -> None:
                 for entry in entries:
                     _entry_row(entry, open_ids)
 
-        def clear() -> None:
+        async def refresh() -> None:
+            if await is_authorized():
+                entries_list.refresh()
+
+        async def clear() -> None:
+            if not await is_authorized():
+                return
             trace_log.clear()
             open_ids.clear()
             entries_list.refresh()
 
-        def poll() -> None:
-            if auto_refresh.value and trace_log.version != rendered_version:
+        async def poll() -> None:
+            # Checked only when there is something new to send, so an idle
+            # tab doesn't hit the database every couple of seconds.
+            if auto_refresh.value and trace_log.version != rendered_version and await is_authorized():
                 entries_list.refresh()
 
         entries_list()

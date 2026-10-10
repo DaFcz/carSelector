@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.api import brands, conversations, models, vehicles
 from app.core.config import CORS_ALLOWED_ORIGINS
+from app.core.security_headers import SecurityHeadersMiddleware
 
 app = FastAPI(title="DriveWise AI API")
 
@@ -16,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# CSP / framing / nosniff / HSTS for every response, UI included.
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 @app.exception_handler(HTTPException)
