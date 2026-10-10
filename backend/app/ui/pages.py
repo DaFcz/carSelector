@@ -236,7 +236,9 @@ async def index() -> None:
         # score, AI explanation) - fall back to the detail itself when
         # the car isn't among the current results.
         card = next((car for car in displayed_cars() if car.configuration_id == detail.configuration_id), None)
-        await share([card or VehicleSummary.model_validate(detail.model_dump(include=set(VehicleSummary.model_fields)))])
+        await share(
+            [card or VehicleSummary.model_validate(detail.model_dump(include=set(VehicleSummary.model_fields)))]
+        )
 
     def toggle_compare(car: VehicleSummary) -> bool:
         """Flips a car's place in the comparison pick (cards' and the
@@ -438,8 +440,8 @@ async def index() -> None:
         neither the reported total nor the filters.
         """
         metrics = event.args or {}
-        distance_to_bottom = metrics.get("scrollHeight", 0) - metrics.get("scrollTop", 0) - metrics.get(
-            "clientHeight", 0
+        distance_to_bottom = (
+            metrics.get("scrollHeight", 0) - metrics.get("scrollTop", 0) - metrics.get("clientHeight", 0)
         )
         if distance_to_bottom > _LOAD_MORE_THRESHOLD_PX:
             return
@@ -571,9 +573,11 @@ async def index() -> None:
             with ui.column().classes("h-full w-full md:w-auto shrink-0 gap-0").mark("chat-panel") as chat_panel:
                 chat_refresh = chat_column(conv, send)
 
-            with ui.column().classes(
-                f"min-w-0 h-full flex-1 flex flex-col overflow-hidden gap-0 {MOBILE_HIDDEN}"
-            ).mark("results-panel") as results_panel:
+            with (
+                ui.column()
+                .classes(f"min-w-0 h-full flex-1 flex flex-col overflow-hidden gap-0 {MOBILE_HIDDEN}")
+                .mark("results-panel") as results_panel
+            ):
 
                 @ui.refreshable
                 def results_header() -> None:
@@ -640,17 +644,21 @@ async def index() -> None:
                 with ui.column().classes("w-full shrink-0 px-4 pt-4 md:px-7 md:pt-6 gap-0"):
                     results_header()
 
-                with ui.column().classes("min-h-0 min-w-0 flex-1 overflow-y-auto px-4 pb-4 md:px-7 md:pb-6 gap-0").on(
-                    "scroll",
-                    on_results_scroll,
-                    throttle=0.2,
-                    js_handler=(
-                        "(event) => emit({"
-                        "scrollTop: event.target.scrollTop, "
-                        "scrollHeight: event.target.scrollHeight, "
-                        "clientHeight: event.target.clientHeight"
-                        "})"
-                    ),
+                with (
+                    ui.column()
+                    .classes("min-h-0 min-w-0 flex-1 overflow-y-auto px-4 pb-4 md:px-7 md:pb-6 gap-0")
+                    .on(
+                        "scroll",
+                        on_results_scroll,
+                        throttle=0.2,
+                        js_handler=(
+                            "(event) => emit({"
+                            "scrollTop: event.target.scrollTop, "
+                            "scrollHeight: event.target.scrollHeight, "
+                            "clientHeight: event.target.clientHeight"
+                            "})"
+                        ),
+                    )
                 ):
 
                     @ui.refreshable
@@ -701,10 +709,14 @@ async def index() -> None:
                     items = compare_state.items
                     if not items:
                         return
-                    with ui.row().classes(
-                        "w-full shrink-0 flex-nowrap items-center justify-between gap-3 border-t border-border "
-                        "bg-panel px-4 py-2.5 md:px-7"
-                    ).mark("compare-tray"):
+                    with (
+                        ui.row()
+                        .classes(
+                            "w-full shrink-0 flex-nowrap items-center justify-between gap-3 border-t border-border "
+                            "bg-panel px-4 py-2.5 md:px-7"
+                        )
+                        .mark("compare-tray")
+                    ):
                         # Phones: just the count - named pills don't fit.
                         ui.label(t("compare.trayCount", count=len(items))).classes(
                             "text-[13px] font-semibold text-text md:hidden!"
@@ -725,9 +737,9 @@ async def index() -> None:
                                         t("compare.remove")
                                     )
                         with ui.row().classes("shrink-0 flex-nowrap items-center gap-2"):
-                            ui.button(t("compare.clear"), on_click=clear_comparison).props("flat dense no-caps").classes(
-                                "text-[12.5px] text-subtext"
-                            )
+                            ui.button(t("compare.clear"), on_click=clear_comparison).props(
+                                "flat dense no-caps"
+                            ).classes("text-[12.5px] text-subtext")
                             ui.button(
                                 t("compare.open", count=len(items)), icon="compare_arrows", on_click=start_comparison
                             ).props("no-caps unelevated").classes(

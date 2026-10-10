@@ -1,6 +1,7 @@
 """reparse_equipment against the real Elroq fixture and an in-memory DB: a
 variant stored with no equipment (as the old EV parser left it) gets the
 parser's current equipment; its price history is not touched."""
+
 from datetime import date, datetime
 from pathlib import Path
 

@@ -68,12 +68,20 @@ async def feedback_admin_panel(admin_id: int) -> None:
                 with ui.expansion(t("feedback.admin.requirements")).props("dense").classes("w-full text-[12px]"):
                     ui.code(item.context.requirements.model_dump_json(indent=2, exclude_defaults=True), language="json")
             with ui.row().classes("w-full items-start gap-2"):
-                status = ui.select(
-                    {value: t(f"feedback.statuses.{value}") for value in FEEDBACK_STATUSES}, value=item.status
-                ).props("outlined dense options-dense").classes("min-w-[160px] text-[13px]").mark("feedback-status")
-                note = ui.textarea(label=t("feedback.admin.note"), value=item.admin_note).props(
-                    "outlined dense autogrow maxlength=4000"
-                ).classes("min-w-0 flex-1 text-[13px]").mark("feedback-note")
+                status = (
+                    ui.select(
+                        {value: t(f"feedback.statuses.{value}") for value in FEEDBACK_STATUSES}, value=item.status
+                    )
+                    .props("outlined dense options-dense")
+                    .classes("min-w-[160px] text-[13px]")
+                    .mark("feedback-status")
+                )
+                note = (
+                    ui.textarea(label=t("feedback.admin.note"), value=item.admin_note)
+                    .props("outlined dense autogrow maxlength=4000")
+                    .classes("min-w-0 flex-1 text-[13px]")
+                    .mark("feedback-note")
+                )
                 ui.button(
                     t("feedback.admin.save"), on_click=lambda i=item, s=status, n=note: save(i, s.value, n.value)
                 ).props("no-caps unelevated").classes(

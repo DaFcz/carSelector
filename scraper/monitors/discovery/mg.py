@@ -15,6 +15,7 @@ prints the same MG3 link both ways in different sections, verified
 would produce for that document, so `source.models` can filter on the
 same names the parser uses without the discoverer having to open every
 PDF itself just to find out what's inside."""
+
 from __future__ import annotations
 
 import re

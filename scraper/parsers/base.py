@@ -12,6 +12,7 @@ doc/arch/webScraping/IMPLEMENTATION_PLAN.md.
 A new brand/lineup = a new file in this directory + registration in
 config/sources.yaml (parser_key), nothing else needs to change.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -38,9 +38,7 @@ _MESSAGES = {
             "reálné vozy k porovnání."
         ),
         "follow_up": "Můžete mi prosím říct trochu více o tom, co potřebujete?",
-        "updated": (
-            "Na základě toho, co jste mi řekli, jsem aktualizoval váš výběr — aktuálně vyhovuje {count} vozů."
-        ),
+        "updated": ("Na základě toho, co jste mi řekli, jsem aktualizoval váš výběr — aktuálně vyhovuje {count} vozů."),
         "no_match": "Aktualizoval jsem vaše požadavky, ale v katalogu zatím nic nevyhovuje — chcete něco uvolnit?",
     },
     "en": {
@@ -118,15 +116,15 @@ class ConversationOrchestrator:
         explanation_generator: ExplanationGenerator | None = None,
     ) -> None:
         """Args:
-            requirement_interpreter: Turns conversation text into
-                structured requirements. Defaults to the shared
-                `app.ai.requirement_interpreter.interpreter` singleton.
-            recommendation_engine: Filters and ranks the catalog. Defaults
-                to the shared
-                `app.services.recommendation_engine.engine` singleton.
-            explanation_generator: Generates per-vehicle explanations.
-                Defaults to the shared
-                `app.ai.explanation_generator.generator` singleton.
+        requirement_interpreter: Turns conversation text into
+            structured requirements. Defaults to the shared
+            `app.ai.requirement_interpreter.interpreter` singleton.
+        recommendation_engine: Filters and ranks the catalog. Defaults
+            to the shared
+            `app.services.recommendation_engine.engine` singleton.
+        explanation_generator: Generates per-vehicle explanations.
+            Defaults to the shared
+            `app.ai.explanation_generator.generator` singleton.
         """
         self._requirement_interpreter = requirement_interpreter or default_interpreter
         self._recommendation_engine = recommendation_engine or default_engine

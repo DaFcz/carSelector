@@ -39,7 +39,6 @@ logger = logging.getLogger(__name__)
 PAGE_SIZE = 20
 
 
-
 @dataclass
 class LikedModelsState:
     """Which car models this session has liked (the heart on a results
@@ -566,7 +565,7 @@ class WizardState:
 
 @dataclass
 class CatalogState:
-    """"Browsing mode" - the paginated full catalog shown before the AI
+    """ "Browsing mode" - the paginated full catalog shown before the AI
     has narrowed anything. Mirrors `catalogStore` + `useCatalog`.
     """
 

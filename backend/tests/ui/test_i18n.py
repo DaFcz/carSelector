@@ -118,6 +118,8 @@ def test_use_language_overrides_the_current_language() -> None:
     assert current_language() == "cs"
 
 
-@pytest.mark.parametrize(("count", "expected"), [(0, "0 matches for you"), (1, "1 match for you"), (3, "3 matches for you")])
+@pytest.mark.parametrize(
+    ("count", "expected"), [(0, "0 matches for you"), (1, "1 match for you"), (3, "3 matches for you")]
+)
 def test_t_count_english(count: int, expected: str) -> None:
     assert t_count("results.title", count, lang="en") == expected

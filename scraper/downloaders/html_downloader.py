@@ -8,6 +8,7 @@ Studio") page - see `parsers/tesla.py`'s module docstring for how that
 gets extracted, and `monitors/discovery/tesla.py`'s for why a bare
 `requests.get()` (even with a full browser header set) can't fetch that
 page at all."""
+
 from __future__ import annotations
 
 from datetime import date

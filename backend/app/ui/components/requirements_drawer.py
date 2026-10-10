@@ -48,9 +48,7 @@ def requirements_drawer(requirements: list[UserRequirement], open_: bool, on_clo
             return
 
         for req in requirements:
-            card_classes = "w-full border-b border-border px-1 py-3 gap-0" + (
-                " animate-flash" if req.changed else ""
-            )
+            card_classes = "w-full border-b border-border px-1 py-3 gap-0" + (" animate-flash" if req.changed else "")
             with ui.column().classes(card_classes):
                 ui.label(req.label).classes("text-[11px] font-bold uppercase tracking-wide text-subtext")
                 ui.label(req.value).classes("mt-0.5 text-[14px] font-semibold text-text")

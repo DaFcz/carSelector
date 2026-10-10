@@ -9,6 +9,7 @@ Item names/counts were transcribed by hand from each fixture's own
 see renault_equipment.py's module docstring for the delta-resolution
 ("navíc oproti <trim>") logic these counts exercise, and for why Austral's
 own two-side-by-side-columns layout is expected to yield nothing here."""
+
 from pathlib import Path
 
 import pdfplumber

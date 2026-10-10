@@ -35,10 +35,12 @@ async def authors_admin_panel(admin_id: int) -> None:
     def request_row(request: AuthorRequestRead) -> None:
         with ui.row().classes(_ROW).mark("author-request-row"):
             with ui.column().classes("min-w-0 flex-1 gap-0"):
-                ui.label(f"{request.display_name} · {request.email}").classes("text-[13px] font-semibold text-text break-all")
-                ui.label(t("authors.admin.requested", date=request.created_at.strftime(t("common.dateFormat")))).classes(
-                    "text-[11.5px] text-subtext"
+                ui.label(f"{request.display_name} · {request.email}").classes(
+                    "text-[13px] font-semibold text-text break-all"
                 )
+                ui.label(
+                    t("authors.admin.requested", date=request.created_at.strftime(t("common.dateFormat")))
+                ).classes("text-[11.5px] text-subtext")
                 if request.message:
                     ui.label(request.message).classes("mt-1 whitespace-pre-wrap text-[12.5px] text-text")
             ui.button(
@@ -64,7 +66,9 @@ async def authors_admin_panel(admin_id: int) -> None:
                 ui.label(f"{author.display_name or '—'} · {author.email}").classes(
                     "text-[13px] font-semibold text-text break-all"
                 )
-                ui.label(t("authors.admin.articleCount", count=author.article_count)).classes("text-[11.5px] text-subtext")
+                ui.label(t("authors.admin.articleCount", count=author.article_count)).classes(
+                    "text-[11.5px] text-subtext"
+                )
             ui.button(
                 t("authors.admin.revoke"),
                 on_click=lambda a=author: act(

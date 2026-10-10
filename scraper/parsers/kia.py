@@ -53,6 +53,7 @@ from the variants already parsed above (same two-pass "parse rows first,
 then derive the trim list, then backfill `equipment`" shape as
 `mazda.py`), since the bullet page's own headings are matched against
 that same already-extracted trim text rather than parsed fresh."""
+
 from __future__ import annotations
 
 import re
@@ -63,9 +64,7 @@ import pdfplumber
 from .base import BaseParser, ExtractedVariant
 from .kia_equipment import parse_standard_equipment
 
-_ROW_RE = re.compile(
-    r"^(?P<engine>.+?\s\d+\s*k\s*/\s*\d+\s*kW)\s+(?P<tail>[\d ]+)$"
-)
+_ROW_RE = re.compile(r"^(?P<engine>.+?\s\d+\s*k\s*/\s*\d+\s*kW)\s+(?P<tail>[\d ]+)$")
 _MARKETING_PREFIXES = ("Nový ", "Nová ", "Nové ", "Kia ")
 _TABLE_HEADER_MARKER = "SPECIFIKACE"
 

@@ -68,6 +68,7 @@ and `raw_text` holds that row's own JSON object (`json.dumps`) instead of
 a PDF text line, so a row can still be traced back to its exact source
 for verification the same way every PDF-based parser's own `raw_text`
 does."""
+
 from __future__ import annotations
 
 import json

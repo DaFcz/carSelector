@@ -7,6 +7,7 @@ source — same discipline as test_kia_parser.py.
 Tucson's ICE/MHEV and HEV/PHEV variants are two separate documents (see
 parsers/hyundai.py and monitors/discovery/hyundai.py), hence two fixtures
 and two sets of Tucson tests below."""
+
 from pathlib import Path
 
 from scraper.parsers.hyundai import HyundaiParser

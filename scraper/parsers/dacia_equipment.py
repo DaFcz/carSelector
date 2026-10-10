@@ -25,6 +25,7 @@ Trim names are matched case-insensitively against `_KNOWN_TRIMS` rather than
 parsed as free text, since the same smallcaps-style font issue documented in
 `dacia.py` (mixed-case glyphs, e.g. "ExpREssION") shows up on this page too.
 """
+
 from __future__ import annotations
 
 import pdfplumber

@@ -7,6 +7,7 @@ sources/registry.py), parses them
 with the parser matching `parser_key` (parsers/registry.py), and stores
 the resulting variants and prices in the DB (VariantRepository).
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -38,14 +39,14 @@ class ScraperPipeline:
         variant_repository: VariantRepository | None = None,
     ) -> None:
         """Args:
-            session: DB session to use. Defaults to a new session from
-                `database.db.get_session()`.
-            source_registry: Provides the sources to process. Defaults to
-                a `SourceRegistry` reading `config/sources.yaml`.
-            monitor: Finds/downloads new documents. Defaults to a
-                `SourceMonitor` bound to `session`.
-            variant_repository: Persists parsed variants/prices/equipment.
-                Defaults to a `VariantRepository` bound to `session`.
+        session: DB session to use. Defaults to a new session from
+            `database.db.get_session()`.
+        source_registry: Provides the sources to process. Defaults to
+            a `SourceRegistry` reading `config/sources.yaml`.
+        monitor: Finds/downloads new documents. Defaults to a
+            `SourceMonitor` bound to `session`.
+        variant_repository: Persists parsed variants/prices/equipment.
+            Defaults to a `VariantRepository` bound to `session`.
         """
         self._session = session or get_session()
         self._source_registry = source_registry or SourceRegistry()

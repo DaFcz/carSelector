@@ -15,6 +15,7 @@ Symbioz, Arkana, Austral, Espace, Rafale), it now also sells five
 Renault's commercial-vehicle lineup (Kangoo, Trafic, Master and their own
 electric versions) that `_SLUG_MODELS` simply omits, same "personal cars
 only" scope as every other brand here."""
+
 from __future__ import annotations
 
 import re

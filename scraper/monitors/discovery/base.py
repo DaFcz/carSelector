@@ -14,6 +14,7 @@ controls the fetch, each brand can have a different strategy without
 A new brand = a new file in this directory + registration in
 `registry.py`, nothing else needs to change.
 """
+
 from __future__ import annotations
 
 from scraper.sources.registry import Source

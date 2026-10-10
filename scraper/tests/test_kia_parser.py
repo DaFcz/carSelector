@@ -8,6 +8,7 @@ test_volkswagen_parser.py.
 Sportage's ICE and HEV/PHEV variants are two separate documents (see
 parsers/kia.py and monitors/discovery/kia.py), hence two fixtures and two
 sets of Sportage tests below."""
+
 from pathlib import Path
 
 from scraper.parsers.kia import KiaParser
@@ -20,9 +21,7 @@ SPORTAGE_HEV_PHEV = FIXTURES / "kia_sportage_hev_phev_cenik.pdf"
 
 
 def _variant(variants, trim: str, engine_fragment: str):
-    return next(
-        v for v in variants if v.trim == trim and engine_fragment in v.raw_text
-    )
+    return next(v for v in variants if v.trim == trim and engine_fragment in v.raw_text)
 
 
 def test_kia_parser_extracts_niro_variants() -> None:

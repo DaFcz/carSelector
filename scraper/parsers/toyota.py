@@ -56,6 +56,7 @@ cover text format ("Ceník platí od D. M. RRRR", not "Platnost od"), so
 third/fourth date format (see kia.py for the same call).
 
 No equipment extraction yet (matches Volkswagen/Kia's current scope)."""
+
 from __future__ import annotations
 
 from pathlib import Path

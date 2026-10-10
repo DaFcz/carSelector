@@ -7,6 +7,7 @@ same discipline as test_parsers.py (Škoda).
 
 16 = 1 variant of the "Golf" trim (no name of its own) + 6 "Life" + 5
 "Style" + 4 "R-Line"."""
+
 from pathlib import Path
 
 from scraper.parsers.volkswagen import VolkswagenParser
@@ -15,9 +16,7 @@ FIXTURE = Path(__file__).parent / "fixtures" / "vw_golf_cenik.pdf"
 
 
 def _variant(variants, trim: str, engine_fragment: str):
-    return next(
-        v for v in variants if v.trim == trim and engine_fragment in v.variant_name
-    )
+    return next(v for v in variants if v.trim == trim and engine_fragment in v.variant_name)
 
 
 def test_volkswagen_parser_extracts_expected_variant_count() -> None:

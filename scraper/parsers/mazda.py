@@ -86,6 +86,7 @@ od 1.7. a dodané do 30.9.2026"), not a single "Platnost od D. M. RRRR"
 date - `_pdf_layout.extract_release_date` doesn't match this format, so
 `release_date` stays None here too, and VariantRepository falls back to
 the download date."""
+
 from __future__ import annotations
 
 import re
@@ -131,9 +132,7 @@ def _words_from_chars(chars: list[dict]) -> list[dict]:
             words[-1].append(char)
         else:
             words.append([char])
-    return [
-        {"text": "".join(c["text"] for c in word), "x0": word[0]["x0"], "top": word[0]["top"]} for word in words
-    ]
+    return [{"text": "".join(c["text"] for c in word), "x0": word[0]["x0"], "top": word[0]["top"]} for word in words]
 
 
 def _clean_lines(page: pdfplumber.page.Page) -> list[tuple[float, str]]:
@@ -141,17 +140,12 @@ def _clean_lines(page: pdfplumber.page.Page) -> list[tuple[float, str]]:
     `top` rather than the tolerance-based grouping in `_pdf_layout` - see
     module docstring for why a tolerance would smear a real row and its
     duplicate echo together here."""
-    chars = [
-        c
-        for c in page.chars
-        if 0 <= c["x0"] and c["x1"] <= page.width and c["size"] <= _MAX_ANCHOR_FONT_SIZE
-    ]
+    chars = [c for c in page.chars if 0 <= c["x0"] and c["x1"] <= page.width and c["size"] <= _MAX_ANCHOR_FONT_SIZE]
     lines: dict[float, list[dict]] = {}
     for word in _words_from_chars(chars):
         lines.setdefault(round(word["top"], 1), []).append(word)
     return [
-        (top, " ".join(w["text"] for w in sorted(words, key=lambda w: w["x0"])))
-        for top, words in sorted(lines.items())
+        (top, " ".join(w["text"] for w in sorted(words, key=lambda w: w["x0"]))) for top, words in sorted(lines.items())
     ]
 
 

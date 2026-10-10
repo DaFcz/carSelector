@@ -33,6 +33,7 @@ Ford's own price-list PDFs use a genuine trim x engine PRICE MATRIX
 unlike every other brand parsed here - see parsers/ford.py's module
 docstring for why only Puma/Kuga/Mustang/Bronco (of Ford's ~10-model
 current CZ lineup) are covered so far."""
+
 from __future__ import annotations
 
 import re
@@ -104,10 +105,7 @@ class FordDiscoverer(BaseDiscoverer):
             if response.status_code != 200:
                 continue
 
-            candidates = [
-                (_link_text(raw_text), href)
-                for href, raw_text in _PDF_LINK_RE.findall(response.text)
-            ]
+            candidates = [(_link_text(raw_text), href) for href, raw_text in _PDF_LINK_RE.findall(response.text)]
             candidates = [(text, href) for text, href in candidates if _is_plain_model_pricelist(text, model)]
             if not candidates:
                 continue

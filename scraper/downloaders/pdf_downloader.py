@@ -1,6 +1,7 @@
 """Downloads a PDF and stores it under its hash, so an existing version is
 never overwritten and history can be traced (auditability, see the
 architecture doc)."""
+
 from __future__ import annotations
 
 import hashlib

@@ -81,6 +81,7 @@ VariantRepository falls back to the download date. The same marker text
 (`_END_OF_TABLE_MARKER`) doubles as the "stop reading data rows" signal for
 `parse`, since the legal/financing disclaimer paragraph directly below
 every price table always opens with it."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -94,7 +95,9 @@ _MARKETING_PREFIXES = ("NOVÁ ", "NOVÝ ", "NOVÉ ")
 _LEFT_LABELS = {"Motor", "Palivo", "Výkon", "Převodovka", "Pohon"}
 _END_OF_TABLE_MARKER = "Všechny ceny jsou platné"
 _HEADER_GAP_THRESHOLD = 15.0  # pt; intra-trim-name gaps are ~1.6-1.7pt, the smallest real column gap is 21.8pt+
-_HEADER_TOP_WINDOW = 8.0  # pt; captures a trim header word wrapped onto its own line just above/below the main header line
+_HEADER_TOP_WINDOW = (
+    8.0  # pt; captures a trim header word wrapped onto its own line just above/below the main header line
+)
 
 
 def _extract_model_name(pdf: pdfplumber.PDF) -> str:
@@ -159,12 +162,7 @@ def _trim_columns(lines: list[list[dict]], header_index: int) -> list[tuple[str,
         x-gap - see module docstring for the gap sizes this relies on.
     """
     header_top = lines[header_index][0]["top"]
-    header_words = [
-        word
-        for line in lines
-        if abs(line[0]["top"] - header_top) <= _HEADER_TOP_WINDOW
-        for word in line
-    ]
+    header_words = [word for line in lines if abs(line[0]["top"] - header_top) <= _HEADER_TOP_WINDOW for word in line]
     trim_words = sorted((w for w in header_words if w["text"] not in _LEFT_LABELS), key=lambda w: w["x0"])
     return [
         (" ".join(w["text"] for w in cluster), cluster[0]["x0"])
@@ -172,9 +170,7 @@ def _trim_columns(lines: list[list[dict]], header_index: int) -> list[tuple[str,
     ]
 
 
-def _classify_row_words(
-    words: list[dict], trim_columns: list[tuple[str, float]]
-) -> tuple[list[dict], dict[str, str]]:
+def _classify_row_words(words: list[dict], trim_columns: list[tuple[str, float]]) -> tuple[list[dict], dict[str, str]]:
     """Splits one line's words into the free-text part (left of the first
     trim column) and this line's per-trim cell content.
 
@@ -269,9 +265,9 @@ class _EngineGroup:
 
     def variants(self, model: str, source_page: int) -> list[ExtractedVariant]:
         """Returns:
-            One `ExtractedVariant` per available trim, or `[]` if this
-            group never completed a (discount, base) pair - an
-            incomplete/malformed group is dropped, not guessed at.
+        One `ExtractedVariant` per available trim, or `[]` if this
+        group never completed a (discount, base) pair - an
+        incomplete/malformed group is dropped, not guessed at.
         """
         if len(self.price_rows) != 2:
             return []

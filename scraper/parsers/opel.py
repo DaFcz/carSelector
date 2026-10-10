@@ -89,6 +89,7 @@ ended "Platnost od" date `_pdf_layout.extract_release_date` looks for, on
 top of being on the wrong page anyway - see CUPRA's and Renault's own
 module docstrings for that half of the same gap), so `release_date` stays
 None; VariantRepository falls back to the download date."""
+
 from __future__ import annotations
 
 import re
@@ -165,9 +166,7 @@ def _column_anchors(lines: list[list[dict]], header_index: int) -> dict[str, flo
         column order - LCDV code left of the engine description).
     """
     header_top = lines[header_index][0]["top"]
-    header_words = [
-        word for line in lines if abs(line[0]["top"] - header_top) <= _HEADER_TOP_WINDOW for word in line
-    ]
+    header_words = [word for line in lines if abs(line[0]["top"] - header_top) <= _HEADER_TOP_WINDOW for word in line]
     anchors: dict[str, float] = {}
     motor_xs: list[float] = []
     for word in header_words:
@@ -308,9 +307,7 @@ class OpelParser(BaseParser):
                     for word in words
                     if word["top"] > header_top + _HEADER_TOP_WINDOW and word["x0"] < trim_boundary
                 ]
-                trim_headings = [
-                    (group[0]["top"], line_text(group)) for group in group_into_lines(trim_words)
-                ]
+                trim_headings = [(group[0]["top"], line_text(group)) for group in group_into_lines(trim_words)]
 
                 row_anchors = sorted(
                     (word for word in words if word["x0"] >= trim_boundary and _LCDV_RE.match(word["text"])),

@@ -80,13 +80,13 @@ class RequirementInterpreter:
 
     def __init__(self, client: LlmClient | None = None) -> None:
         """Args:
-            client: `LlmClient` to use. Defaults to `None`, in which case
-                `interpret` lazily resolves the shared client from
-                `app.ai.client.get_client()` on first use - so
-                constructing a `RequirementInterpreter` never fails just
-                because the selected provider's API key isn't set; only
-                calling `interpret` does. Pass an explicit client (e.g. a
-                test double) to bypass that shared singleton.
+        client: `LlmClient` to use. Defaults to `None`, in which case
+            `interpret` lazily resolves the shared client from
+            `app.ai.client.get_client()` on first use - so
+            constructing a `RequirementInterpreter` never fails just
+            because the selected provider's API key isn't set; only
+            calling `interpret` does. Pass an explicit client (e.g. a
+            test double) to bypass that shared singleton.
         """
         self._client = client
 

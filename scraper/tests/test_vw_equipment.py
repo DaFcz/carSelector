@@ -9,6 +9,7 @@ necessarily the trim right before it" branching (Golf's own Style AND
 R-Line both build on Life, not on each other) were cross-checked by hand
 against the fixtures' own "Sériová Výbava" pages - see vw_equipment.py's
 module docstring."""
+
 from pathlib import Path
 
 from scraper.parsers.volkswagen import VolkswagenParser

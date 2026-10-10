@@ -23,7 +23,9 @@ def test_load_returns_none_when_nothing_saved(db_session: Session, user: User) -
 
 
 def test_save_then_load_round_trips(db_session: Session, user: User) -> None:
-    requirements = StructuredRequirements(body_type="SUV", fuel_type="electric", budget_max=Money(amount=900000, currency="CZK"))
+    requirements = StructuredRequirements(
+        body_type="SUV", fuel_type="electric", budget_max=Money(amount=900000, currency="CZK")
+    )
 
     saved_requirements.save(db_session, user.id, requirements)
 

@@ -3,6 +3,7 @@
 potentially other OEMs whose price lists have a similarly non-tabular
 structure).
 """
+
 from __future__ import annotations
 
 import re

@@ -38,7 +38,9 @@ def test_pdf_contains_vehicle_detail(seeded_session: SeededData) -> None:
     assert "Strana 1/" in text
 
 
-def test_pdf_without_unicode_font_strips_diacritics(seeded_session: SeededData, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_pdf_without_unicode_font_strips_diacritics(
+    seeded_session: SeededData, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(vehicle_pdf, "_find_fonts", lambda: None)
     detail = catalog.get_vehicle_detail(seeded_session.session, seeded_session.config_prime_2wd_id)
     assert detail is not None

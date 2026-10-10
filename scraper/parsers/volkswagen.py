@@ -22,6 +22,7 @@ based on the fuel text (see `_classify_powertrain`).
 The price is "Cena s DPH" ("price incl. VAT", the end-customer price),
 same principle as for Škoda. The line is stored unchanged in `raw_text`
 so it can be verified against the PDF."""
+
 from __future__ import annotations
 
 import re
@@ -105,9 +106,7 @@ class VolkswagenParser(BaseParser):
 
         return variants
 
-    def _build_variant(
-        self, model: str, trim: str | None, source_page: int, match: re.Match[str]
-    ) -> ExtractedVariant:
+    def _build_variant(self, model: str, trim: str | None, source_page: int, match: re.Match[str]) -> ExtractedVariant:
         engine = f"{match.group('engine').strip()} / {match.group('engine_kw')} kW"
         fuel = match.group("fuel").strip()
         price_vat = int(match.group("price_vat").replace(" ", ""))

@@ -9,6 +9,7 @@ module docstring for the column-detection approach this exercises (a
 wrapped heading/item line, a trim heading that copies an explicitly
 named base trim, a color row whose price is one shared value for
 whichever trims marked it optional)."""
+
 from pathlib import Path
 
 from scraper.parsers.cupra import CupraParser
@@ -32,7 +33,9 @@ def test_formentor_equipment_inherits_named_base_trim() -> None:
     # never assumed to be "whatever came right before".
     by_trim = _by_trim(CupraParser().parse(FORMENTOR))
     cupra_items = set(k for k in by_trim["CUPRA"].equipment if by_trim["CUPRA"].equipment[k] == "STANDARD")
-    vz_extreme_items = set(k for k in by_trim["VZ Extreme"].equipment if by_trim["VZ Extreme"].equipment[k] == "STANDARD")
+    vz_extreme_items = set(
+        k for k in by_trim["VZ Extreme"].equipment if by_trim["VZ Extreme"].equipment[k] == "STANDARD"
+    )
     assert len(by_trim["CUPRA"].equipment) >= 80
     assert cupra_items <= vz_extreme_items
     assert "Matrix HD LED světlomety" in vz_extreme_items  # VZ Extreme's own addition

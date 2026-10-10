@@ -54,6 +54,7 @@ D. M. RRRR" numeric format `_pdf_layout.extract_release_date` matches - so
 `release_date` stays None here too, and VariantRepository falls back to the
 download date.
 """
+
 from __future__ import annotations
 
 import re

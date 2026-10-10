@@ -12,6 +12,7 @@ start of the page (see `SkodaEvParser.parse`).
 Enyaq, "Laurin" is on the same line as "&"/"Klement" (like Superb in the
 ICE price list); for Elroq, "Laurin" is on the line ABOVE the header (a
 two-line split like "Exclusive Selection" for the Kodiaq) — both tested separately."""
+
 from pathlib import Path
 
 from scraper.parsers.skoda_ev import SkodaEvParser
@@ -24,9 +25,7 @@ def _variant(variants, trim: str, spec_fragment: str, body_style: str | None = N
     return next(
         v
         for v in variants
-        if v.trim == trim
-        and spec_fragment in v.variant_name
-        and (body_style is None or body_style in v.variant_name)
+        if v.trim == trim and spec_fragment in v.variant_name and (body_style is None or body_style in v.variant_name)
     )
 
 

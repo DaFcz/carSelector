@@ -72,6 +72,7 @@ item's own name starting, with or without marks trailing on that same
 line) - `pending_marks` from wherever the marks line actually landed is
 applied to whatever text was buffered up to that point.
 """
+
 from __future__ import annotations
 
 import re

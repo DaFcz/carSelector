@@ -9,6 +9,7 @@ more cheaply - they'd have matched. Reproduced here with a synthetic
 catalog: brand "AAA" gets the low ids (inserted first, like Škoda always
 being scraped/imported first in production) but is pricier than brand
 "ZZZ" (inserted second, higher ids) - the exact shape that broke."""
+
 from datetime import UTC, date, datetime
 
 from sqlalchemy.orm import Session

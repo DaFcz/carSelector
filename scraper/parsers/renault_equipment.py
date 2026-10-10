@@ -71,6 +71,7 @@ column layout would need `page.extract_words()`'s own x0 coordinates
 instead of `extract_text()`, a materially different approach from the one
 this module takes.
 """
+
 from __future__ import annotations
 
 import re
@@ -109,9 +110,7 @@ def _parse_equipment_lines(lines: list[str]) -> dict[str, dict[str, str]]:
         module docstring for why this is looked up by name rather than
         carried forward as one running accumulator).
     """
-    heading_indices = {
-        i - 1 for i, line in enumerate(lines) if i > 0 and line.lower().startswith(_SECTION_MARKER)
-    }
+    heading_indices = {i - 1 for i, line in enumerate(lines) if i > 0 and line.lower().startswith(_SECTION_MARKER)}
 
     trim_items: dict[str, dict[str, str]] = {}
     current_trim: str | None = None

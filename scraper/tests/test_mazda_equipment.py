@@ -8,6 +8,7 @@ tables - see mazda_equipment.py's module docstring for why the three
 fixtures need three different mark alphabets (plain letters, PDF CIDs, and
 Private-Use-Area glyphs) reconciled through each page's own legend line
 rather than one hardcoded set of marks."""
+
 from pathlib import Path
 
 from scraper.parsers.mazda import MazdaParser
@@ -83,7 +84,13 @@ def test_mazda3_equipment_covers_hatchback_and_sedan_separately() -> None:
     sedan = _equipment_by_trim([v for v in variants if v.model == "3 Sedan"], "3 Sedan")
 
     assert set(hatchback) == {
-        "Prime-line", "Centre-line", "Exclusive-line", "Takumi", "Homura", "Homura Plus", "Nagisa"
+        "Prime-line",
+        "Centre-line",
+        "Exclusive-line",
+        "Takumi",
+        "Homura",
+        "Homura Plus",
+        "Nagisa",
     }
     assert set(sedan) == {"Prime-line", "Centre-line", "Exclusive-line", "Takumi"}
     # "Homura Plus" must be its own trim, not merged with plain "Homura".

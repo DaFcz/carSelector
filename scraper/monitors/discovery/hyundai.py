@@ -41,6 +41,7 @@ Some models (e.g. Bayon) currently have no discoverable "l Ceník" link at
 all (verified 2026-08-28) — `discover` simply omits them, same as VW's
 Touareg precedent.
 """
+
 from __future__ import annotations
 
 import re

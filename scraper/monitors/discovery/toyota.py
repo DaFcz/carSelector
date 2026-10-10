@@ -35,6 +35,7 @@ Real-world messiness handled here, all verified against the live API on
   even though its name also starts with "Corolla" — Toyota positions it
   as its own (crossover) nameplate, not a Corolla body style.
 """
+
 from __future__ import annotations
 
 import requests
@@ -68,7 +69,8 @@ def _current_price_list(documents: list[dict]) -> str | None:
     candidates = [
         d
         for d in documents
-        if d.get("active") and not any(m in d.get("label", "") or m in d.get("mainLink", "") for m in _EXCLUDE_DOC_MARKERS)
+        if d.get("active")
+        and not any(m in d.get("label", "") or m in d.get("mainLink", "") for m in _EXCLUDE_DOC_MARKERS)
     ]
     if not candidates:
         return None

@@ -7,6 +7,7 @@ Item counts/names were cross-checked by hand against the fixtures' own
 the two-column-per-line bullet layout this reads, and why the separate
 "VÝBAVA NA PŘÁNÍ" (priced options) pages are a documented out-of-scope
 gap rather than a parser bug."""
+
 from pathlib import Path
 
 from scraper.parsers.opel import OpelParser

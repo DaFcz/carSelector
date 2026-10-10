@@ -3,6 +3,7 @@
 Anyone on the team can add a new brand by editing the YAML file, without
 touching the downloader, monitor, or other brands' parsers.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -46,15 +47,15 @@ class SourceRegistry:
 
     def load_all(self) -> list[Source]:
         """Returns:
-            Every source entry in `config/sources.yaml`, active or not.
+        Every source entry in `config/sources.yaml`, active or not.
         """
         data = yaml.safe_load(self._config_path.read_text(encoding="utf-8"))
         return [Source(**entry) for entry in data["sources"]]
 
     def load_active(self) -> list[Source]:
         """Returns:
-            Only the sources with `active: true` - the ones
-            `ScraperPipeline.run` actually processes.
+        Only the sources with `active: true` - the ones
+        `ScraperPipeline.run` actually processes.
         """
         return [s for s in self.load_all() if s.active]
 

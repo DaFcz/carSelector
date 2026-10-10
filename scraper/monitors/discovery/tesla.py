@@ -28,6 +28,7 @@ and it did not resolve to real content in this environment either - a
 strictly harder block than Opel's own (whose actual PDF endpoints, unlike
 its listing page, ARE reachable via bare `requests`). See `sources.yaml`'s
 own tesla entry for why it's registered here but not yet `active: true`."""
+
 from __future__ import annotations
 
 from scraper.sources.registry import Source

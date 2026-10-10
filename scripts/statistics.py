@@ -30,6 +30,7 @@ location, not the current working directory):
     python scripts/statistics.py --category source,docs --by dir
     python scripts/statistics.py --exclude storage --tracked
 """
+
 from __future__ import annotations
 
 import argparse
@@ -53,11 +54,26 @@ CATEGORIES = ("source", "docs", "config", "data", "media", "office", "other")
 # other extension is looked up by its name without the dot (".gitignore"
 # -> "gitignore").
 _EXTENSIONS: dict[str, tuple[str, bool]] = {
-    **{ext: ("source", True) for ext in ("py", "js", "ts", "html", "htm", "css", "bat", "cmd", "ps1", "sh", "mako", "sql")},
+    **{
+        ext: ("source", True)
+        for ext in ("py", "js", "ts", "html", "htm", "css", "bat", "cmd", "ps1", "sh", "mako", "sql")
+    },
     **{ext: ("docs", True) for ext in ("md", "txt", "rst")},
     **{
         ext: ("config", True)
-        for ext in ("json", "yaml", "yml", "toml", "ini", "cfg", "example", "gitignore", "gitkeep", "gitattributes", "env")
+        for ext in (
+            "json",
+            "yaml",
+            "yml",
+            "toml",
+            "ini",
+            "cfg",
+            "example",
+            "gitignore",
+            "gitkeep",
+            "gitattributes",
+            "env",
+        )
     },
     **{ext: ("data", False) for ext in ("db", "sqlite", "sqlite3", "pdf")},
     "csv": ("data", True),
@@ -207,9 +223,7 @@ def tracked_files(root: Path) -> Iterator[Path]:
         SystemExit: git isn't installed or `root` isn't in a repository.
     """
     try:
-        listing = subprocess.run(
-            ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True
-        ).stdout
+        listing = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError) as exc:
         raise SystemExit(f"--tracked needs git and a repository at {root}: {exc}") from None
     for name in listing.decode("utf-8", errors="replace").split("\0"):
@@ -337,9 +351,9 @@ def print_table(title: str, rows: list[tuple[str, Stats]]) -> None:
 
 def print_report(stats: dict[StatsKey, Stats], by: str = "both") -> None:
     """Args:
-        stats: Result of `collect_stats`. Prints "No files found." instead
-            of the tables if it is empty.
-        by: `"dir"`, `"type"` or `"both"` - which table(s) to print.
+    stats: Result of `collect_stats`. Prints "No files found." instead
+        of the tables if it is empty.
+    by: `"dir"`, `"type"` or `"both"` - which table(s) to print.
     """
     if not stats:
         print("No files found.")
@@ -362,24 +376,32 @@ def _csv_set(raw: str | None) -> set[str] | None:
 
 def main() -> None:
     """CLI entry point: parses the options, scans, and prints the report."""
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--path",
         type=Path,
         default=REPO_ROOT,
         help="Directory to scan (default: repository root, resolved from this script's own location).",
     )
-    parser.add_argument("--by", choices=("dir", "type", "both"), default="both", help="Which table(s) to print (default: both).")
     parser.add_argument(
-        "--category", help=f"Count only these categories, comma-separated ({', '.join(CATEGORIES)})."
+        "--by", choices=("dir", "type", "both"), default="both", help="Which table(s) to print (default: both)."
     )
-    parser.add_argument("--ext", help="Count only these extensions, comma-separated (e.g. py,md). `--ext py` gives the old Python-only report.")
+    parser.add_argument("--category", help=f"Count only these categories, comma-separated ({', '.join(CATEGORIES)}).")
     parser.add_argument(
-        "--exclude", action="append", default=[], help="Directory name to skip, on top of caches and .venv (repeatable, or comma-separated)."
+        "--ext",
+        help="Count only these extensions, comma-separated (e.g. py,md). `--ext py` gives the old Python-only report.",
     )
-    parser.add_argument("--tracked", action="store_true", help="Count only files tracked by git (`git ls-files`) instead of walking the disk.")
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Directory name to skip, on top of caches and .venv (repeatable, or comma-separated).",
+    )
+    parser.add_argument(
+        "--tracked",
+        action="store_true",
+        help="Count only files tracked by git (`git ls-files`) instead of walking the disk.",
+    )
     args = parser.parse_args()
 
     root = args.path.resolve()

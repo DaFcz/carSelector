@@ -88,6 +88,7 @@ classification note in `dacia.py`) rather than a silently wrong "fix": if
 the two sections ever disagreed on a given trim's item, the later section
 in document order would win.
 """
+
 from __future__ import annotations
 
 import pdfplumber

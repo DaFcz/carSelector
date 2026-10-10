@@ -93,8 +93,11 @@ def login_dialog(auth: AuthState, on_logged_in: Callable[[], None]) -> Callable[
         form.error = None
         body.refresh()
 
-    with ui.dialog() as dialog, ui.card().classes(
-        "w-full max-w-[420px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+    with (
+        ui.dialog() as dialog,
+        ui.card().classes(
+            "w-full max-w-[420px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+        ),
     ):
 
         @ui.refreshable
@@ -104,17 +107,23 @@ def login_dialog(auth: AuthState, on_logged_in: Callable[[], None]) -> Callable[
             if form.step == "email":
                 ui.label(t("auth.emailDescription")).classes("text-[13px] text-subtext")
                 email_input = (
-                    ui.input(label=t("auth.emailLabel"), value=form.email, on_change=lambda e: setattr(form, "email", e.value))
+                    ui.input(
+                        label=t("auth.emailLabel"),
+                        value=form.email,
+                        on_change=lambda e: setattr(form, "email", e.value),
+                    )
                     .props("outlined dense type=email autocomplete=email autofocus")
                     .classes("w-full")
                 )
                 email_input.on("keydown.enter", submit_email)
             else:
-                ui.label(t("auth.codeDescription", email=form.email.strip().lower(), minutes=config.LOGIN_CODE_TTL_MINUTES)).classes(
-                    "text-[13px] text-subtext"
-                )
+                ui.label(
+                    t("auth.codeDescription", email=form.email.strip().lower(), minutes=config.LOGIN_CODE_TTL_MINUTES)
+                ).classes("text-[13px] text-subtext")
                 code_input = (
-                    ui.input(label=t("auth.codeLabel"), value=form.code, on_change=lambda e: setattr(form, "code", e.value))
+                    ui.input(
+                        label=t("auth.codeLabel"), value=form.code, on_change=lambda e: setattr(form, "code", e.value)
+                    )
                     # one-time-code lets phones offer the code from the
                     # email/SMS notification; numeric brings up the digit pad.
                     .props("outlined dense maxlength=6 inputmode=numeric autocomplete=one-time-code autofocus")
@@ -140,18 +149,22 @@ def login_dialog(auth: AuthState, on_logged_in: Callable[[], None]) -> Callable[
                     ui.button(t("auth.changeEmail"), on_click=change_email).props("flat no-caps").classes(
                         "mr-auto text-[13px] text-subtext"
                     )
-                    ui.button(t("auth.resend"), on_click=resend).props("flat no-caps").classes("text-[13px] text-subtext")
+                    ui.button(t("auth.resend"), on_click=resend).props("flat no-caps").classes(
+                        "text-[13px] text-subtext"
+                    )
                 else:
                     ui.button(t("auth.cancel"), on_click=dialog.close).props("flat no-caps").classes(
                         "rounded-control border border-border px-3.5 py-2 text-[13px] text-subtext"
                     )
-                primary = ui.button(
-                    (t("auth.sending") if form.busy else t("auth.sendCode"))
-                    if form.step == "email"
-                    else (t("auth.verifying") if form.busy else t("auth.verify")),
-                    on_click=submit_email if form.step == "email" else submit_code,
-                ).props("no-caps unelevated").classes(
-                    "rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text"
+                primary = (
+                    ui.button(
+                        (t("auth.sending") if form.busy else t("auth.sendCode"))
+                        if form.step == "email"
+                        else (t("auth.verifying") if form.busy else t("auth.verify")),
+                        on_click=submit_email if form.step == "email" else submit_code,
+                    )
+                    .props("no-caps unelevated")
+                    .classes("rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text")
                 )
                 primary.set_enabled(not form.busy)
 

@@ -9,6 +9,7 @@ The fixture covers BMW's entire current lineup (29 model sections across
 electric, plug-in hybrid, a section split across two pages, and a section
 sharing its page with an M-performance chassis annotation) rather than
 every row."""
+
 from pathlib import Path
 
 from scraper.parsers.bmw import BmwParser

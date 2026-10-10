@@ -31,9 +31,7 @@ class SourceDocument(Base):
     id: Mapped[int] = mapped_column(BigIntPK, primary_key=True)
     model_id: Mapped[int] = mapped_column(ForeignKey("models.id"), nullable=False)
     file_path: Mapped[str] = mapped_column(Text, nullable=False)
-    document_type: Mapped[DocumentType] = mapped_column(
-        SAEnum(DocumentType, name="document_type"), nullable=False
-    )
+    document_type: Mapped[DocumentType] = mapped_column(SAEnum(DocumentType, name="document_type"), nullable=False)
     market: Mapped[str] = mapped_column(String(8), nullable=False)
     locale: Mapped[str | None] = mapped_column(String(16))
     effective_date: Mapped[date] = mapped_column(Date, nullable=False)

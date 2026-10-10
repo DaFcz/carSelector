@@ -79,6 +79,7 @@ way it does for CUPRA/Renault/Opel/Peugeot.
 `equipment` is populated per row from MG's own "VÝBAVA" checkbox-matrix
 pages (see `mg_equipment.py`'s own module docstring) - looked up by
 `trim`, the same as `dacia.py`'s own `equipment_by_trim.get(trim, {})`."""
+
 from __future__ import annotations
 
 import re
@@ -194,9 +195,7 @@ class MgParser(BaseParser):
                 words = page.extract_words()
                 lines = group_into_lines(words)
                 header_indices = [
-                    i
-                    for i, line in enumerate(lines)
-                    if {w["text"].upper() for w in line} >= {"VÝBAVA", "MOTOR"}
+                    i for i, line in enumerate(lines) if {w["text"].upper() for w in line} >= {"VÝBAVA", "MOTOR"}
                 ]
                 if not header_indices:
                     continue
@@ -207,9 +206,7 @@ class MgParser(BaseParser):
                         continue
 
                     trim_boundary = _trim_boundary(lines[header_index])
-                    section_end = (
-                        header_indices[section + 1] if section + 1 < len(header_indices) else len(lines)
-                    )
+                    section_end = header_indices[section + 1] if section + 1 < len(header_indices) else len(lines)
 
                     trim_headings: list[tuple[float, str]] = []
                     row_lines: list[list[dict]] = []
@@ -227,9 +224,7 @@ class MgParser(BaseParser):
                         # trim word would) is prose, not a heading, and
                         # must not corrupt `_nearest_trim`'s own candidates.
                         if has_trim_word and (not rest or is_priced_row):
-                            trim_text = line_text(
-                                [word for word in line if word["x0"] < trim_boundary]
-                            ).strip()
+                            trim_text = line_text([word for word in line if word["x0"] < trim_boundary]).strip()
                             if trim_text:
                                 trim_headings.append((line[0]["top"], trim_text))
                         if is_priced_row:

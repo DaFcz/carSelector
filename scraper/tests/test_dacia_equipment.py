@@ -7,6 +7,7 @@ Item counts (Essential/Expression/[Journey|Extreme]/[Extreme|Journey]) were
 cross-checked by hand against each fixture's own bullet list - see module
 docstring in dacia_equipment.py for the cumulative-vs-standalone distinction
 this exercises across models."""
+
 import pdfplumber
 
 from scraper.parsers.dacia import DaciaParser
@@ -27,7 +28,7 @@ def test_sandero_equipment_is_cumulative_across_trims() -> None:
     assert len(result["Essential"]) == 15
     assert len(result["Expression"]) == 25
     assert len(result["Journey"]) == 33
-    assert "15\" ocelová kola + kryty kol ELMA" in result["Essential"]
+    assert '15" ocelová kola + kryty kol ELMA' in result["Essential"]
     # Everything Essential has must still be present on Journey (cumulative).
     assert set(result["Essential"]) <= set(result["Journey"])
     assert all(availability == "STANDARD" for availability in result["Journey"].values())
@@ -62,8 +63,9 @@ def test_jogger_equipment_handles_multi_line_wrapped_items() -> None:
     # aplikace pro chytré telefony Dacia Media Control" wraps across two
     # lines under one bullet - must merge into a single item, not two.
     result = _parse(JOGGER)
-    assert "Multimediální systém Media Control se 4 reproduktory + aplikace pro chytré telefony Dacia Media Control" in (
-        result["Essential"]
+    assert (
+        "Multimediální systém Media Control se 4 reproduktory + aplikace pro chytré telefony Dacia Media Control"
+        in (result["Essential"])
     )
 
 
@@ -72,7 +74,7 @@ def test_dacia_parser_attaches_equipment_to_variants() -> None:
     essential = next(v for v in variants if v.trim == "Essential")
     journey = next(v for v in variants if v.trim == "Journey")
     assert essential.equipment
-    assert "15\" ocelová kola + kryty kol ELMA" in essential.equipment
+    assert '15" ocelová kola + kryty kol ELMA' in essential.equipment
     assert len(journey.equipment) == 33
     assert not essential.equipment_surcharge  # no priced options on this page, see module docstring
 

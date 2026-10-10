@@ -3,6 +3,7 @@
 A new parser = a new entry here + a file in this directory, nothing else
 in main.py needs to change.
 """
+
 from __future__ import annotations
 
 from .audi import AudiParser

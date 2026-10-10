@@ -21,6 +21,7 @@ were genuinely corrupted, even though 70/70 Octavia variants passed unchanged:
 
 Prices transcribed by hand from `pdfplumber.extract_text()` (see below),
 not derived from the parser — same discipline as test_parsers.py."""
+
 from pathlib import Path
 
 from scraper.parsers.skoda_ice import SkodaIceParser
@@ -30,9 +31,7 @@ FABIA_FIXTURE = Path(__file__).parent / "fixtures" / "skoda_fabia_cenik.pdf"
 
 
 def _variant(variants, trim: str, motor_fragment: str):
-    return next(
-        v for v in variants if v.trim == trim and motor_fragment in v.variant_name
-    )
+    return next(v for v in variants if v.trim == trim and motor_fragment in v.variant_name)
 
 
 def test_superb_merges_laurin_a_klement_into_single_trim() -> None:
@@ -72,7 +71,9 @@ def test_fabia_merges_top_selection_and_monte_carlo() -> None:
     assert "Monte Carlo" in trims
     # legend fragments ("Pakety", "Samostatné", "prvky", numbered items)
     # must not show up as a standalone or merged trim name
-    assert not any(trim.startswith(("Pakety", "Samostatné", "prvky")) or trim[0].isdigit() and "." in trim for trim in trims)
+    assert not any(
+        trim.startswith(("Pakety", "Samostatné", "prvky")) or trim[0].isdigit() and "." in trim for trim in trims
+    )
 
 
 def test_fabia_prices_match_source_pdf_no_split_price_bleed() -> None:

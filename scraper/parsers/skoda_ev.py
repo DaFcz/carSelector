@@ -24,6 +24,7 @@ Elroq, "Laurin" is on the line ABOVE the header (a two-line split like
 `merge_same_line_trim_tokens` from ICE can't, because for Elroq it would
 incorrectly merge "Sportline & Klement" (the nearest token BEFORE "&" on
 the same line is "Sportline", not "Laurin")."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -189,9 +190,7 @@ class SkodaEvParser(BaseParser):
                         continue
 
                     trim_cells = {
-                        col - _FIRST_TRIM_COLUMN: tokens
-                        for col, tokens in cells.items()
-                        if col >= _FIRST_TRIM_COLUMN
+                        col - _FIRST_TRIM_COLUMN: tokens for col, tokens in cells.items() if col >= _FIRST_TRIM_COLUMN
                     }
                     is_price_row = bool(trim_cells) and all(
                         token == "–" or token.replace(" ", "").isdigit()

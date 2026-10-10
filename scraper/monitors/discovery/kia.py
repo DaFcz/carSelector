@@ -20,6 +20,7 @@ for the same model, so it's skipped — processing it too would just be a
 redundant (harmless, SourceMonitor dedups by content hash) second key
 pointing at the same URL.
 """
+
 from __future__ import annotations
 
 import requests

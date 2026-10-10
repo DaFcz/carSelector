@@ -56,9 +56,7 @@ class Powertrain(Base):
     # source gives a single value, min == max.
     consumption_min: Mapped[float | None] = mapped_column(Numeric(5, 2))
     consumption_max: Mapped[float | None] = mapped_column(Numeric(5, 2))
-    consumption_unit: Mapped[ConsumptionUnit | None] = mapped_column(
-        SAEnum(ConsumptionUnit, name="consumption_unit")
-    )
+    consumption_unit: Mapped[ConsumptionUnit | None] = mapped_column(SAEnum(ConsumptionUnit, name="consumption_unit"))
     co2_min_g_km: Mapped[int | None] = mapped_column(Integer)
     co2_max_g_km: Mapped[int | None] = mapped_column(Integer)
     emission_standard: Mapped[str | None] = mapped_column(String(16))

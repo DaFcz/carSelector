@@ -8,6 +8,7 @@ discipline as test_kia_parser.py.
 Row counts per fixture were cross-checked by hand against
 `page.extract_words()`/`group_into_lines` output for every fixture, not
 just spot-checked."""
+
 from pathlib import Path
 
 from scraper.parsers.renault import RenaultParser

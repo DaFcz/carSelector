@@ -9,6 +9,7 @@ test_kia_parser.py.
 Mazda3 is the only one of the three fixtures with two body styles
 (hatchback vs sedan, see parsers/mazda.py), hence the extra assertions
 splitting its variants by `model`."""
+
 from pathlib import Path
 
 from scraper.parsers.mazda import MazdaParser
@@ -20,9 +21,7 @@ CX30 = FIXTURES / "mazda_cx-30_cenik.pdf"
 
 
 def _variant(variants, model: str, trim: str, engine_fragment: str):
-    return next(
-        v for v in variants if v.model == model and v.trim == trim and engine_fragment in v.variant_name
-    )
+    return next(v for v in variants if v.model == model and v.trim == trim and engine_fragment in v.variant_name)
 
 
 def test_mazda_parser_extracts_cx5_variants() -> None:

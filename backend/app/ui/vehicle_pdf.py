@@ -48,8 +48,8 @@ _FAMILY = "Body"
 
 def _find_fonts() -> tuple[str, str] | None:
     """Returns:
-        `(regular, bold)` TTF paths, or `None` if no Unicode font is
-        available. A missing bold file falls back to the regular one.
+    `(regular, bold)` TTF paths, or `None` if no Unicode font is
+    available. A missing bold file falls back to the regular one.
     """
     if config.PDF_FONT_PATH:
         return config.PDF_FONT_PATH, config.PDF_FONT_BOLD_PATH or config.PDF_FONT_PATH
@@ -226,7 +226,9 @@ def build_vehicle_pdf(detail: VehicleDetail, today: date | None = None) -> bytes
             name = color.name
             if color.finish_type is not None:
                 name += " · " + t(f"vehicleDetail.enums.colorFinish.{color.finish_type.value}")
-            surcharge = f"+{format_money(color.surcharge)}" if color.surcharge.amount > 0 else t("vehicleDetail.pdf.included")
+            surcharge = (
+                f"+{format_money(color.surcharge)}" if color.surcharge.amount > 0 else t("vehicleDetail.pdf.included")
+            )
             color_rows.append((name, surcharge))
         pdf.table_rows(color_rows, (3, 1))
 
@@ -262,14 +264,15 @@ def build_vehicle_pdf(detail: VehicleDetail, today: date | None = None) -> bytes
             valid_to = point.valid_to.isoformat() if point.valid_to else t("vehicleDetail.priceHistory.current")
             price_text = format_money(point.price)
             if point.lowest_price_30d is not None:
-                price_text += " (" + t(
-                    "vehicleDetail.priceHistory.lowestPrice30d", price=format_money(point.lowest_price_30d)
-                ) + ")"
+                price_text += (
+                    " ("
+                    + t("vehicleDetail.priceHistory.lowestPrice30d", price=format_money(point.lowest_price_30d))
+                    + ")"
+                )
             history_rows.append((f"{point.valid_from.isoformat()} – {valid_to}", price_text))
         pdf.table_rows(history_rows, (1, 2))
 
     return bytes(pdf.output())
-
 
 
 def comparison_pdf_filename(details: list[VehicleDetail]) -> str:

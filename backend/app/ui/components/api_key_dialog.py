@@ -42,8 +42,11 @@ def api_key_dialog(on_changed: Callable[[], None], is_authorized: Callable[[], b
     """
     provider, console_url = _PROVIDER_LABELS.get(AI_PROVIDER, (AI_PROVIDER, ""))
 
-    with ui.dialog() as dialog, ui.card().classes(
-        "w-full max-w-[480px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+    with (
+        ui.dialog() as dialog,
+        ui.card().classes(
+            "w-full max-w-[480px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+        ),
     ):
         ui.label(t("apiKey.title", provider=provider)).classes("text-[17px] font-bold text-text")
         ui.label(t("apiKey.description")).classes("text-[13px] text-subtext")
@@ -86,7 +89,9 @@ def api_key_dialog(on_changed: Callable[[], None], is_authorized: Callable[[], b
         key_input.on("keydown.enter", save)
 
         with ui.row().classes("w-full items-center justify-end gap-2"):
-            ui.button(t("apiKey.clear"), on_click=clear).props("flat no-caps").classes("mr-auto text-[13px] text-subtext")
+            ui.button(t("apiKey.clear"), on_click=clear).props("flat no-caps").classes(
+                "mr-auto text-[13px] text-subtext"
+            )
             ui.button(t("apiKey.cancel"), on_click=dialog.close).props("flat no-caps").classes(
                 "rounded-control border border-border px-3.5 py-2 text-[13px] text-subtext"
             )

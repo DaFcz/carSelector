@@ -6,6 +6,7 @@ links are) is per-brand logic — see `discovery/` (Škoda: a single listing
 page with all models; VW: a separate page per model). The fetch is part of
 the discoverer; `SourceMonitor` just passes it the `source`.
 """
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session
@@ -56,11 +57,7 @@ class SourceMonitor:
             downloader = self._downloader
         path, file_hash = downloader.download(pdf_url, brand=source.brand)
 
-        existing = (
-            self._session.query(Document)
-            .filter_by(source_brand=source.brand, sha256_hash=file_hash)
-            .first()
-        )
+        existing = self._session.query(Document).filter_by(source_brand=source.brand, sha256_hash=file_hash).first()
         if existing:
             return None  # already processed, nothing new
 

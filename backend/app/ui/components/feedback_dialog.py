@@ -65,8 +65,11 @@ def feedback_dialog(
             form.error = error_text("feedback", outcome.error)
         body.refresh()
 
-    with ui.dialog() as dialog, ui.card().classes(
-        "w-full max-w-[520px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+    with (
+        ui.dialog() as dialog,
+        ui.card().classes(
+            "w-full max-w-[520px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+        ),
     ):
 
         @ui.refreshable
@@ -96,9 +99,9 @@ def feedback_dialog(
                         on_change=lambda e: setattr(form, "attach_requirements", e.value),
                     ).classes("text-[13px] text-text").mark("feedback-attach-requirements")
                 version = app_version() or "—"
-                ui.label(
-                    t("feedback.dialog.contextNote", version=version, page=t(f"feedback.pages.{page}"))
-                ).classes("text-[11.5px] text-subtext")
+                ui.label(t("feedback.dialog.contextNote", version=version, page=t(f"feedback.pages.{page}"))).classes(
+                    "text-[11.5px] text-subtext"
+                )
             if form.error:
                 ui.label(form.error).classes("text-[12.5px] text-flag").mark("feedback-error")
 
@@ -107,11 +110,14 @@ def feedback_dialog(
                     "rounded-control border border-border px-3.5 py-2 text-[13px] text-subtext"
                 )
                 if not form.sent:
-                    button = ui.button(
-                        t("feedback.dialog.sending") if form.busy else t("feedback.dialog.submit"), on_click=submit
-                    ).props("no-caps unelevated").classes(
-                        "rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text"
-                    ).mark("feedback-submit")
+                    button = (
+                        ui.button(
+                            t("feedback.dialog.sending") if form.busy else t("feedback.dialog.submit"), on_click=submit
+                        )
+                        .props("no-caps unelevated")
+                        .classes("rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text")
+                        .mark("feedback-submit")
+                    )
                     button.set_enabled(not form.busy)
 
         body()

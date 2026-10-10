@@ -9,6 +9,7 @@ discipline as test_kia_parser.py.
 Row counts per fixture (10/26/6/2) were cross-checked by hand against
 `page.extract_words()` output (and, for Kuga, a rendered page image) for
 every fixture, not just spot-checked."""
+
 from pathlib import Path
 
 from scraper.parsers.ford import FordParser

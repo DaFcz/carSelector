@@ -32,6 +32,7 @@ The path is stored in the HTML pre-URL-encoded (raw UTF-8, e.g. an actual
 "í" byte sequence, not "%C3%AD") - `urllib.parse.quote` is applied before
 the GET, same as a browser would when following the link.
 """
+
 from __future__ import annotations
 
 import re

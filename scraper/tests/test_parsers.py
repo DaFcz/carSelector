@@ -11,6 +11,7 @@ table, and an earlier version of the parser (with a fixed header
 x-coordinate tuned only for the main table) missed it. The new parser
 looks up the header by the text "Motor"/"Pohon", not by a fixed
 position, so it finds both tables, and any number of others on other pages."""
+
 from pathlib import Path
 
 from scraper.parsers.skoda_ice import SkodaIceParser
@@ -19,9 +20,7 @@ FIXTURE = Path(__file__).parent / "fixtures" / "skoda_octavia_cenik.pdf"
 
 
 def _variant(variants, trim: str, motor_fragment: str):
-    return next(
-        v for v in variants if v.trim == trim and motor_fragment in v.variant_name
-    )
+    return next(v for v in variants if v.trim == trim and motor_fragment in v.variant_name)
 
 
 def test_skoda_ice_parser_extracts_expected_variant_count() -> None:

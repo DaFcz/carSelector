@@ -65,8 +65,11 @@ def author_request_dialog(auth: AuthState) -> Callable[[], Awaitable[None]]:
             form.error = error_text("authors", outcome.error)
         body.refresh()
 
-    with ui.dialog() as dialog, ui.card().classes(
-        "w-full max-w-[460px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+    with (
+        ui.dialog() as dialog,
+        ui.card().classes(
+            "w-full max-w-[460px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card animate-fade-in gap-3"
+        ),
     ):
 
         @ui.refreshable
@@ -104,11 +107,14 @@ def author_request_dialog(auth: AuthState) -> Callable[[], Awaitable[None]]:
                     "rounded-control border border-border px-3.5 py-2 text-[13px] text-subtext"
                 )
                 if not form.sent and not (latest is not None and latest.status == "pending"):
-                    button = ui.button(
-                        t("authors.request.sending") if form.busy else t("authors.request.submit"), on_click=submit
-                    ).props("no-caps unelevated").classes(
-                        "rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text"
-                    ).mark("author-request-submit")
+                    button = (
+                        ui.button(
+                            t("authors.request.sending") if form.busy else t("authors.request.submit"), on_click=submit
+                        )
+                        .props("no-caps unelevated")
+                        .classes("rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text")
+                        .mark("author-request-submit")
+                    )
                     button.set_enabled(not form.busy)
 
         body()

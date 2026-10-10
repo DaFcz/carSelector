@@ -14,8 +14,8 @@ _HEADING = re.compile(r"^## (\d+\.\d+\.\d+)\b", re.MULTILINE)
 @cache
 def app_version() -> str | None:
     """Returns:
-        The first `## x.y.z` heading's version, or `None` if the changelog
-        isn't there (e.g. a deployment without `doc/`) or has none.
+    The first `## x.y.z` heading's version, or `None` if the changelog
+    isn't there (e.g. a deployment without `doc/`) or has none.
     """
     # Matched case-insensitively: git tracks the file as `changelog.md`,
     # while Windows checkouts may show `CHANGELOG.md`.

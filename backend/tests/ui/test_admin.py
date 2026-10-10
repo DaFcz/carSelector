@@ -43,7 +43,7 @@ async def test_job_state_turns_progress_lines_into_progress_not_log() -> None:
     state = JobState()
     script = (
         "print('Active source: skoda'); "
-        "print('PROGRESS {\"step\": 2, \"steps\": 4, \"item\": \"skoda\", \"sub\": 1, \"subs\": 2}')"
+        'print(\'PROGRESS {"step": 2, "steps": 4, "item": "skoda", "sub": 1, "subs": 2}\')'
     )
     await state.run([sys.executable, "-c", script], lambda: None)
 

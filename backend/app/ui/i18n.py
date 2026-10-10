@@ -528,8 +528,7 @@ STRINGS: dict = {
         "missing": "—",
         "colorSummary": "Barev: {count} · {range}",
         "perBrandNote": (
-            "Každá značka pojmenovává výbavu jinak, proto ji u vozů různých značek ukazujeme "
-            "pro každý vůz zvlášť."
+            "Každá značka pojmenovává výbavu jinak, proto ji u vozů různých značek ukazujeme pro každý vůz zvlášť."
         ),
         "standardCount": "Standardní výbava ({count})",
         "optionalCount": "Volitelná výbava ({count})",
@@ -631,9 +630,7 @@ STRINGS: dict = {
             "created": "Vytvořeno {date}",
             "included": "v ceně",
             "page": "Strana {page}/{total}",
-            "disclaimer": (
-                "Údaje vycházejí z ceníků výrobců a mohou se změnit. Závaznou nabídku vám dá prodejce."
-            ),
+            "disclaimer": ("Údaje vycházejí z ceníků výrobců a mohou se změnit. Závaznou nabídku vám dá prodejce."),
         },
         "noColors": "Žádné barevné varianty nejsou k dispozici.",
         "noOptionalEquipment": "Žádná volitelná výbava není k dispozici.",

@@ -86,6 +86,7 @@ format (the closest text is "Ceny platné na skladové vozy od D. M. RRRR
 do D. M. RRRR", a closed campaign window like CUPRA's/Renault's/Opel's
 own gap - see their module docstrings), so `release_date` stays None;
 VariantRepository falls back to the download date."""
+
 from __future__ import annotations
 
 import re
@@ -275,18 +276,14 @@ class PeugeotParser(BaseParser):
                         suffix = preceding_text[len(base_model) :].strip()
                         model = f"{base_model} {suffix}".strip()
 
-                    section_end = (
-                        header_indices[section + 1] if section + 1 < len(header_indices) else len(lines)
-                    )
+                    section_end = header_indices[section + 1] if section + 1 < len(header_indices) else len(lines)
 
                     current_trim: str | None = None
                     pending: list[list[dict]] = []
                     for line in lines[header_index + 1 : section_end]:
                         leftmost = min(line, key=lambda word: word["x0"])
                         if leftmost["x0"] < trim_boundary and leftmost["text"].isalpha():
-                            current_trim = line_text(
-                                [word for word in line if word["x0"] < trim_boundary]
-                            ).strip()
+                            current_trim = line_text([word for word in line if word["x0"] < trim_boundary]).strip()
                             rest = [word for word in line if word["x0"] >= trim_boundary]
                             pending = [rest] if rest else []
                             continue

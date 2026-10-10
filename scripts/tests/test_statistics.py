@@ -8,7 +8,9 @@ from pathlib import Path
 
 import pytest
 
-_SPEC = importlib.util.spec_from_file_location("statistics_script", Path(__file__).resolve().parents[1] / "statistics.py")
+_SPEC = importlib.util.spec_from_file_location(
+    "statistics_script", Path(__file__).resolve().parents[1] / "statistics.py"
+)
 statistics = importlib.util.module_from_spec(_SPEC)
 # Registered before running it: @dataclass looks its module up there.
 sys.modules[_SPEC.name] = statistics
@@ -77,7 +79,9 @@ def test_filters_and_exclude(tree: Path) -> None:
     assert "storage" not in {group for group, _, _ in without_storage}
 
 
-def test_directory_rows_have_category_subrows_and_total_counts_once(tree: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_directory_rows_have_category_subrows_and_total_counts_once(
+    tree: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     stats = statistics.collect_stats(tree)
     rows = statistics.directory_rows(stats)
     labels = [label for label, _ in rows]

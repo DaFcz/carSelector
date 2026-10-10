@@ -11,6 +11,7 @@ embedding, not the full downloaded page). Prices are cross-checked by hand
 against what actually rendered on the live page for each trim, not just
 spot-checked - same discipline as every other brand's own parser tests
 here."""
+
 from pathlib import Path
 
 from scraper.parsers.tesla import TeslaParser

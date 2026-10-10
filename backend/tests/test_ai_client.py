@@ -84,9 +84,7 @@ def test_anthropic_llm_client_extracts_text_from_content_blocks() -> None:
 
 
 def test_groq_llm_client_extracts_message_content() -> None:
-    fake_response = SimpleNamespace(
-        choices=[SimpleNamespace(message=SimpleNamespace(content="hello from groq"))]
-    )
+    fake_response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="hello from groq"))])
     calls = []
 
     class FakeCompletions:

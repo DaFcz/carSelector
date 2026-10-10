@@ -7,6 +7,7 @@ two-page VÝBAVA matrix - see mg_equipment.py's module docstring for why
 the mark glyphs ("•"/"—") are still read per-page from each page's own
 legend line rather than hardcoded, and why MG HS's own equipment pages
 come back empty (a real source gap, not a parser bug)."""
+
 from pathlib import Path
 
 from scraper.parsers.mg import MgParser

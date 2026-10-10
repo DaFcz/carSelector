@@ -63,6 +63,7 @@ over a decorative "Model Configuration" button, see
 `_extract_model_name`). So `release_date` stays None here too, for a
 different reason than every other brand added so far (a wrong page, not a
 wrong date format) - VariantRepository falls back to the download date."""
+
 from __future__ import annotations
 
 import re

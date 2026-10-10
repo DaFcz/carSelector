@@ -46,7 +46,9 @@ def test_normalize_email_strips_and_lowercases() -> None:
     assert normalize_email("  Jana.Novak@Example.CZ ") == "jana.novak@example.cz"
 
 
-@pytest.mark.parametrize("bad", ["", "   ", "no-at-sign", "a@b", "two@@example.cz", "sp ace@example.cz", "a" * 320 + "@x.cz"])
+@pytest.mark.parametrize(
+    "bad", ["", "   ", "no-at-sign", "a@b", "two@@example.cz", "sp ace@example.cz", "a" * 320 + "@x.cz"]
+)
 def test_normalize_email_rejects_malformed_addresses(bad: str) -> None:
     with pytest.raises(AuthError) as exc_info:
         normalize_email(bad)

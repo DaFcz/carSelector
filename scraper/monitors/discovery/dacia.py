@@ -21,6 +21,7 @@ documents like Kia's Sportage, no stock/promo duplicate like Mazda's), so,
 unlike Mazda's caption-scoped search, one page-wide regex sweep is enough -
 order on the page doesn't matter since the slug identifies the model
 directly."""
+
 from __future__ import annotations
 
 import re

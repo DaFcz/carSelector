@@ -23,9 +23,7 @@ class OptionItem(Base):
 
     id: Mapped[int] = mapped_column(BigIntPK, primary_key=True)
     model_id: Mapped[int] = mapped_column(ForeignKey("models.id"), nullable=False)
-    category: Mapped[OptionCategory] = mapped_column(
-        SAEnum(OptionCategory, name="option_category"), nullable=False
-    )
+    category: Mapped[OptionCategory] = mapped_column(SAEnum(OptionCategory, name="option_category"), nullable=False)
     # VW's "WBQ"/"PL5"-style codes; null for Mazda, which names items
     # without an internal SKU code in the consumer-facing brochure.
     code: Mapped[str | None] = mapped_column(String(32))

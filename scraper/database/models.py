@@ -5,6 +5,7 @@ Key principle for data verification: `Variant` and `PriceHistory` always
 link back to `Document` (source_page, raw_text), so every extracted
 number can be traced back to the page and exact text in the source PDF.
 """
+
 from __future__ import annotations
 
 from datetime import date, datetime

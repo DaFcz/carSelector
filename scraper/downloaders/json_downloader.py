@@ -3,6 +3,7 @@ as `pdf_downloader.py` (auditability - an existing version is never
 overwritten, and history can be traced). Needed because Audi's own price
 data comes from its web configurator's JSON API rather than a downloadable
 PDF price list - see parsers/audi.py's module docstring for why."""
+
 from __future__ import annotations
 
 from datetime import date

@@ -63,6 +63,7 @@ mutated state across every get_or_create_* call for that run) - a class,
 with the caches as instance attributes instead of a dict threaded through
 every function call.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -524,10 +525,10 @@ class ScraperDataImporter:
 
     def __init__(self, db: Session, scraper_con: sqlite3.Connection) -> None:
         """Args:
-            db: Backend database session to write the imported catalog
-                into. Not committed by this class - the caller commits
-                (or rolls back, for `--dry-run`) after `run()` returns.
-            scraper_con: Read-only connection to scraper.db to import from.
+        db: Backend database session to write the imported catalog
+            into. Not committed by this class - the caller commits
+            (or rolls back, for `--dry-run`) after `run()` returns.
+        scraper_con: Read-only connection to scraper.db to import from.
         """
         self._db = db
         self._scraper_con = scraper_con
@@ -576,9 +577,7 @@ class ScraperDataImporter:
         key = (brand.id, slug)
         if key in self._model_cache:
             return self._model_cache[key]
-        model = self._db.scalar(
-            select(CarModel).where(CarModel.brand_id == brand.id, CarModel.slug == slug)
-        )
+        model = self._db.scalar(select(CarModel).where(CarModel.brand_id == brand.id, CarModel.slug == slug))
         if model is None:
             model = CarModel(brand_id=brand.id, slug=slug, name=name, category=infer_body_type(brand.name, name))
             self._db.add(model)
@@ -676,9 +675,7 @@ class ScraperDataImporter:
         if key in self._configuration_cache:
             return self._configuration_cache[key]
         configuration = self._db.scalar(
-            select(Configuration).where(
-                Configuration.trim_id == trim.id, Configuration.powertrain_id == powertrain.id
-            )
+            select(Configuration).where(Configuration.trim_id == trim.id, Configuration.powertrain_id == powertrain.id)
         )
         if configuration is None:
             configuration = Configuration(trim_id=trim.id, powertrain_id=powertrain.id)
@@ -716,15 +713,11 @@ class ScraperDataImporter:
         if key in self._source_document_cache:
             return self._source_document_cache[key]
         source_document = self._db.scalar(
-            select(SourceDocument).where(
-                SourceDocument.file_path == file_path, SourceDocument.model_id == model.id
-            )
+            select(SourceDocument).where(SourceDocument.file_path == file_path, SourceDocument.model_id == model.id)
         )
         if source_document is None:
             effective_date = (
-                date.fromisoformat(release_date)
-                if release_date
-                else datetime.fromisoformat(downloaded_at).date()
+                date.fromisoformat(release_date) if release_date else datetime.fromisoformat(downloaded_at).date()
             )
             source_document = SourceDocument(
                 model_id=model.id,
@@ -978,9 +971,7 @@ class ScraperDataImporter:
 
             for model_name, model_variants in variants_by_model.items():
                 model = self.get_or_create_model(brand, model_name)
-                source_document = self.get_or_create_source_document(
-                    model, file_path, release_date, downloaded_at
-                )
+                source_document = self.get_or_create_source_document(model, file_path, release_date, downloaded_at)
 
                 for variant_id, _model_name, trim_name, scraper_powertrain, variant_name in model_variants:
                     trim = self.get_or_create_trim(model, trim_name)
@@ -989,9 +980,7 @@ class ScraperDataImporter:
                     drivetrain = infer_drivetrain(variant_name)
                     power_kw = extract_power_kw(variant_name)
                     signature = powertrain_signature(variant_name, trim_name)
-                    powertrain = self.get_or_create_powertrain(
-                        model, signature, fuel_type, drivetrain, power_kw
-                    )
+                    powertrain = self.get_or_create_powertrain(model, signature, fuel_type, drivetrain, power_kw)
                     configuration = self.get_or_create_configuration(trim, powertrain)
 
                     price_row = self._scraper_con.execute(
@@ -1020,9 +1009,7 @@ def main() -> None:
     pass, commits (or rolls back for `--dry-run`), and prints the summary.
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Run the import but roll back instead of committing."
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Run the import but roll back instead of committing.")
     args = parser.parse_args()
 
     if not SCRAPER_DB_PATH.exists():
@@ -1055,10 +1042,7 @@ def main() -> None:
         f"{stats.option_availabilities_updated} updated, "
         f"{stats.option_availabilities_unchanged} already up to date"
     )
-    print(
-        f"  equipment_assignment rows skipped (PACKAGE, or OPTIONAL with no price): "
-        f"{stats.equipment_skipped}"
-    )
+    print(f"  equipment_assignment rows skipped (PACKAGE, or OPTIONAL with no price): {stats.equipment_skipped}")
 
 
 if __name__ == "__main__":

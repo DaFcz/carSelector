@@ -78,7 +78,9 @@ def _progress(wizard: WizardState) -> None:
     )
     with ui.row().classes("mt-1.5 mb-5 h-1.5 w-full gap-1"):
         for i in range(WizardState.STEP_COUNT):
-            ui.element("div").classes("h-full flex-1 rounded-full " + ("bg-accent" if i <= wizard.step else "bg-border"))
+            ui.element("div").classes(
+                "h-full flex-1 rounded-full " + ("bg-accent" if i <= wizard.step else "bg-border")
+            )
 
 
 def _option_list(options: tuple[str, ...], labels_path: str, on_pick: Callable[[str], Awaitable[None]]) -> None:
@@ -120,9 +122,12 @@ def wizard_dialog(
         current step - call after `wizard.open_wizard()`.
     """
     # `dialog-mobile-full` (see app/ui/styles.py): fullscreen on phones.
-    with ui.dialog().classes("dialog-mobile-full") as dialog, ui.card().classes(
-        "w-full max-w-[480px] overflow-y-auto rounded-card border border-border bg-panel p-4 md:p-6 shadow-card "
-        "animate-fade-in"
+    with (
+        ui.dialog().classes("dialog-mobile-full") as dialog,
+        ui.card().classes(
+            "w-full max-w-[480px] overflow-y-auto rounded-card border border-border bg-panel p-4 md:p-6 shadow-card "
+            "animate-fade-in"
+        ),
     ):
 
         async def _advance() -> None:
@@ -160,7 +165,9 @@ def wizard_dialog(
                 budget_input = (
                     ui.number(placeholder=t("wizard.questions.budget.placeholder"), value=wizard.budget, min=0)
                     .props(f'borderless dense suffix="{t("wizard.questions.budget.unit")}"')
-                    .classes("w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text")
+                    .classes(
+                        "w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text"
+                    )
                 )
 
                 async def _next_budget() -> None:
@@ -177,7 +184,9 @@ def wizard_dialog(
                 seats_input = (
                     ui.number(placeholder=t("wizard.questions.seats.placeholder"), value=wizard.seats, min=1, max=9)
                     .props("borderless dense")
-                    .classes("w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text")
+                    .classes(
+                        "w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text"
+                    )
                 )
 
                 async def _next_seats() -> None:
@@ -188,7 +197,9 @@ def wizard_dialog(
             elif step == 3:
                 ui.label(t("wizard.questions.bodyType.title")).classes("mb-1 text-[14px] font-semibold text-text")
                 ui.label(t("wizard.questions.bodyType.hint")).classes("mb-3 text-[12.5px] text-subtext")
-                _option_list(_BODY_TYPE_OPTIONS, "wizard.questions.bodyType.options", lambda v: _pick(_set_body_type, v))
+                _option_list(
+                    _BODY_TYPE_OPTIONS, "wizard.questions.bodyType.options", lambda v: _pick(_set_body_type, v)
+                )
                 _footer(wizard, _content.refresh, _advance, None)
             elif step == 4:
                 ui.label(t("wizard.questions.awd.title")).classes("mb-1 text-[14px] font-semibold text-text")
@@ -216,7 +227,9 @@ def wizard_dialog(
                     )
                     .props('borderless dense suffix="km"')
                     .mark("mileage-input")
-                    .classes("w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text")
+                    .classes(
+                        "w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text"
+                    )
                 )
 
                 async def _next_mileage() -> None:
@@ -233,7 +246,9 @@ def wizard_dialog(
                 brand_input = (
                     ui.input(placeholder=t("wizard.questions.brand.placeholder"), value=wizard.brand_pref)
                     .props("borderless dense")
-                    .classes("w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text")
+                    .classes(
+                        "w-full rounded-control border border-border bg-panel-2 px-3.5 py-2.5 text-[14px] text-text"
+                    )
                 )
 
                 async def _next_brand() -> None:
@@ -296,6 +311,7 @@ def _footer(
             choice-button steps, which already advance on click and only
             need this footer for Back/Skip.
     """
+
     def _go_back() -> None:
         wizard.go_back()
         refresh()

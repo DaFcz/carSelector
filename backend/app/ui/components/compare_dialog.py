@@ -94,8 +94,9 @@ def compare_dialog(
     """
     view = _CompareView()
 
-    with ui.dialog().props("maximized") as dialog, ui.card().classes(
-        "h-full w-full max-w-none flex flex-col flex-nowrap gap-0 rounded-none bg-panel p-0"
+    with (
+        ui.dialog().props("maximized") as dialog,
+        ui.card().classes("h-full w-full max-w-none flex flex-col flex-nowrap gap-0 rounded-none bg-panel p-0"),
     ):
 
         async def _export_pdf() -> None:
@@ -145,7 +146,9 @@ def compare_dialog(
                     ui.label(t("compare.bestHint")).classes("text-[12px] text-subtext")
                 with ui.row().classes("flex-wrap items-center gap-2"):
                     ui.switch(
-                        t("compare.differencesOnly"), value=view.differences_only, on_change=lambda e: _toggle_differences(e.value)
+                        t("compare.differencesOnly"),
+                        value=view.differences_only,
+                        on_change=lambda e: _toggle_differences(e.value),
                     ).props("dense color=primary").classes("text-[13px] text-text").mark("compare-differences")
                     if len(view.details) >= MIN_COMPARE:
                         ui.button(t("share.button"), icon="share", on_click=_share).props("flat no-caps").classes(
@@ -154,7 +157,9 @@ def compare_dialog(
                         ui.button(t("vehicleDetail.exportPdf"), icon="picture_as_pdf", on_click=_export_pdf).props(
                             "flat no-caps"
                         ).classes(_BUTTON_CLASSES).mark("compare-pdf")
-                    ui.button(t("vehicleDetail.close"), on_click=dialog.close).props("flat no-caps").classes(_BUTTON_CLASSES)
+                    ui.button(t("vehicleDetail.close"), on_click=dialog.close).props("flat no-caps").classes(
+                        _BUTTON_CLASSES
+                    )
 
         _toolbar()
 
@@ -233,8 +238,10 @@ def _table(
     ):
         ui.element("div").classes(f"sticky left-0 top-0 z-[3] bg-panel {_CELL}")
         for detail in details:
-            with ui.column().classes(f"sticky top-0 z-[2] gap-1 bg-panel {_CELL}").mark(
-                f"compare-column-{detail.configuration_id}"
+            with (
+                ui.column()
+                .classes(f"sticky top-0 z-[2] gap-1 bg-panel {_CELL}")
+                .mark(f"compare-column-{detail.configuration_id}")
             ):
                 with ui.row().classes("w-full flex-nowrap items-start justify-between gap-1"):
                     ui.label(vehicle_title(detail)).classes(
@@ -281,14 +288,18 @@ def _per_car_equipment(details: list[VehicleDetail]) -> None:
     ui.element("div").classes(f"{_STICKY_LEFT} {_CELL}")
     for detail in details:
         with ui.column().classes(f"gap-1 {_CELL}"):
-            with ui.expansion(t("compare.standardCount", count=len(detail.standard_equipment))).props(
-                "dense"
-            ).classes("w-full text-[12.5px]"):
+            with (
+                ui.expansion(t("compare.standardCount", count=len(detail.standard_equipment)))
+                .props("dense")
+                .classes("w-full text-[12.5px]")
+            ):
                 for item in detail.standard_equipment:
                     ui.label(f"• {item}").classes("text-[12px] text-text")
-            with ui.expansion(t("compare.optionalCount", count=len(detail.optional_equipment))).props(
-                "dense"
-            ).classes("w-full text-[12.5px]"):
+            with (
+                ui.expansion(t("compare.optionalCount", count=len(detail.optional_equipment)))
+                .props("dense")
+                .classes("w-full text-[12.5px]")
+            ):
                 for option in detail.optional_equipment:
                     ui.label(f"• {option.name} · {format_money(option.surcharge)}").classes("text-[12px] text-text")
 
@@ -314,7 +325,9 @@ class _PickerView:
     error: bool = False
 
 
-def trim_picker_dialog(compare: CompareState, on_confirm: Callable[[], Awaitable[None]]) -> Callable[[int], Awaitable[None]]:
+def trim_picker_dialog(
+    compare: CompareState, on_confirm: Callable[[], Awaitable[None]]
+) -> Callable[[int], Awaitable[None]]:
     """Builds the (initially closed) "which trims to compare" dialog.
 
     Args:
@@ -329,8 +342,9 @@ def trim_picker_dialog(compare: CompareState, on_confirm: Callable[[], Awaitable
     """
     view = _PickerView()
 
-    with ui.dialog() as dialog, ui.card().classes(
-        "w-full max-w-[480px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card"
+    with (
+        ui.dialog() as dialog,
+        ui.card().classes("w-full max-w-[480px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card"),
     ):
 
         def _toggle(index: int, value: bool) -> None:

@@ -25,7 +25,10 @@ def _user(session: Session, email: str, *, author: bool = False, admin: bool = F
 
 
 def _draft(
-    visibility: str = "draft", recipients: list[str] | None = None, title: str = "Test", english: tuple[str, str] | None = None
+    visibility: str = "draft",
+    recipients: list[str] | None = None,
+    title: str = "Test",
+    english: tuple[str, str] | None = None,
 ) -> ArticleDraft:
     """A Czech article, plus an English version when `english` is
     `(title, content_html)`."""
@@ -94,7 +97,13 @@ def test_validation_errors(db: Session) -> None:
     author = _user(db, "author@example.cz", author=True)
     cases = [
         (_draft(title="   "), "missing_title"),
-        (ArticleDraft(translations=[ArticleTranslation(language="cs", title=" ", content_html="<p><br></p>")], visibility="draft"), "empty_title"),
+        (
+            ArticleDraft(
+                translations=[ArticleTranslation(language="cs", title=" ", content_html="<p><br></p>")],
+                visibility="draft",
+            ),
+            "empty_title",
+        ),
         (_draft(english=("", "<p>Hello</p>")), "missing_title"),
         (_draft(title="x" * 201), "title_too_long"),
         (_draft("restricted"), "no_recipients"),

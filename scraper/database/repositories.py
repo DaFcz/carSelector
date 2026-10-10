@@ -5,6 +5,7 @@ Only called for documents that `fetch_new_documents` judged to be new
 doesn't need to be handled here; the same document is never processed
 twice, thanks to the hash-based dedup.
 """
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session

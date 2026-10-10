@@ -117,9 +117,7 @@ def get_client() -> LlmClient:
         return GroqLlmClient(groq.Groq(api_key=api_key), GROQ_MODEL)
 
     if AI_PROVIDER != "anthropic":
-        raise RuntimeError(
-            f"Unknown AI_PROVIDER {AI_PROVIDER!r} - expected 'anthropic' or 'groq'."
-        )
+        raise RuntimeError(f"Unknown AI_PROVIDER {AI_PROVIDER!r} - expected 'anthropic' or 'groq'.")
     if not api_key:
         raise RuntimeError(
             "ANTHROPIC_API_KEY is not set. The AI layer (requirement "

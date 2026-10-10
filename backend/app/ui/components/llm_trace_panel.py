@@ -129,10 +129,7 @@ def _entry_row(entry: LlmTraceEntry, open_ids: set[int]) -> None:
         icon="check_circle" if entry.ok else "error",
         value=is_open,
         on_value_change=on_change,
-    ).classes(
-        "w-full rounded-control border border-border bg-panel "
-        + ("" if entry.ok else "border-flag")
-    )
+    ).classes("w-full rounded-control border border-border bg-panel " + ("" if entry.ok else "border-flag"))
     if is_open:
         build()
 

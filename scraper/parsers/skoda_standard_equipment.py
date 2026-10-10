@@ -43,6 +43,7 @@ Known gap: a page describing TWO trims side by side (Octavia's "Standardní
 výbava Classic / Standardní výbava Dynamic" promo models) is skipped -
 those trims get no standard equipment rather than a wrong mix.
 """
+
 from __future__ import annotations
 
 import re

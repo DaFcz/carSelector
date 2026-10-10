@@ -92,7 +92,9 @@ def main() -> None:
             response = requests.get(url, headers=BROWSER_HEADERS, timeout=30)
             response.raise_for_status()
             if not response.content.startswith(b"%PDF"):
-                raise ValueError(f"response doesn't look like a PDF (Content-Type: {response.headers.get('Content-Type')})")
+                raise ValueError(
+                    f"response doesn't look like a PDF (Content-Type: {response.headers.get('Content-Type')})"
+                )
             target_path.write_bytes(response.content)
             print(f"OK ({len(response.content):,} bytes)")
         except Exception as exc:  # noqa: BLE001 - report every failure, then continue with the rest

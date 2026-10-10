@@ -2,6 +2,7 @@
 once the pipeline is verified it switches to Postgres via the same
 SQLAlchemy models (see doc/arch/webScraping/IMPLEMENTATION_PLAN.md,
 the transition phase)."""
+
 from __future__ import annotations
 
 import os

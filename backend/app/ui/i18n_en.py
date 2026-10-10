@@ -113,7 +113,7 @@ STRINGS_EN: dict = {
             "sending": "Sending…",
             "close": "Close",
             "pending": "Your request from {date} is waiting for an administrator's approval.",
-            "sent": "Request sent. Once an administrator approves it, you'll find \"My articles\" in the account menu.",
+            "sent": 'Request sent. Once an administrator approves it, you\'ll find "My articles" in the account menu.',
             "rejected": "Your previous request from {date} was rejected. You can send a new one.",
         },
         "admin": {
@@ -220,7 +220,7 @@ STRINGS_EN: dict = {
             "empty": "You haven't written any articles yet.",
             "updated": "Edited {date}",
             "onlyAuthors": "This page is for authors only.",
-            "onlyAuthorsHint": "You can ask for the author role in the account menu on the main page (\"Become an author\").",
+            "onlyAuthorsHint": 'You can ask for the author role in the account menu on the main page ("Become an author").',
             "backToMine": "← My articles",
         },
         "editor": {
@@ -242,7 +242,7 @@ STRINGS_EN: dict = {
             "published": "Published",
             "view": "View",
             "delete": "Delete",
-            "confirmDelete": "Really delete the article \"{title}\"? This can't be undone.",
+            "confirmDelete": 'Really delete the article "{title}"? This can\'t be undone.',
             "cancel": "Cancel",
             "deleted": "Article deleted",
         },
@@ -495,8 +495,7 @@ STRINGS_EN: dict = {
         "missing": "—",
         "colorSummary": "Colours: {count} · {range}",
         "perBrandNote": (
-            "Every brand names its equipment differently, so for cars of different brands it's "
-            "listed per car."
+            "Every brand names its equipment differently, so for cars of different brands it's listed per car."
         ),
         "standardCount": "Standard equipment ({count})",
         "optionalCount": "Optional equipment ({count})",

@@ -61,6 +61,7 @@ Audi's own JSON-based parser), and `raw_text` holds the option's own JSON
 object (`json.dumps`) instead of a PDF text line, so a row can still be
 traced back to its exact source for verification the same way every other
 parser's own `raw_text` does."""
+
 from __future__ import annotations
 
 import json

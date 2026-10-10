@@ -40,6 +40,7 @@ shape is a materially different, harder parsing problem (rotated headers,
 in-cell manufacturer codes, multi-line wrapped names, per-cell prices) on
 top of what was needed just to unblock standard equipment being entirely
 absent; left as a known gap rather than a rushed, unverified attempt."""
+
 from __future__ import annotations
 
 import re
@@ -94,9 +95,7 @@ def _words_from_chars(chars: list[dict]) -> list[dict]:
             words[-1].append(char)
         else:
             words.append([char])
-    return [
-        {"text": "".join(c["text"] for c in word), "x0": word[0]["x0"], "top": word[0]["top"]} for word in words
-    ]
+    return [{"text": "".join(c["text"] for c in word), "x0": word[0]["x0"], "top": word[0]["top"]} for word in words]
 
 
 def _cluster_items(words: list[dict]) -> list[str]:

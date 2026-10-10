@@ -8,6 +8,7 @@ checked by summing each trim's own delta bullets against the base trim(s)
 it resolves from - see kia_equipment.py's module docstring for why that
 resolution is by explicit name reference rather than a simple running
 accumulator (Dacia's approach)."""
+
 from pathlib import Path
 
 from scraper.parsers.kia import KiaParser

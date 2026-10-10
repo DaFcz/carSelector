@@ -26,7 +26,11 @@ pytestmark = [
 
 def _author(session: Session, email: str = "author@example.cz") -> UserRow:
     row = UserRow(
-        email=email, is_admin=False, is_author=True, display_name="Jana Nová", is_active=True,
+        email=email,
+        is_admin=False,
+        is_author=True,
+        display_name="Jana Nová",
+        is_active=True,
         created_at=datetime.now(UTC),
     )
     session.add(row)
@@ -34,7 +38,9 @@ def _author(session: Session, email: str = "author@example.cz") -> UserRow:
     return row
 
 
-def _draft(title: str, content_html: str, visibility: str, recipients: list[str] | None = None, *, language: str = "cs") -> ArticleDraft:
+def _draft(
+    title: str, content_html: str, visibility: str, recipients: list[str] | None = None, *, language: str = "cs"
+) -> ArticleDraft:
     return ArticleDraft(
         translations=[ArticleTranslation(language=language, title=title, content_html=content_html)],
         visibility=visibility,
@@ -119,7 +125,8 @@ async def test_anonymous_reader_sees_public_but_not_restricted(user: User, patch
     author = _author(patch_ui_session)
     public = articles.save(patch_ui_session, author.id, _draft("Veřejný", "<p>Pro všechny</p>", "public"))
     restricted = articles.save(
-        patch_ui_session, author.id,
+        patch_ui_session,
+        author.id,
         _draft("Tajný", "<p>Jen pro Petra</p>", "restricted", ["petr@example.cz"]),
     )
 
@@ -138,7 +145,8 @@ async def test_anonymous_reader_sees_public_but_not_restricted(user: User, patch
 async def test_recipient_sees_restricted_article(user: User, log_in, patch_ui_session: Session) -> None:
     author = _author(patch_ui_session)
     restricted = articles.save(
-        patch_ui_session, author.id,
+        patch_ui_session,
+        author.id,
         _draft("Tajný", "<p>Jen pro Petra</p>", "restricted", ["petr@example.cz"]),
     )
 
@@ -153,7 +161,9 @@ async def test_recipient_sees_restricted_article(user: User, log_in, patch_ui_se
 
 async def test_missing_language_version_shows_notice(user: User, patch_ui_session: Session) -> None:
     author = _author(patch_ui_session)
-    english = articles.save(patch_ui_session, author.id, _draft("Choosing an SUV", "<p>Hi</p>", "public", language="en"))
+    english = articles.save(
+        patch_ui_session, author.id, _draft("Choosing an SUV", "<p>Hi</p>", "public", language="en")
+    )
 
     await user.open("/articles")
     await user.should_see("Choosing an SUV", retries=100)

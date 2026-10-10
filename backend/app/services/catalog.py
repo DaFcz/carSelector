@@ -203,9 +203,7 @@ def list_vehicles(
     return Page(items=items, page=page, page_size=page_size, total=total or 0)
 
 
-def get_vehicle_detail(
-    db: Session, configuration_id: int, *, market: str = DEFAULT_MARKET
-) -> VehicleDetail | None:
+def get_vehicle_detail(db: Session, configuration_id: int, *, market: str = DEFAULT_MARKET) -> VehicleDetail | None:
     """Full detail page for one configuration: summary + powertrain spec,
     colors, standard/optional equipment, and price history.
 
@@ -220,11 +218,7 @@ def get_vehicle_detail(
         has no current price row for `market`.
     """
     configuration = (
-        db.execute(
-            select(Configuration)
-            .where(Configuration.id == configuration_id)
-            .options(*_SUMMARY_LOAD_OPTIONS)
-        )
+        db.execute(select(Configuration).where(Configuration.id == configuration_id).options(*_SUMMARY_LOAD_OPTIONS))
         .unique()
         .scalar_one_or_none()
     )
@@ -290,9 +284,7 @@ def get_vehicle_detail(
             valid_to=p.valid_to,
             price=Money(amount=float(p.price_incl_vat), currency=p.currency),
             lowest_price_30d=(
-                Money(amount=float(p.lowest_price_30d), currency=p.currency)
-                if p.lowest_price_30d is not None
-                else None
+                Money(amount=float(p.lowest_price_30d), currency=p.currency) if p.lowest_price_30d is not None else None
             ),
         )
         for p in price_history_rows
@@ -337,9 +329,7 @@ def compare_vehicles(
     return found, missing
 
 
-def list_trim_alternatives(
-    db: Session, configuration_id: int, *, market: str = DEFAULT_MARKET
-) -> list[TrimChoice]:
+def list_trim_alternatives(db: Session, configuration_id: int, *, market: str = DEFAULT_MARKET) -> list[TrimChoice]:
     """Every priced trim of `configuration_id`'s model, each represented by
     one configuration - for comparing a model's trims ("flavours") side by
     side. The configuration's own trim is represented by the configuration

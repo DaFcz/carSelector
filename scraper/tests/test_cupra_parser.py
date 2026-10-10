@@ -11,6 +11,7 @@ fixture, not just spot-checked - see parsers/cupra.py's module docstring
 for the layout quirk (`extract_text()` visually scrambling some rows)
 that makes trusting raw extracted text risky here, confirmed against a
 rendered page image for Terramar."""
+
 from pathlib import Path
 
 from scraper.parsers.cupra import CupraParser

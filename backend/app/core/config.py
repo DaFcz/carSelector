@@ -58,9 +58,7 @@ LLM_TRACE_MAX_ENTRIES = int(os.getenv("LLM_TRACE_MAX_ENTRIES", "200"))
 # API's CORS default isn't part of a frontend-only migration.
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
-    for origin in os.getenv(
-        "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
-    ).split(",")
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
     if origin.strip()
 ]
 
@@ -83,9 +81,7 @@ AUTH_SECRET = os.getenv("AUTH_SECRET") or NICEGUI_STORAGE_SECRET
 # Emails that become admins the moment they log in (comma-separated,
 # case-insensitive). Grant-only bootstrap: removing an address here does not
 # demote anyone - `users.is_admin` is the source of truth after that.
-ADMIN_EMAILS = frozenset(
-    email.strip().lower() for email in os.getenv("ADMIN_EMAILS", "").split(",") if email.strip()
-)
+ADMIN_EMAILS = frozenset(email.strip().lower() for email in os.getenv("ADMIN_EMAILS", "").split(",") if email.strip())
 
 LOGIN_CODE_TTL_MINUTES = int(os.getenv("LOGIN_CODE_TTL_MINUTES", "10"))
 LOGIN_CODE_MAX_ATTEMPTS = int(os.getenv("LOGIN_CODE_MAX_ATTEMPTS", "5"))

@@ -5,6 +5,7 @@ not derived from the parser — same discipline as the other tests.
 
 Legend in the PDF: "●" = available (always OPTIONAL, items have a price,
 they aren't free), "–" = not available for that trim (no record)."""
+
 from pathlib import Path
 
 import pdfplumber

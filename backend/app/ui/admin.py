@@ -287,9 +287,8 @@ def _source_row(source: Source) -> None:
     Args:
         source: The source to render.
     """
-    status_classes = (
-        "rounded-full px-2.5 py-1 text-[11px] font-semibold "
-        + ("bg-accent-soft text-accent" if source.active else "bg-panel-2 text-subtext")
+    status_classes = "rounded-full px-2.5 py-1 text-[11px] font-semibold " + (
+        "bg-accent-soft text-accent" if source.active else "bg-panel-2 text-subtext"
     )
     with ui.row().classes("w-full items-center gap-3 rounded-control border border-border bg-panel px-3.5 py-2.5"):
         ui.label(t("admin.active") if source.active else t("admin.inactive")).classes(status_classes)
@@ -331,9 +330,7 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
         state: The job's `JobState` - fresh per page load (see `admin`).
         command: Argv to run when the button is clicked.
     """
-    with ui.column().classes(
-        "w-full gap-2.5 rounded-card border border-border bg-panel p-4 shadow-card"
-    ):
+    with ui.column().classes("w-full gap-2.5 rounded-card border border-border bg-panel p-4 shadow-card"):
         ui.label(title).classes("text-[15px] font-bold text-text")
         ui.label(description).classes("text-[12.5px] text-subtext")
 
@@ -360,9 +357,9 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
                 return
 
             fraction = state.progress.fraction if state.progress is not None else 0.0
-            ui.linear_progress(value=fraction, show_value=False, size="8px").props("rounded").classes(
-                "w-full"
-            ).mark("job-progress")
+            ui.linear_progress(value=fraction, show_value=False, size="8px").props("rounded").classes("w-full").mark(
+                "job-progress"
+            )
             with ui.row().classes("w-full items-center justify-between gap-2"):
                 if state.progress is not None:
                     progress = state.progress
@@ -385,11 +382,13 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
         @ui.refreshable
         def content() -> None:
             with ui.row().classes("items-center gap-2.5"):
-                button = ui.button(
-                    t("admin.running") if state.is_running else t("admin.run"),
-                    on_click=start,
-                ).props("no-caps unelevated").classes(
-                    "rounded-control bg-accent px-4 py-2 text-[13px] font-semibold text-accent-text"
+                button = (
+                    ui.button(
+                        t("admin.running") if state.is_running else t("admin.run"),
+                        on_click=start,
+                    )
+                    .props("no-caps unelevated")
+                    .classes("rounded-control bg-accent px-4 py-2 text-[13px] font-semibold text-accent-text")
                 )
                 button.set_enabled(not state.is_running)
                 if state.return_code is not None:
@@ -402,9 +401,7 @@ def _job_section(job_key: str, title: str, description: str, state: JobState, co
                 with ui.scroll_area().classes(
                     "h-[240px] w-full rounded-control border border-border bg-panel-2 p-2.5"
                 ) as log_area:
-                    ui.label("\n".join(state.lines)).classes(
-                        "whitespace-pre-wrap font-mono text-[11.5px] text-text"
-                    )
+                    ui.label("\n".join(state.lines)).classes("whitespace-pre-wrap font-mono text-[11.5px] text-text")
                 log_area.scroll_to(percent=1.0)
 
         content()

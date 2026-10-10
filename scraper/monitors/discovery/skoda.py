@@ -7,6 +7,7 @@ anchor tags — one with text, one empty/image-only). BeautifulSoup
 handles both the entities and the duplicates without needing a custom
 regex on the raw HTML (that was tried first and was unreliable).
 """
+
 from __future__ import annotations
 
 import requests

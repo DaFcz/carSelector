@@ -190,7 +190,9 @@ async def test_login_dialog_says_no_email_is_sent_in_console_mode(user: User, mo
     await user.should_see("e-mail se neodesílá")
 
 
-async def test_login_dialog_has_no_dev_notice_when_mail_is_really_sent(user: User, monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_login_dialog_has_no_dev_notice_when_mail_is_really_sent(
+    user: User, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(config, "EMAIL_BACKEND", "smtp")
     await user.open("/")
     user.find(marker="login").click()

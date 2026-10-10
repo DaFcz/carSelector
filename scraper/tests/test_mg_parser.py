@@ -3,6 +3,7 @@
 on model - see scraper/tests/fixtures/mg_*.pdf). Prices and row counts
 are transcribed by hand from `page.extract_text()` output for every
 fixture, not just spot-checked - same discipline as test_opel_parser.py."""
+
 from pathlib import Path
 
 from scraper.parsers.mg import MgParser

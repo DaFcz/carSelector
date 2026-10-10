@@ -13,9 +13,7 @@ SORT_OPTIONS = ("recommended", "price_asc", "price_desc", "alpha", "custom")
 BACKEND_SORT_OPTIONS = ("price_asc", "price_desc", "alpha")
 
 
-def sort_cars(
-    cars: list[VehicleSummary], sort: str, custom_order: list[int] | None = None
-) -> list[VehicleSummary]:
+def sort_cars(cars: list[VehicleSummary], sort: str, custom_order: list[int] | None = None) -> list[VehicleSummary]:
     """Orders `cars` for display. Does not mutate `cars`.
 
     Args:

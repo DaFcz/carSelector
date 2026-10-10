@@ -68,6 +68,7 @@ table's own multi-section shape) are out of scope for the same reason
 VW's "Příplatková výbava" and Kia's own availability matrix are - a
 materially different, harder parsing problem layered on top of what was
 needed just to stop equipment being entirely absent."""
+
 from __future__ import annotations
 
 import re
@@ -202,7 +203,9 @@ def parse_equipment(
         all_words = page.extract_words()
         if not all_words or not _is_header_line(all_words[:3]):
             continue
-        model = next((m for m in trims_by_model if m.upper() in " ".join(w["text"] for w in all_words[:6]).upper()), None)
+        model = next(
+            (m for m in trims_by_model if m.upper() in " ".join(w["text"] for w in all_words[:6]).upper()), None
+        )
         if model is None:
             continue
         trims = trims_by_model[model]

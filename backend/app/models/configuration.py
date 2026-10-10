@@ -34,9 +34,5 @@ class Configuration(Base):
     trim: Mapped["Trim"] = relationship(back_populates="configurations")
     powertrain: Mapped["Powertrain"] = relationship(back_populates="configurations")
     prices: Mapped[list["Price"]] = relationship(back_populates="configuration")
-    option_availabilities: Mapped[list["OptionAvailability"]] = relationship(
-        back_populates="configuration"
-    )
-    configuration_colors: Mapped[list["ConfigurationColor"]] = relationship(
-        back_populates="configuration"
-    )
+    option_availabilities: Mapped[list["OptionAvailability"]] = relationship(back_populates="configuration")
+    configuration_colors: Mapped[list["ConfigurationColor"]] = relationship(back_populates="configuration")

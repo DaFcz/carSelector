@@ -8,6 +8,7 @@ Row counts per fixture (19/9/10/22/17/3) were cross-checked by hand against
 `page.extract_words()` output for every fixture, not just spot-checked —
 see parsers/dacia.py's module docstring for the row/cluster shape this
 relies on."""
+
 from pathlib import Path
 
 from scraper.parsers.dacia import DaciaParser

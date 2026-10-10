@@ -9,6 +9,7 @@ peugeot_208_cenik.pdf's own "VÝBAVA PEUGEOT 208" pages - see
 peugeot_equipment.py's module docstring for the Private-Use-Area ""
 mark, the hybrid mark/price cells, and the known limitation where a run of
 unusually tightly-spaced items can merge into one paragraph."""
+
 from pathlib import Path
 
 from scraper.parsers.peugeot import PeugeotParser
@@ -44,10 +45,18 @@ def test_208_captures_real_priced_options() -> None:
     # non-included is unavailable".
     by_trim = _equipment_by_trim(PeugeotParser().parse(P208), "208")
     gt = by_trim["GT"]
-    assert gt.equipment.get("Pack Vision: Visiopark 2 (couvací a přední kamera 360°) Systém sledování mrtvého úhlu Vnější zpětná zrcátka s bočním osvětlením karoserie") == "OPTIONAL"
-    assert gt.equipment_surcharge.get(
-        "Pack Vision: Visiopark 2 (couvací a přední kamera 360°) Systém sledování mrtvého úhlu Vnější zpětná zrcátka s bočním osvětlením karoserie"
-    ) == 8000.0
+    assert (
+        gt.equipment.get(
+            "Pack Vision: Visiopark 2 (couvací a přední kamera 360°) Systém sledování mrtvého úhlu Vnější zpětná zrcátka s bočním osvětlením karoserie"
+        )
+        == "OPTIONAL"
+    )
+    assert (
+        gt.equipment_surcharge.get(
+            "Pack Vision: Visiopark 2 (couvací a přední kamera 360°) Systém sledování mrtvého úhlu Vnější zpětná zrcátka s bočním osvětlením karoserie"
+        )
+        == 8000.0
+    )
 
 
 def test_2008_equipment_has_real_item_names() -> None:

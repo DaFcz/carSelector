@@ -184,24 +184,19 @@ class RecommendationEngine:
         if liked_model_ids:
             liked_brands = set(
                 db.scalars(
-                    select(Brand.name).join(CarModel, CarModel.brand_id == Brand.id).where(
-                        CarModel.id.in_(list(liked_model_ids))
-                    )
+                    select(Brand.name)
+                    .join(CarModel, CarModel.brand_id == Brand.id)
+                    .where(CarModel.id.in_(list(liked_model_ids)))
                 )
             )
 
         scored = sorted(
-            (
-                (self._score(vehicle, requirements, liked_model_ids, liked_brands), vehicle)
-                for vehicle in candidates
-            ),
+            ((self._score(vehicle, requirements, liked_model_ids, liked_brands), vehicle) for vehicle in candidates),
             key=lambda pair: pair[0],
             reverse=True,
         )[:limit]
 
-        results = [
-            vehicle.model_copy(update={"match_score": min(round(score), 100)}) for score, vehicle in scored
-        ]
+        results = [vehicle.model_copy(update={"match_score": min(round(score), 100)}) for score, vehicle in scored]
         if results:
             results[0] = results[0].model_copy(update={"top_pick": True})
         return results

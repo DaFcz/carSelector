@@ -55,9 +55,7 @@ async def test_blank_key_is_rejected(user: User, log_in) -> None:
     assert not client_module.is_configured()
 
 
-async def test_rejected_key_shows_specific_message_in_chat(
-    user: User, log_in, monkeypatch: pytest.MonkeyPatch
-) -> None:
+async def test_rejected_key_shows_specific_message_in_chat(user: User, log_in, monkeypatch: pytest.MonkeyPatch) -> None:
     from app.ai.errors import AiProviderError
     from app.ui import state as state_module
 

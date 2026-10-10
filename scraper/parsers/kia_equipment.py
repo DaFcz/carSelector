@@ -62,6 +62,7 @@ here (unlike `skoda_equipment.py`'s standalone-item page) — a wrapped
 bullet's continuation lines carry no "•" of their own and simply keep
 appending to the item currently being built, same convention as
 `dacia_equipment.py`."""
+
 from __future__ import annotations
 
 import re

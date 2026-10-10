@@ -222,8 +222,10 @@ OEM-specific implementations:
 class SkodaParser(BaseParser):
     pass
 
+
 class ToyotaParser(BaseParser):
     pass
+
 
 class BMWParser(BaseParser):
     pass

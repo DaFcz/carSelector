@@ -67,7 +67,9 @@ async def test_catalog_state_has_more_is_false_once_fully_loaded(patch_ui_sessio
     assert state.has_more is False
 
 
-async def test_catalog_state_load_more_is_a_noop_when_nothing_left(patch_ui_session, seeded_session: SeededData) -> None:
+async def test_catalog_state_load_more_is_a_noop_when_nothing_left(
+    patch_ui_session, seeded_session: SeededData
+) -> None:
     state = CatalogState()
     await state.load_first_page(sort=None)
     cars_before = list(state.cars)

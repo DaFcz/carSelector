@@ -178,13 +178,15 @@ def list_authors(db: Session, admin_id: int) -> list[AuthorRead]:
         AuthorError: `"forbidden"`.
     """
     _require_admin(db, admin_id)
-    article_count = (
-        select(func.count()).select_from(Article).where(Article.author_id == User.id).scalar_subquery()
-    )
+    article_count = select(func.count()).select_from(Article).where(Article.author_id == User.id).scalar_subquery()
     rows = db.execute(
-        select(User.id, User.email, User.display_name, article_count).where(User.is_author.is_(True)).order_by(User.email)
+        select(User.id, User.email, User.display_name, article_count)
+        .where(User.is_author.is_(True))
+        .order_by(User.email)
     ).all()
-    return [AuthorRead(user_id=uid, email=email, display_name=name, article_count=count) for uid, email, name, count in rows]
+    return [
+        AuthorRead(user_id=uid, email=email, display_name=name, article_count=count) for uid, email, name, count in rows
+    ]
 
 
 def revoke(db: Session, admin_id: int, user_id: int) -> None:

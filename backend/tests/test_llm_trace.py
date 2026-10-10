@@ -107,9 +107,10 @@ def test_log_keeps_newest_entries_up_to_capacity_and_clears() -> None:
 def test_zero_capacity_disables_tracing() -> None:
     log = LlmTraceLog(max_entries=0)
     assert not log.enabled
-    assert log.record(
-        started_at=None, provider="groq", model="m", request={}, response=None, reply_text="", duration_ms=0
-    ) is None
+    assert (
+        log.record(started_at=None, provider="groq", model="m", request={}, response=None, reply_text="", duration_ms=0)
+        is None
+    )
     assert log.entries() == []
 
 

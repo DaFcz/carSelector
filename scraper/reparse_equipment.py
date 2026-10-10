@@ -20,6 +20,7 @@ Usage (repo root):
 Then re-run `scripts/import_scraper_data.py` to bring the result into the
 app's database.
 """
+
 from __future__ import annotations
 
 from collections import Counter

@@ -10,6 +10,7 @@ Mercedes-Benz model) - these tests only check the four chapters this
 scraper tracks (C-Class/C-Class Estate/E-Class/E-Class Estate), the same
 document also contains ~65 other pages (A-Class, GLC, S-Class, EQS, AMG
 GT, ...) that MercedesBenzParser is expected to skip."""
+
 from pathlib import Path
 
 from scraper.parsers.mercedes_benz import MercedesBenzParser
@@ -94,6 +95,8 @@ def test_mercedes_benz_parser_extracts_e_class_estate_variants() -> None:
 def test_mercedes_benz_parser_raw_text_traceable_to_source() -> None:
     variants = MercedesBenzParser().parse(FIXTURE)
     variant = _variant(variants, "C-Class", "C 200 d 206.003")
-    assert "1 045 000" in variant.raw_text  # ex-VAT price (row 1), kept for verification even though not stored as `price`
+    assert (
+        "1 045 000" in variant.raw_text
+    )  # ex-VAT price (row 1), kept for verification even though not stored as `price`
     assert "1 264 450" in variant.raw_text  # VAT-inclusive price (row 2) == variant.price
     assert variant.source_page == 21

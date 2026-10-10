@@ -7,6 +7,7 @@ built from, so it can be quickly checked against the open PDF.
 Usage:
     python -m scraper.verification.review_cli --document-id 1
 """
+
 from __future__ import annotations
 
 import click

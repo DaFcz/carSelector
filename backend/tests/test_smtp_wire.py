@@ -255,7 +255,9 @@ def test_message_is_delivered_with_correct_envelope_headers_and_both_bodies(serv
 
 def test_starttls_upgrades_before_credentials_are_sent(serve, server_tls_context, trusting_client_context) -> None:
     server = serve(tls_context=server_tls_context, offer_starttls=True, require_auth=True)
-    _sender(server, security="starttls", context=trusting_client_context).send_login_code("jana@example.cz", "111222", 10)
+    _sender(server, security="starttls", context=trusting_client_context).send_login_code(
+        "jana@example.cz", "111222", 10
+    )
 
     assert server.auth_attempts == [True]  # the password only ever crossed an encrypted channel
     assert "111222" in server.parse_last_message().get_body(("plain",)).get_content()

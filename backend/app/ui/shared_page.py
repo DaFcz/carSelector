@@ -72,7 +72,9 @@ def register_shared_page() -> None:
                         )
                         with ui.row().classes("w-full flex-wrap gap-2"):
                             for req in content.requirements:
-                                with ui.column().classes("gap-0 rounded-control border border-border bg-panel px-3 py-2"):
+                                with ui.column().classes(
+                                    "gap-0 rounded-control border border-border bg-panel px-3 py-2"
+                                ):
                                     ui.label(req.label).classes(
                                         "text-[10.5px] font-bold uppercase tracking-wide text-subtext"
                                     )

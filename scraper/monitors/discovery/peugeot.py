@@ -35,6 +35,7 @@ docstring), so it's omitted here too rather than left as a document this
 source would find but the parser can't use. Expert/Partner/Boxer
 commercial vehicles were never in `_MODEL_PAGES` to begin with, same
 "personal cars only" convention as every other brand here."""
+
 from __future__ import annotations
 
 import re

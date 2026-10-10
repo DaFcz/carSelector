@@ -81,6 +81,7 @@ reads "platné od D. M. RRRR" (lowercase, no "Platnost") - doesn't match
 `_pdf_layout.extract_release_date`'s "Platnost od ..." pattern, so
 `release_date` stays None here too; VariantRepository falls back to the
 download date."""
+
 from __future__ import annotations
 
 from pathlib import Path

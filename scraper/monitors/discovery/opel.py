@@ -31,6 +31,7 @@ someone has to visit the listing page in a real browser, copy the new
 links, and update `_DOCUMENT_URLS` by hand; there's no way to detect that
 automatically short of building the browser-based discovery this module's
 docstring says is out of scope."""
+
 from __future__ import annotations
 
 from scraper.sources.registry import Source

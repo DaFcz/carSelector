@@ -5,6 +5,7 @@ output, not derived from the parser — same discipline as the other tests.
 ID.4 and ID.3 Neo deliberately have OPPOSITE power/battery order in the
 description ("140 kW, 58 kWh" vs "50 kWh 125 kW") — that's why it's not
 just tested on one of them, see the `volkswagen_ev.py` module docstring."""
+
 from pathlib import Path
 
 from scraper.parsers.volkswagen_ev import VolkswagenEvParser

@@ -37,10 +37,8 @@ class LikeButtons:
     @staticmethod
     def _apply(button: ui.button, liked: bool) -> None:
         button.props(f"icon={'favorite' if liked else 'favorite_border'}")
-        button.props(f'aria-pressed={"true" if liked else "false"}')
-        button.classes(
-            add="text-flag" if liked else "text-subtext", remove="text-subtext" if liked else "text-flag"
-        )
+        button.props(f"aria-pressed={'true' if liked else 'false'}")
+        button.classes(add="text-flag" if liked else "text-subtext", remove="text-subtext" if liked else "text-flag")
 
     def render(self, model_id: int) -> ui.button:
         """Builds the heart button for one card of `model_id`.
@@ -97,8 +95,10 @@ class CompareToggles:
     @staticmethod
     def _apply(button: ui.button, picked: bool) -> None:
         button.props(f"icon={'check_box' if picked else 'check_box_outline_blank'}")
-        button.props(f'aria-pressed={"true" if picked else "false"}')
-        button.classes(add="text-accent" if picked else "text-subtext", remove="text-subtext" if picked else "text-accent")
+        button.props(f"aria-pressed={'true' if picked else 'false'}")
+        button.classes(
+            add="text-accent" if picked else "text-subtext", remove="text-subtext" if picked else "text-accent"
+        )
 
     def render(self, car: VehicleSummary) -> ui.button:
         """Builds the toggle for one card.
@@ -185,11 +185,15 @@ def car_card(
                 "uppercase tracking-wide text-accent-text"
             )
 
-        with ui.element("div").classes(
-            "relative flex h-[110px] sm:h-[140px] w-full items-center justify-center px-3 text-center font-mono text-[11px] text-subtext"
-        ).style(
-            "background-image: repeating-linear-gradient(45deg, var(--color-panel-2), var(--color-panel-2) 10px, "
-            "var(--color-border) 10px, var(--color-border) 20px)"
+        with (
+            ui.element("div")
+            .classes(
+                "relative flex h-[110px] sm:h-[140px] w-full items-center justify-center px-3 text-center font-mono text-[11px] text-subtext"
+            )
+            .style(
+                "background-image: repeating-linear-gradient(45deg, var(--color-panel-2), var(--color-panel-2) 10px, "
+                "var(--color-border) 10px, var(--color-border) 20px)"
+            )
         ):
             ui.label(t("car.photoPlaceholder", make=car.brand, model=car.model))
             if like is not None:

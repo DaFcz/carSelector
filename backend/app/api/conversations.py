@@ -17,9 +17,7 @@ def start_conversation() -> ConversationStartResponse:
 
 
 @router.post("/{conversation_id}/messages", response_model=MessageResponse)
-def send_message(
-    conversation_id: str, body: MessageRequest, db: Session = Depends(get_db)
-) -> MessageResponse:
+def send_message(conversation_id: str, body: MessageRequest, db: Session = Depends(get_db)) -> MessageResponse:
     try:
         return orchestrator.handle_message(db, conversation_id, body.text)
     except UnknownConversationError:

@@ -67,7 +67,11 @@ def split_recipients(raw: str) -> list[str]:
 
 def _byline(article: ArticleSummary) -> str:
     when = article.published_at or article.updated_at
-    return t("articles.byline", author=article.author_name or t("articles.editorial"), date=when.strftime(t("common.dateFormat")))
+    return t(
+        "articles.byline",
+        author=article.author_name or t("articles.editorial"),
+        date=when.strftime(t("common.dateFormat")),
+    )
 
 
 def _badge(text: str, *, accent: bool = False) -> None:
@@ -111,7 +115,9 @@ def _page_shell(auth_state: AuthState) -> ui.column:
         ):
             with ui.row().classes("items-center gap-4"):
                 ui.link(t("header.brand"), "/").classes("text-[17px] font-bold text-text no-underline")
-                ui.link(t("header.articles"), "/articles").classes("text-[13px] font-semibold text-subtext no-underline")
+                ui.link(t("header.articles"), "/articles").classes(
+                    "text-[13px] font-semibold text-subtext no-underline"
+                )
                 if auth_state.can_write_articles:
                     ui.link(t("header.myArticles"), "/author").classes(
                         "text-[13px] font-semibold text-subtext no-underline"
@@ -138,9 +144,11 @@ def _articles_list(auth_state: AuthState, items: list[ArticleSummary]) -> None:
     viewer_id = auth_state.user.id if auth_state.user else None
     with ui.column().classes("mt-4 w-full gap-3"):
         for article in items:
-            with ui.link(target=f"/articles/{article.id}").classes(
-                "w-full no-underline rounded-card border border-border bg-panel px-4 py-3.5 shadow-card"
-            ).mark("article-link"):
+            with (
+                ui.link(target=f"/articles/{article.id}")
+                .classes("w-full no-underline rounded-card border border-border bg-panel px-4 py-3.5 shadow-card")
+                .mark("article-link")
+            ):
                 ui.label(article.title).classes("text-[16px] font-bold text-text")
                 with ui.row().classes("mt-1 items-center gap-2"):
                     ui.label(_byline(article)).classes("text-[12.5px] text-subtext")
@@ -173,9 +181,13 @@ def _language_note(article: ArticleRead) -> None:
     and another version exists too - offers that one."""
     language = current_language()
     if article.language != language:
-        with ui.row().classes(
-            "mt-4 w-full flex-nowrap items-center gap-2 rounded-control border border-border bg-panel-2 px-3.5 py-2.5"
-        ).mark("article-language-notice"):
+        with (
+            ui.row()
+            .classes(
+                "mt-4 w-full flex-nowrap items-center gap-2 rounded-control border border-border bg-panel-2 px-3.5 py-2.5"
+            )
+            .mark("article-language-notice")
+        ):
             ui.icon("translate").classes("text-[18px] text-subtext")
             ui.label(t(f"articles.onlyIn.{article.language}")).classes("text-[13px] text-text")
         return
@@ -188,9 +200,9 @@ def _language_note(article: ArticleRead) -> None:
 
     for other in article.languages:
         if other != language:
-            ui.button(t(f"articles.readIn.{other}"), icon="translate", on_click=lambda other=other: read_in(other)).props(
-                "flat dense no-caps"
-            ).classes("mt-2 text-[13px] text-accent").mark("article-read-in")
+            ui.button(
+                t(f"articles.readIn.{other}"), icon="translate", on_click=lambda other=other: read_in(other)
+            ).props("flat dense no-caps").classes("mt-2 text-[13px] text-accent").mark("article-read-in")
 
 
 def _not_allowed(auth_state: AuthState) -> None:
@@ -211,9 +223,11 @@ def _own_list(items: list[ArticleSummary]) -> None:
         return
     with ui.column().classes("mt-4 w-full gap-2.5"):
         for article in items:
-            with ui.link(target=f"/author/edit/{article.id}").classes(
-                "w-full no-underline rounded-control border border-border bg-panel px-4 py-3"
-            ).mark("own-article"):
+            with (
+                ui.link(target=f"/author/edit/{article.id}")
+                .classes("w-full no-underline rounded-control border border-border bg-panel px-4 py-3")
+                .mark("own-article")
+            ):
                 with ui.row().classes("w-full flex-nowrap items-center justify-between gap-3"):
                     with ui.column().classes("min-w-0 gap-0"):
                         ui.label(article.title).classes("text-[14.5px] font-semibold text-text")
@@ -272,14 +286,23 @@ def _editor(auth_state: AuthState, article: ArticleRead | None) -> None:
             for language in ARTICLE_LANGUAGES:
                 version = existing.get(language)
                 with ui.tab_panel(language).classes("w-full gap-3 p-0 pt-2"):
-                    titles[language] = ui.input(
-                        t("articles.editor.titleLabel"),
-                        value=version.title if version else "",
-                        on_change=lambda _, language=language: refresh_tab_label(language),
-                    ).props("outlined dense maxlength=200").classes("w-full").mark(f"article-title-input-{language}")
-                    editor = ui.editor(
-                        value=version.content_html if version else "", placeholder=t("articles.editor.placeholder")
-                    ).classes("article-body w-full bg-panel").mark(f"article-editor-{language}")
+                    titles[language] = (
+                        ui.input(
+                            t("articles.editor.titleLabel"),
+                            value=version.title if version else "",
+                            on_change=lambda _, language=language: refresh_tab_label(language),
+                        )
+                        .props("outlined dense maxlength=200")
+                        .classes("w-full")
+                        .mark(f"article-title-input-{language}")
+                    )
+                    editor = (
+                        ui.editor(
+                            value=version.content_html if version else "", placeholder=t("articles.editor.placeholder")
+                        )
+                        .classes("article-body w-full bg-panel")
+                        .mark(f"article-editor-{language}")
+                    )
                     editor.props["toolbar"] = _TOOLBAR_GROUPS
                     editor.props["min-height"] = "18rem"
                     editors[language] = editor
@@ -287,16 +310,28 @@ def _editor(auth_state: AuthState, article: ArticleRead | None) -> None:
             refresh_tab_label(language)
 
         with ui.column().classes("w-full gap-1 rounded-control border border-border bg-panel px-3.5 py-3"):
-            ui.label(t("articles.visibility.label")).classes("text-[12px] font-bold uppercase tracking-wide text-subtext")
-            visibility = ui.radio(
-                {value: t(f"articles.visibility.{value}") for value in VISIBILITIES},
-                value=article.visibility if article else "draft",
-            ).props("inline dense").classes("text-[13.5px] text-text").mark("article-visibility")
+            ui.label(t("articles.visibility.label")).classes(
+                "text-[12px] font-bold uppercase tracking-wide text-subtext"
+            )
+            visibility = (
+                ui.radio(
+                    {value: t(f"articles.visibility.{value}") for value in VISIBILITIES},
+                    value=article.visibility if article else "draft",
+                )
+                .props("inline dense")
+                .classes("text-[13.5px] text-text")
+                .mark("article-visibility")
+            )
             recipients_box = ui.column().classes("w-full gap-1 pt-2")
             with recipients_box:
-                recipients = ui.textarea(
-                    t("articles.editor.recipientsLabel"), value="\n".join(article.recipients) if article else ""
-                ).props("outlined dense autogrow").classes("w-full").mark("article-recipients")
+                recipients = (
+                    ui.textarea(
+                        t("articles.editor.recipientsLabel"), value="\n".join(article.recipients) if article else ""
+                    )
+                    .props("outlined dense autogrow")
+                    .classes("w-full")
+                    .mark("article-recipients")
+                )
                 ui.label(t("articles.editor.recipientsHint")).classes("text-[12px] text-subtext")
             recipients_box.bind_visibility_from(visibility, "value", backward=lambda value: value == "restricted")
 
@@ -313,7 +348,9 @@ def _editor(auth_state: AuthState, article: ArticleRead | None) -> None:
             draft = ArticleDraft(
                 translations=[
                     ArticleTranslation(
-                        language=language, title=titles[language].value or "", content_html=editors[language].value or ""
+                        language=language,
+                        title=titles[language].value or "",
+                        content_html=editors[language].value or "",
                     )
                     for language in ARTICLE_LANGUAGES
                 ],
@@ -362,19 +399,25 @@ def _editor(auth_state: AuthState, article: ArticleRead | None) -> None:
                 ).mark("confirm-delete")
 
         with ui.row().classes("w-full items-center gap-2"):
-            save_button = ui.button(on_click=save).props("no-caps unelevated").classes(_BUTTON_PRIMARY).mark("save-article")
+            save_button = (
+                ui.button(on_click=save).props("no-caps unelevated").classes(_BUTTON_PRIMARY).mark("save-article")
+            )
             save_button.bind_text_from(
                 visibility,
                 "value",
-                backward=lambda value: t("articles.editor.saveDraft") if value == "draft" else t("articles.editor.publish"),
+                backward=lambda value: (
+                    t("articles.editor.saveDraft") if value == "draft" else t("articles.editor.publish")
+                ),
             )
             if article is not None:
                 ui.button(
-                    t("articles.editor.view"), icon="visibility", on_click=lambda: ui.navigate.to(f"/articles/{article.id}")
+                    t("articles.editor.view"),
+                    icon="visibility",
+                    on_click=lambda: ui.navigate.to(f"/articles/{article.id}"),
                 ).props("flat no-caps").classes(_BUTTON_SECONDARY)
-                ui.button(t("articles.editor.delete"), icon="delete", on_click=confirm.open).props("flat no-caps").classes(
-                    "ml-auto text-[13px] text-flag"
-                ).mark("delete-article")
+                ui.button(t("articles.editor.delete"), icon="delete", on_click=confirm.open).props(
+                    "flat no-caps"
+                ).classes("ml-auto text-[13px] text-flag").mark("delete-article")
 
 
 def _error_block(code: str, detail: str = "") -> None:

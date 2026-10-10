@@ -91,9 +91,7 @@ def test_handle_wizard_answers_merges_onto_a_prior_chat_turn(seeded_session: See
 def test_handle_wizard_answers_raises_for_unknown_conversation(seeded_session: SeededData) -> None:
     orchestrator = ConversationOrchestrator()
     with pytest.raises(UnknownConversationError):
-        orchestrator.handle_wizard_answers(
-            seeded_session.session, "not-a-real-id", StructuredRequirements(), "summary"
-        )
+        orchestrator.handle_wizard_answers(seeded_session.session, "not-a-real-id", StructuredRequirements(), "summary")
 
 
 class _CountingExplanationGenerator:

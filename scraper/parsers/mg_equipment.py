@@ -92,6 +92,7 @@ carrying MG's own "Standardní výbava .../. Není k dispozici" legend text
 spaced "V Ý B A V A" title - only the FIRST of a document's two equipment
 pages does; the second (e.g. MG3's own page 6) starts straight into its
 own next category heading, no title of its own."""
+
 from __future__ import annotations
 
 import re

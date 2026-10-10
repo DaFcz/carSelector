@@ -8,6 +8,7 @@ docstring for why marks are read from the right end of each row rather
 than the first, and how package-only cells (e.g. Santa Fe's "PREMIUM")
 fall out of the row-validation naturally rather than needing their own
 vocabulary."""
+
 from pathlib import Path
 
 from scraper.parsers.hyundai import HyundaiParser

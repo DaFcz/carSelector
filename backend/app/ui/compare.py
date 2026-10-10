@@ -190,10 +190,14 @@ def build_sections(details: list[VehicleDetail], match_scores: Mapping[int, int]
 
     same_unit = len({pt.consumption_unit for pt in powertrains}) == 1
     powertrain = [
-        _text_row(t("vehicleDetail.fields.fuelType"), [t(f"vehicleDetail.enums.fuelType.{pt.fuel_type.value}") for pt in powertrains]),
+        _text_row(
+            t("vehicleDetail.fields.fuelType"),
+            [t(f"vehicleDetail.enums.fuelType.{pt.fuel_type.value}") for pt in powertrains],
+        ),
         _text_row(t("vehicleDetail.fields.transmission"), [pt.transmission for pt in powertrains]),
         _text_row(
-            t("vehicleDetail.fields.drivetrain"), [t(f"vehicleDetail.enums.drivetrain.{pt.drivetrain.value}") for pt in powertrains]
+            t("vehicleDetail.fields.drivetrain"),
+            [t(f"vehicleDetail.enums.drivetrain.{pt.drivetrain.value}") for pt in powertrains],
         ),
         _text_row(
             t("vehicleDetail.fields.power"),
@@ -256,4 +260,3 @@ def default_trim_selection(prices: list[float], current_index: int, limit: int =
     """
     order = sorted(range(len(prices)), key=lambda index: (abs(prices[index] - prices[current_index]), index))
     return set(order[:limit])
-

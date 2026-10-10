@@ -26,6 +26,7 @@ this page for it, only a "Katalog" - matches the homepage's own "SKLADOVÉ
 VOZY" label instead of a price link) and Tavascan has no price-list link
 yet either (too new - CZ sales hadn't started as of this verification
 date). `_SLUG_MODELS` covers exactly the 6 that do."""
+
 from __future__ import annotations
 
 import re

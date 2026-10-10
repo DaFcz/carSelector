@@ -3,6 +3,7 @@ single canonical name (see doc/arch/webScraping/Car_Price_List_Architecture.md,
 Data Normalization section). Currently a small hand-written dictionary —
 once more parsers are written, move it into a DB table (equipment_alias)
 so it can be edited without a deployment."""
+
 from __future__ import annotations
 
 EQUIPMENT_ALIASES: dict[str, str] = {

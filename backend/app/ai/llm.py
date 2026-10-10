@@ -136,9 +136,9 @@ class AnthropicLlmClient:
 
     def __init__(self, client: anthropic.Anthropic, model: str) -> None:
         """Args:
-            client: An authenticated Anthropic SDK client.
-            model: Model id to pass as `model=` on every call, e.g.
-                `CLAUDE_MODEL`.
+        client: An authenticated Anthropic SDK client.
+        model: Model id to pass as `model=` on every call, e.g.
+            `CLAUDE_MODEL`.
         """
         self._client = client
         self._model = model
@@ -177,9 +177,9 @@ class GroqLlmClient:
 
     def __init__(self, client: groq.Groq, model: str) -> None:
         """Args:
-            client: An authenticated Groq SDK client.
-            model: Model id to pass as `model=` on every call, e.g.
-                `GROQ_MODEL`.
+        client: An authenticated Groq SDK client.
+        model: Model id to pass as `model=` on every call, e.g.
+            `GROQ_MODEL`.
         """
         self._client = client
         self._model = model

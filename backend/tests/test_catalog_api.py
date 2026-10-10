@@ -108,7 +108,9 @@ def test_get_vehicle_detail(client: TestClient, seeded_session: SeededData):
     assert len(body["colors"]) == 7
     colors_by_name = {c["name"]: c for c in body["colors"]}
     assert colors_by_name["Arctic White"] == {
-        "name": "Arctic White", "finish_type": None, "surcharge": {"amount": 0.0, "currency": "CZK"}
+        "name": "Arctic White",
+        "finish_type": None,
+        "surcharge": {"amount": 0.0, "currency": "CZK"},
     }
     assert colors_by_name["Jet Black"]["surcharge"] == {"amount": 14900.0, "currency": "CZK"}
     # Real per-trim VÝBAVA data (Prime-Line column) - standard only, since
@@ -141,7 +143,9 @@ def test_get_vehicle_detail_vw_has_priced_optional_equipment(client: TestClient,
     assert "IQ.LIGHT HD LED Matrix světlomety s Dynamic Light Assist" in body["standard_equipment"]
     optional_by_name = {o["name"]: o for o in body["optional_equipment"]}
     assert optional_by_name["Paket Black Style"] == {
-        "name": "Paket Black Style", "category": "package", "surcharge": {"amount": 7100.0, "currency": "CZK"}
+        "name": "Paket Black Style",
+        "category": "package",
+        "surcharge": {"amount": 7100.0, "currency": "CZK"},
     }
 
 

@@ -8,6 +8,7 @@ test_parsers.py (Škoda) and test_kia_parser.py.
 Corolla's three body styles (Sedan/Hatchback/Touring Sports) are three
 separate documents (see parsers/toyota.py and monitors/discovery/toyota.py),
 hence three fixtures and three sets of Corolla tests below."""
+
 from pathlib import Path
 
 from scraper.parsers.toyota import ToyotaParser
@@ -23,9 +24,7 @@ RAV4 = FIXTURES / "toyota_rav4_cenik.pdf"
 
 
 def _variant(variants, trim: str, engine_fragment: str):
-    return next(
-        v for v in variants if v.trim == trim and engine_fragment in v.raw_text
-    )
+    return next(v for v in variants if v.trim == trim and engine_fragment in v.raw_text)
 
 
 def test_toyota_parser_extracts_yaris_variants() -> None:

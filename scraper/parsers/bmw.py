@@ -76,6 +76,7 @@ cover/disclaimer text states a production-month WINDOW ("Od 1. července
 "Platnost od D. M. RRRR" date - `_pdf_layout.extract_release_date` doesn't
 match this format, so `release_date` stays None here too, and
 VariantRepository falls back to the download date."""
+
 from __future__ import annotations
 
 import re

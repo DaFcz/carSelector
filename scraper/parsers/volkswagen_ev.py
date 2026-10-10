@@ -17,6 +17,7 @@ right — the code/transmission/drivetrain/prices always have the same
 shape regardless of model, so it's enough to capture THOSE and store
 everything before them as the description (and also, unchanged, in
 `raw_text`/`variant_name`, so it can always be traced back to the PDF)."""
+
 from __future__ import annotations
 
 import re
@@ -85,9 +86,7 @@ class VolkswagenEvParser(BaseParser):
 
         return variants
 
-    def _build_variant(
-        self, model: str, trim: str | None, source_page: int, match: re.Match[str]
-    ) -> ExtractedVariant:
+    def _build_variant(self, model: str, trim: str | None, source_page: int, match: re.Match[str]) -> ExtractedVariant:
         description = match.group("description").strip()
         price_vat = int(match.group("price_vat").replace(" ", ""))
 

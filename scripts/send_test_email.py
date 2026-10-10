@@ -78,7 +78,9 @@ def main() -> int:
         if problem:
             print(f"Configuration problem: {problem}")
             return 1
-        print(f"SMTP {config.SMTP_HOST}:{config.SMTP_PORT} ({config.SMTP_SECURITY}), user {config.SMTP_USER or '(none)'}, from {config.SMTP_FROM}")
+        print(
+            f"SMTP {config.SMTP_HOST}:{config.SMTP_PORT} ({config.SMTP_SECURITY}), user {config.SMTP_USER or '(none)'}, from {config.SMTP_FROM}"
+        )
 
     try:
         sender = get_email_sender()
@@ -94,7 +96,9 @@ def main() -> int:
         return 1
 
     if config.EMAIL_BACKEND == "console":
-        print("Console backend: nothing was sent (the code above went to the log). Set EMAIL_BACKEND=smtp to send real mail.")
+        print(
+            "Console backend: nothing was sent (the code above went to the log). Set EMAIL_BACKEND=smtp to send real mail."
+        )
         return 0
     print(f"OK: the mail server accepted the message for {recipient}. Check the inbox (and spam folder).")
     return 0

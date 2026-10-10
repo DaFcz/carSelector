@@ -39,6 +39,7 @@ The price as well as the engine/fuel/transmission/drivetrain/body style
 from that row are stored unchanged in `raw_text` (see ExtractedVariant),
 so the result can always be verified against the exact text from the PDF.
 """
+
 from __future__ import annotations
 
 import re
@@ -65,9 +66,7 @@ _COL_MOTOR, _COL_DRUH, _COL_PREVODOVKA, _COL_POHON = range(4)
 _FIRST_TRIM_COLUMN = 4
 
 
-def _detect_header(
-    lines: list[list[dict]], index: int
-) -> tuple[list[str], list[float]] | None:
+def _detect_header(lines: list[list[dict]], index: int) -> tuple[list[str], list[float]] | None:
     """If `lines[index]` is the main header line of the price table,
     returns (column_names, their_x0_coordinates) — the first 4 are always
     Motor/Druh/Převodovka/Pohon, the rest are trim levels. Otherwise None.
@@ -104,11 +103,7 @@ def _detect_header(
     trim_x: list[float] = []
     for token in trim_tokens:
         prefix = next(
-            (
-                c["text"]
-                for c in continuation_tokens
-                if abs(c["x0"] - token["x0"]) <= _HEADER_CONTINUATION_TOLERANCE
-            ),
+            (c["text"] for c in continuation_tokens if abs(c["x0"] - token["x0"]) <= _HEADER_CONTINUATION_TOLERANCE),
             None,
         )
         trim_labels.append(f"{prefix} {token['text']}" if prefix else token["text"])
@@ -204,9 +199,7 @@ class SkodaIceParser(BaseParser):
                         continue
 
                     trim_cells = {
-                        col - _FIRST_TRIM_COLUMN: tokens
-                        for col, tokens in cells.items()
-                        if col >= _FIRST_TRIM_COLUMN
+                        col - _FIRST_TRIM_COLUMN: tokens for col, tokens in cells.items() if col >= _FIRST_TRIM_COLUMN
                     }
                     is_price_row = bool(trim_cells) and all(
                         token == "–" or token.replace(" ", "").isdigit()

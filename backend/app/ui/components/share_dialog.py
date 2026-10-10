@@ -52,8 +52,9 @@ def share_dialog() -> Callable[[SharedSnapshot], None]:
     """
     state: dict[str, SharedSnapshot | None] = {"snapshot": None}
 
-    with ui.dialog().classes("dialog-mobile-full") as dialog, ui.card().classes(
-        "w-full max-w-[440px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card"
+    with (
+        ui.dialog().classes("dialog-mobile-full") as dialog,
+        ui.card().classes("w-full max-w-[440px] rounded-card border border-border bg-panel p-4 md:p-6 shadow-card"),
     ):
 
         @ui.refreshable

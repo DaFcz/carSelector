@@ -3,6 +3,7 @@ configurator JSON API (downloaded 2026-09-14 from konfigurator.audi.cz -
 see scraper/tests/fixtures/audi_modelgroup.json). Row counts and prices
 are cross-checked by hand against the raw JSON, not just spot-checked -
 same discipline as every other brand's own parser tests here."""
+
 from pathlib import Path
 
 from scraper.parsers.audi import AudiParser

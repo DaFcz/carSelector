@@ -71,6 +71,7 @@ PDF lays that page out as a single column - see
 `renault_equipment.parse_standard_equipment`'s own module docstring for
 which those are and why the other five (a two-side-by-side-columns layout)
 are a known, accepted gap instead."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -209,7 +210,7 @@ def _parse_row(
 
     price_cluster = clusters[-trailing_digit_count]
     price = float("".join(w["text"] for w in price_cluster))
-    engine = line_text([w for c in clusters[: -trailing_digit_count] for w in c]).strip()
+    engine = line_text([w for c in clusters[:-trailing_digit_count] for w in c]).strip()
     if not engine:
         return None
 

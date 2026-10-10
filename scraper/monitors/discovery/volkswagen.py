@@ -33,6 +33,7 @@ EVs (ID.) have two further irregularities:
   combustion models (the period in "ID.3"/"ID.4"/"ID.7" isn't in the
   slug: .../id4/..., and "ID.3" currently only has a page at "id3-neo",
   not "id3") — `_SLUG_OVERRIDES`."""
+
 from __future__ import annotations
 
 import re

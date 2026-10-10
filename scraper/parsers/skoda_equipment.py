@@ -27,6 +27,7 @@ osvětlením nástupního prostoru") are skipped — the data row with the
 dots/dashes then has no text in front of it and `item_name` comes out
 empty. Better to have fewer items without guessing than an invented/
 misassigned name."""
+
 from __future__ import annotations
 
 import pdfplumber

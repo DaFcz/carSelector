@@ -20,10 +20,10 @@ class AiProviderError(Exception):
 
     def __init__(self, code: str, message: str) -> None:
         """Args:
-            code: See `code` above.
-            message: Developer-facing detail (the SDK's own message).
-                Never contains the API key, but is meant for logs, not for
-                showing to end users - map `code` to UI text instead.
+        code: See `code` above.
+        message: Developer-facing detail (the SDK's own message).
+            Never contains the API key, but is meant for logs, not for
+            showing to end users - map `code` to UI text instead.
         """
         super().__init__(message)
         self.code = code

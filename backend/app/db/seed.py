@@ -22,6 +22,7 @@ referenced, so those are left to autoincrement instead of hand-numbering
 each one - still fully deterministic given a fixed insert order, just not
 manually authored.
 """
+
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 
@@ -689,8 +690,10 @@ def main() -> None:
     session = SessionLocal()
     try:
         if session.scalar(select(Brand.id).limit(1)) is not None:
-            print("Database already has catalog data - skipping seed. "
-                  "Delete drivewise.db (or point DATABASE_URL elsewhere) to reseed.")
+            print(
+                "Database already has catalog data - skipping seed. "
+                "Delete drivewise.db (or point DATABASE_URL elsewhere) to reseed."
+            )
             return
         data = seed_demo_data(session)
         print(

@@ -98,11 +98,7 @@ def login_code_body(code: str, ttl_minutes: int, language: str = "cs") -> str:
         The message body.
     """
     text = _login_code_text(language)
-    return (
-        f"{text['intro']} {code}\n\n"
-        f"{text['validity'].format(minutes=ttl_minutes)}\n"
-        f"{text['ignore']}\n"
-    )
+    return f"{text['intro']} {code}\n\n{text['validity'].format(minutes=ttl_minutes)}\n{text['ignore']}\n"
 
 
 def login_code_html(code: str, ttl_minutes: int, language: str = "cs") -> str:
@@ -185,18 +181,18 @@ class SmtpEmailSender(EmailSender):
         ssl_context: ssl.SSLContext | None = None,
     ) -> None:
         """Args:
-            host: SMTP server hostname.
-            port: SMTP port (587 for `starttls`, 465 for `ssl`).
-            username: Login name, or `None` for an unauthenticated relay.
-                Most providers want the full email address.
-            password: Login password (or app password), or `None`.
-            from_address: Sender address for the `From` header/envelope.
-            security: `"starttls"`, `"ssl"` (implicit TLS) or `"none"`.
-            from_name: Display name shown next to the sender address.
-            ssl_context: TLS settings. Defaults to the system trust store
-                with certificate and hostname verification on; overridden
-                only in tests (to trust a throwaway self-signed cert) -
-                verification is never turned off in production code.
+        host: SMTP server hostname.
+        port: SMTP port (587 for `starttls`, 465 for `ssl`).
+        username: Login name, or `None` for an unauthenticated relay.
+            Most providers want the full email address.
+        password: Login password (or app password), or `None`.
+        from_address: Sender address for the `From` header/envelope.
+        security: `"starttls"`, `"ssl"` (implicit TLS) or `"none"`.
+        from_name: Display name shown next to the sender address.
+        ssl_context: TLS settings. Defaults to the system trust store
+            with certificate and hostname verification on; overridden
+            only in tests (to trust a throwaway self-signed cert) -
+            verification is never turned off in production code.
         """
         self._host = host
         self._port = port
@@ -254,7 +250,9 @@ class SmtpEmailSender(EmailSender):
 
         try:
             if self._security == "ssl":
-                smtp: smtplib.SMTP = smtplib.SMTP_SSL(self._host, self._port, timeout=SMTP_TIMEOUT_SECONDS, context=context)
+                smtp: smtplib.SMTP = smtplib.SMTP_SSL(
+                    self._host, self._port, timeout=SMTP_TIMEOUT_SECONDS, context=context
+                )
             else:
                 smtp = smtplib.SMTP(self._host, self._port, timeout=SMTP_TIMEOUT_SECONDS)
             with smtp:
@@ -348,4 +346,6 @@ def log_email_backend_status() -> None:
         if config.SMTP_SECURITY == "none" and config.SMTP_USER:
             logger.warning("SMTP_SECURITY=none: the SMTP password is sent unencrypted")
     else:
-        logger.error("Email login is broken: unknown EMAIL_BACKEND %r (expected 'console' or 'smtp')", config.EMAIL_BACKEND)
+        logger.error(
+            "Email login is broken: unknown EMAIL_BACKEND %r (expected 'console' or 'smtp')", config.EMAIL_BACKEND
+        )

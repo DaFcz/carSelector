@@ -2,6 +2,7 @@
 items are transcribed by hand from the PDFs' "Standardní výbava" pages
 (Elroq p. 4-8, Octavia p. 9), not derived from the parser - same
 discipline as test_skoda_equipment.py."""
+
 from pathlib import Path
 
 import pdfplumber
@@ -29,7 +30,7 @@ def test_items_from_every_column_are_standard() -> None:
     for item in (
         "Dvouzónová klimatizace Climatronic",  # Design / Komfort
         "Parkovací kamera vzadu",  # Bezpečnost
-        "Virtuální kokpit 5\"",  # Funkčnost
+        'Virtuální kokpit 5"',  # Funkčnost
         "Tísňové volání eCall",  # Funkčnost, spilled into a 4th column
     ):
         assert essence[item] == "STANDARD"

@@ -4,6 +4,7 @@ lists (downloaded 2026-09-12/13 from opel.cz, effective 7-30 September
 transcribed by hand from `page.extract_text()`/`extract_words()` output
 for every fixture, not just spot-checked — same discipline as
 test_renault_parser.py."""
+
 from pathlib import Path
 
 from scraper.parsers.opel import OpelParser

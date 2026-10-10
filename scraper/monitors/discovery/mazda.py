@@ -26,6 +26,7 @@ toyota.py's module docstring).
 
 Unlike every other brand's link, this one doesn't need URL-encoding before
 the GET (verified 2026-08-29: the path is plain ASCII, no diacritics)."""
+
 from __future__ import annotations
 
 import re

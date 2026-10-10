@@ -88,6 +88,7 @@ Formentor's own BARVY pages (3 columns -> CUPRA/VZ/VZ Extreme, 2 columns
 follows the price/equipment pages for the trim group it prices, so this
 sequential consumption lines up without needing to parse the header text
 at all."""
+
 from __future__ import annotations
 
 import re
@@ -105,7 +106,9 @@ _INCLUDED_MARK = ""
 _OPTIONAL_MARK = ""
 _NAME_MAX_X0 = 260.0
 _MARK_MIN_X0 = 280.0
-_MARK_MAX_X0 = 600.0  # pt; excludes a second, unexplained mark-glyph cluster some BARVY pages carry far to the right (~700+)
+_MARK_MAX_X0 = (
+    600.0  # pt; excludes a second, unexplained mark-glyph cluster some BARVY pages carry far to the right (~700+)
+)
 _PRICE_TOKEN_RE = re.compile(r"^[\d ]+$")
 
 
@@ -379,7 +382,9 @@ def parse_colors(
             result.setdefault(trim, ({}, {}))
 
         name_lines = _group_lines(sorted(name_words, key=lambda w: w["top"]))
-        name_by_top = {ln[0]["top"]: " ".join(w["text"] for w in sorted(ln, key=lambda w: w["x0"])) for ln in name_lines}
+        name_by_top = {
+            ln[0]["top"]: " ".join(w["text"] for w in sorted(ln, key=lambda w: w["x0"])) for ln in name_lines
+        }
 
         mark_rows = _group_lines(sorted(mark_words, key=lambda w: w["top"]))
         for row in mark_rows:

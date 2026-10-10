@@ -59,8 +59,8 @@ class AuthError(Exception):
 
     def __init__(self, code: str, message: str | None = None) -> None:
         """Args:
-            code: See `code` above.
-            message: Developer-facing detail for logs; defaults to `code`.
+        code: See `code` above.
+        message: Developer-facing detail for logs; defaults to `code`.
         """
         super().__init__(message or code)
         self.code = code
@@ -95,9 +95,9 @@ class AuthService:
 
     def __init__(self, email_sender: EmailSender | None = None) -> None:
         """Args:
-            email_sender: How codes are delivered. Defaults to whatever
-                `EMAIL_BACKEND` selects, built lazily on first use so
-                importing this module never touches the mail config.
+        email_sender: How codes are delivered. Defaults to whatever
+            `EMAIL_BACKEND` selects, built lazily on first use so
+            importing this module never touches the mail config.
         """
         self._email_sender = email_sender
 
@@ -149,14 +149,18 @@ class AuthService:
 
         hour_ago = now - timedelta(hours=1)
         recent_for_email = db.scalar(
-            select(func.count()).select_from(LoginCode).where(LoginCode.email == address, LoginCode.created_at > hour_ago)
+            select(func.count())
+            .select_from(LoginCode)
+            .where(LoginCode.email == address, LoginCode.created_at > hour_ago)
         )
         if recent_for_email >= config.LOGIN_CODE_MAX_REQUESTS_PER_EMAIL_HOUR:
             db.commit()
             raise AuthError("rate_limited")
         if ip:
             recent_for_ip = db.scalar(
-                select(func.count()).select_from(LoginCode).where(LoginCode.request_ip == ip, LoginCode.created_at > hour_ago)
+                select(func.count())
+                .select_from(LoginCode)
+                .where(LoginCode.request_ip == ip, LoginCode.created_at > hour_ago)
             )
             if recent_for_ip >= config.LOGIN_CODE_MAX_REQUESTS_PER_IP_HOUR:
                 db.commit()

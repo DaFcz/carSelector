@@ -17,6 +17,7 @@ The page also links a couple of older, narrower price lists further down
 having its own current M3/M4 rows) - `_PRICE_LIST_RE` only matches an href
 whose filename contains "Cenik" (this brand's own spelling, capital C) to
 avoid picking one of those up instead."""
+
 from __future__ import annotations
 
 import re

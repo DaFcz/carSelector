@@ -119,8 +119,8 @@ def _read(
     recipients: list[str] | None = None,
 ) -> ArticleRead:
     """Args:
-        recipients: The author's view - fills in `recipients` and
-            `translations`. `None` for a reader, who gets neither.
+    recipients: The author's view - fills in `recipients` and
+        `translations`. `None` for a reader, who gets neither.
     """
     for_author = recipients is not None
     return ArticleRead(
@@ -140,7 +140,11 @@ def _require_writer(db: Session, user_id: int) -> User:
 
 def _recipients(db: Session, article_id: int) -> list[str]:
     return list(
-        db.scalars(select(ArticleRecipient.email).where(ArticleRecipient.article_id == article_id).order_by(ArticleRecipient.email))
+        db.scalars(
+            select(ArticleRecipient.email)
+            .where(ArticleRecipient.article_id == article_id)
+            .order_by(ArticleRecipient.email)
+        )
     )
 
 
@@ -235,7 +239,9 @@ def get_for_reader(
     if not readable:
         return None
     versions = _translations(db, [article.id])[article.id]
-    return _read(article, author_name, versions, language, recipients=_recipients(db, article.id) if is_author else None)
+    return _read(
+        article, author_name, versions, language, recipients=_recipients(db, article.id) if is_author else None
+    )
 
 
 def list_own(db: Session, author_id: int, language: ArticleLanguage = ARTICLE_LANGUAGES[0]) -> list[ArticleSummary]:

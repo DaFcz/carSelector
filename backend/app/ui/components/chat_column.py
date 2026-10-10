@@ -17,9 +17,8 @@ def _bubble(role: str, text: str) -> None:
     """
     is_user = role == "user"
     with ui.row().classes(f"w-full {'justify-end' if is_user else 'justify-start'}"):
-        bubble_classes = (
-            "max-w-[82%] rounded-control border px-3.5 py-2.5 text-[13.5px] leading-relaxed "
-            + ("border-accent bg-accent text-accent-text" if is_user else "border-border bg-ai-bubble text-text")
+        bubble_classes = "max-w-[82%] rounded-control border px-3.5 py-2.5 text-[13.5px] leading-relaxed " + (
+            "border-accent bg-accent text-accent-text" if is_user else "border-border bg-ai-bubble text-text"
         )
         ui.label(text).classes(bubble_classes).style("white-space: pre-wrap")
 
@@ -67,8 +66,10 @@ def chat_column(state: ConversationState, on_send: Callable[[str], Awaitable[Non
                 )
                 .props("borderless dense")
             )
-            send_button = ui.button(t("chat.send"), on_click=lambda: _submit()).props("no-caps unelevated").classes(
-                "shrink-0 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-text"
+            send_button = (
+                ui.button(t("chat.send"), on_click=lambda: _submit())
+                .props("no-caps unelevated")
+                .classes("shrink-0 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-text")
             )
 
         async def _submit() -> None:

@@ -74,11 +74,17 @@ def app_header(
                 "shrink-0 rounded-control bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-text "
                 "whitespace-nowrap max-md:px-3"
             )
-            with ui.button(on_click=on_toggle_drawer).props("flat no-caps").classes(
-                "relative shrink-0 flex flex-nowrap items-center gap-2 rounded-control border border-border bg-panel-2 "
-                "px-3.5 py-2 max-md:w-9 max-md:h-9 max-md:min-h-0 max-md:p-0 "
-                "text-[13px] font-semibold text-text"
-            ).tooltip(t("header.technicalRequirements")).mark("requirements-toggle"):
+            with (
+                ui.button(on_click=on_toggle_drawer)
+                .props("flat no-caps")
+                .classes(
+                    "relative shrink-0 flex flex-nowrap items-center gap-2 rounded-control border border-border bg-panel-2 "
+                    "px-3.5 py-2 max-md:w-9 max-md:h-9 max-md:min-h-0 max-md:p-0 "
+                    "text-[13px] font-semibold text-text"
+                )
+                .tooltip(t("header.technicalRequirements"))
+                .mark("requirements-toggle")
+            ):
                 ui.label(t("header.technicalRequirements")).classes("max-md:hidden!")
                 ui.icon("tune", size="18px").classes("md:hidden!")
                 # A corner bubble on the icon-only phone button, inline on desktop.
@@ -87,9 +93,9 @@ def app_header(
                     "max-md:absolute max-md:-top-2 max-md:-right-2 max-md:px-[5px] max-md:py-0 max-md:leading-4"
                 )
 
-            ui.button(icon="refresh", on_click=on_restart).props("flat dense").classes(
-                _ICON_BUTTON_CLASSES
-            ).tooltip(t("header.restart")).mark("restart")
+            ui.button(icon="refresh", on_click=on_restart).props("flat dense").classes(_ICON_BUTTON_CLASSES).tooltip(
+                t("header.restart")
+            ).mark("restart")
 
             _account_menu(
                 user,
@@ -132,35 +138,41 @@ def _account_menu(
     """
     avatar_classes = "relative shrink-0 rounded-full w-9 h-9 min-h-0 "
     if user is not None:
-        button = ui.button(user.email[:1].upper()).props("flat dense no-caps").classes(
-            avatar_classes + "bg-accent-soft text-accent text-[14px] font-bold"
+        button = (
+            ui.button(user.email[:1].upper())
+            .props("flat dense no-caps")
+            .classes(avatar_classes + "bg-accent-soft text-accent text-[14px] font-bold")
         )
     else:
-        button = ui.button(icon="person").props("flat dense").classes(
-            avatar_classes + "border border-border text-subtext"
+        button = (
+            ui.button(icon="person").props("flat dense").classes(avatar_classes + "border border-border text-subtext")
         )
     button.tooltip(t("header.account")).mark("account-menu")
 
     with button:
         if key_missing:
-            ui.element("span").classes(
-                "absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-flag border-2 border-panel"
-            )
-        with ui.menu().props("anchor='bottom right' self='top right'").classes(
-            "min-w-[220px] rounded-control border border-border bg-panel"
+            ui.element("span").classes("absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-flag border-2 border-panel")
+        with (
+            ui.menu()
+            .props("anchor='bottom right' self='top right'")
+            .classes("min-w-[220px] rounded-control border border-border bg-panel")
         ):
             if user is not None:
                 ui.label(user.email).classes("px-4 pt-2.5 pb-2 text-[12.5px] text-subtext break-all")
                 ui.separator()
             _menu_item("article", t("header.articles"), lambda: ui.navigate.to("/articles")).mark("menu-articles")
             if user is not None and user.can_write_articles:
-                _menu_item("edit_note", t("header.myArticles"), lambda: ui.navigate.to("/author")).mark("menu-my-articles")
+                _menu_item("edit_note", t("header.myArticles"), lambda: ui.navigate.to("/author")).mark(
+                    "menu-my-articles"
+                )
             elif user is not None:
                 _menu_item("history_edu", t("header.becomeAuthor"), on_request_author).mark("menu-become-author")
             if user is not None:
                 _menu_item("feedback", t("header.sendFeedback"), on_send_feedback).mark("menu-feedback")
             if is_admin:
-                _menu_item("admin_panel_settings", t("header.admin"), lambda: ui.navigate.to("/admin")).mark("menu-admin")
+                _menu_item("admin_panel_settings", t("header.admin"), lambda: ui.navigate.to("/admin")).mark(
+                    "menu-admin"
+                )
                 _menu_item(
                     "key",
                     t("header.apiKeyMissing") if key_missing else t("header.apiKey"),

@@ -17,6 +17,7 @@ Like BMW's own single combined price list, one document covers Audi's
 entire lineup - `discover` always returns the same `{"all": ...}` single
 entry regardless of `source.models` (which is descriptive here, not a
 filter - same convention as BMW's own sources.yaml comment)."""
+
 from __future__ import annotations
 
 from scraper.sources.registry import Source

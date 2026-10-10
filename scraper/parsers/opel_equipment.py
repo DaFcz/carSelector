@@ -79,6 +79,7 @@ it retries with its trailing word(s) dropped one at a time (a generic
 "strip the body-style/AWD suffix" fallback, not a hardcoded list of
 suffixes - it would resolve a hypothetical future "Edition XL" against a
 page that only prints "Edition" just as well as it does here)."""
+
 from __future__ import annotations
 
 import re
@@ -218,10 +219,12 @@ def _parse_page(page: pdfplumber.page.Page) -> dict[str, dict[str, str]]:
             columns = [{"buffer": [], "conditional": False}, {"buffer": [], "conditional": False}]
             continue
 
-        for index, column_words in enumerate((
-            [word for word in line if word["x0"] < threshold],
-            [word for word in line if word["x0"] >= threshold],
-        )):
+        for index, column_words in enumerate(
+            (
+                [word for word in line if word["x0"] < threshold],
+                [word for word in line if word["x0"] >= threshold],
+            )
+        ):
             if not column_words:
                 continue
             if column_words[0]["text"] == "•":
