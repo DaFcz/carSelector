@@ -11,7 +11,7 @@ talks to the database/orchestrator and carries the real risk, independent
 of how the DOM ends up rendering it.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -25,7 +25,7 @@ from tests.conftest import SeededData
 
 @pytest.fixture()
 def user(seeded_session: SeededData) -> User:
-    row = User(email="driver@example.cz", is_admin=False, is_active=True, created_at=datetime.now(timezone.utc))
+    row = User(email="driver@example.cz", is_admin=False, is_active=True, created_at=datetime.now(UTC))
     seeded_session.session.add(row)
     seeded_session.session.commit()
     return row

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ def _user(session: Session, email: str, *, author: bool = False, admin: bool = F
         is_author=author,
         display_name="Jana Nová" if author else None,
         is_active=True,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     session.add(row)
     session.commit()

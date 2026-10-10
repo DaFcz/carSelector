@@ -9,12 +9,12 @@ more cheaply - they'd have matched. Reproduced here with a synthetic
 catalog: brand "AAA" gets the low ids (inserted first, like Škoda always
 being scraped/imported first in production) but is pricier than brand
 "ZZZ" (inserted second, higher ids) - the exact shape that broke."""
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from sqlalchemy.orm import Session
 
 from app.models import Brand, CarModel, Configuration, Powertrain, Price, SourceDocument, Trim
-from app.models.enums import Drivetrain, DocumentType, FuelType
+from app.models.enums import DocumentType, Drivetrain, FuelType
 from app.schemas.common import Money
 from app.schemas.requirement import StructuredRequirements
 from app.services.recommendation_engine import RecommendationEngine
@@ -37,7 +37,7 @@ def _add_catalog(session: Session, brand_slug: str, brand_name: str, count: int,
         market="CZ",
         locale="cs-CZ",
         effective_date=date(2026, 1, 1),
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     session.add(source_doc)
     session.flush()
@@ -73,7 +73,7 @@ def _add_catalog(session: Session, brand_slug: str, brand_name: str, count: int,
                 price_incl_vat=price,
                 valid_from=date(2026, 1, 1),
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             )
         )
     session.commit()

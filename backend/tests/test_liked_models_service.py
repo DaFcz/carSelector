@@ -1,10 +1,10 @@
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pytest
 from sqlalchemy.orm import Session
 
 from app.models import Brand, CarModel, Configuration, Powertrain, Price, SourceDocument, Trim
-from app.models.enums import Drivetrain, DocumentType, FuelType
+from app.models.enums import DocumentType, Drivetrain, FuelType
 from app.models.liked_model import LikedModel
 from app.models.user import User
 from app.schemas.requirement import StructuredRequirements
@@ -14,7 +14,7 @@ from tests.conftest import SeededData
 
 
 def _user(session: Session, email: str = "driver@example.cz") -> User:
-    row = User(email=email, is_admin=False, is_active=True, created_at=datetime.now(timezone.utc))
+    row = User(email=email, is_admin=False, is_active=True, created_at=datetime.now(UTC))
     session.add(row)
     session.commit()
     return row
@@ -105,7 +105,7 @@ def _add_model(session: Session, brand_id: int, model_id: int, price: int) -> No
             market="CZ",
             locale="cs-CZ",
             effective_date=date(2026, 1, 1),
-            retrieved_at=datetime.now(timezone.utc),
+            retrieved_at=datetime.now(UTC),
         )
     )
     session.add(Trim(id=model_id, model_id=model_id, name="Base", display_order=1))
@@ -128,7 +128,7 @@ def _add_model(session: Session, brand_id: int, model_id: int, price: int) -> No
             price_incl_vat=price,
             valid_from=date(2026, 1, 1),
             valid_to=None,
-            scraped_at=datetime.now(timezone.utc),
+            scraped_at=datetime.now(UTC),
         )
     )
     session.commit()

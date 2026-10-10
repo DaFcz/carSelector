@@ -2,11 +2,10 @@
 share dialog with a link and QR code, and the link's public page shows the
 frozen result - or a "link expired" message."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
-from nicegui import ui
 from nicegui.testing import User
 
 from app.ai import client as client_module
@@ -73,7 +72,7 @@ async def test_shared_page_shows_frozen_cars(user: User, seeded_session: SeededD
 
 async def test_expired_link_shows_message(user: User, seeded_session: SeededData) -> None:
     car = catalog.list_vehicles(seeded_session.session).items[0]
-    long_ago = datetime.now(timezone.utc) - timedelta(days=config.SHARE_TTL_DAYS + 1)
+    long_ago = datetime.now(UTC) - timedelta(days=config.SHARE_TTL_DAYS + 1)
     snapshot = sharing.create(seeded_session.session, [], [car], now=long_ago)
 
     await user.open(f"/s/{snapshot.token}")

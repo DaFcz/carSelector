@@ -10,7 +10,6 @@ from __future__ import annotations
 from datetime import date, datetime
 
 from sqlalchemy import (
-    JSON,
     Date,
     DateTime,
     Float,
@@ -40,7 +39,7 @@ class Document(Base):
     release_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     downloaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    variants: Mapped[list["Variant"]] = relationship(back_populates="document")
+    variants: Mapped[list[Variant]] = relationship(back_populates="document")
 
 
 class Variant(Base):
@@ -64,9 +63,9 @@ class Variant(Base):
     source_page: Mapped[int] = mapped_column()
     raw_text: Mapped[str] = mapped_column(String)
 
-    document: Mapped["Document"] = relationship(back_populates="variants")
-    prices: Mapped[list["PriceHistory"]] = relationship(back_populates="variant")
-    equipment: Mapped[list["EquipmentAssignment"]] = relationship(back_populates="variant")
+    document: Mapped[Document] = relationship(back_populates="variants")
+    prices: Mapped[list[PriceHistory]] = relationship(back_populates="variant")
+    equipment: Mapped[list[EquipmentAssignment]] = relationship(back_populates="variant")
 
 
 class PriceHistory(Base):
@@ -79,7 +78,7 @@ class PriceHistory(Base):
     currency: Mapped[str] = mapped_column(String(3), default="CZK")
     valid_from: Mapped[date] = mapped_column(Date)
 
-    variant: Mapped["Variant"] = relationship(back_populates="prices")
+    variant: Mapped[Variant] = relationship(back_populates="prices")
 
 
 class Equipment(Base):
@@ -105,4 +104,4 @@ class EquipmentAssignment(Base):
     surcharge_amount: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
     currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
 
-    variant: Mapped["Variant"] = relationship(back_populates="equipment")
+    variant: Mapped[Variant] = relationship(back_populates="equipment")

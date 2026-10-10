@@ -23,7 +23,7 @@ each one - still fully deterministic given a fixed insert order, just not
 manually authored.
 """
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -44,8 +44,8 @@ from app.models import (
 from app.models.enums import (
     AvailabilityStatus,
     ColorFinish,
-    Drivetrain,
     DocumentType,
+    Drivetrain,
     FuelType,
     OptionCategory,
 )
@@ -489,7 +489,7 @@ def _seed_mazda_cx5(session: Session) -> tuple[int, int, int]:
         effective_date=date(2025, 9, 22),
         campaign_valid_from=date(2026, 7, 1),
         campaign_valid_to=date(2026, 9, 30),
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     session.add(source_doc)
     session.flush()
@@ -508,7 +508,7 @@ def _seed_mazda_cx5(session: Session) -> tuple[int, int, int]:
                 lowest_price_30d=875_900,
                 valid_from=date(2026, 7, 1),
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             ),
             Price(
                 id=2,
@@ -522,7 +522,7 @@ def _seed_mazda_cx5(session: Session) -> tuple[int, int, int]:
                 lowest_price_30d=1_074_900,
                 valid_from=date(2026, 7, 1),
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             ),
         ]
     )
@@ -622,7 +622,7 @@ def _seed_vw_tiguan(session: Session) -> tuple[int, int, int]:
         market="CZ",
         locale="cs-CZ",
         effective_date=date(2027, 7, 1),
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     session.add(source_doc)
     session.flush()
@@ -640,7 +640,7 @@ def _seed_vw_tiguan(session: Session) -> tuple[int, int, int]:
                 price_excl_vat=971_901,
                 valid_from=date(2027, 7, 1),
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             ),
             Price(
                 id=4,
@@ -653,7 +653,7 @@ def _seed_vw_tiguan(session: Session) -> tuple[int, int, int]:
                 price_excl_vat=1_205_785,
                 valid_from=date(2027, 7, 1),
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             ),
         ]
     )

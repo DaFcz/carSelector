@@ -8,7 +8,7 @@ where this is loaded (on `begin()`), saved (after `send`/
 `send_wizard_answers`), and cleared (`restart()`).
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -43,7 +43,7 @@ def save(db: Session, user_id: int, requirements: StructuredRequirements) -> Non
     """
     row = db.scalar(select(SavedRequirements).where(SavedRequirements.user_id == user_id))
     payload = requirements.model_dump_json()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if row is None:
         db.add(SavedRequirements(user_id=user_id, requirements_json=payload, updated_at=now))
     else:

@@ -218,7 +218,7 @@ def parse_equipment(pdf: pdfplumber.PDF) -> dict[str, dict[str, str]]:
             item_name = line_text(name_tokens).strip()
             if not item_name:
                 continue
-            for trim, token in zip(trims, mark_tokens):
+            for trim, token in zip(trims, mark_tokens, strict=False):
                 if token["text"] == _STANDARD_MARK:
                     result[trim][item_name] = "STANDARD"
 

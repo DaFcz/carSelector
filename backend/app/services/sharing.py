@@ -7,7 +7,7 @@ author's user id (if any) never leaves this module.
 """
 
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -26,13 +26,13 @@ _TOKEN_BYTES = 16
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _aware(value: datetime) -> datetime:
     """SQLite hands `DateTime(timezone=True)` back naive; the stored values
     are always UTC, so re-attach it before comparing."""
-    return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
 
 
 def create(

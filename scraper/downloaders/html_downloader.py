@@ -15,7 +15,7 @@ from pathlib import Path
 
 import requests
 
-from .pdf_downloader import STORAGE_ROOT, _BROWSER_HEADERS, sha256_of
+from .pdf_downloader import _BROWSER_HEADERS, STORAGE_ROOT, sha256_of
 
 
 class HtmlDownloader:

@@ -5,7 +5,7 @@ who gets to read it.
 """
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -27,7 +27,7 @@ pytestmark = [
 def _author(session: Session, email: str = "author@example.cz") -> UserRow:
     row = UserRow(
         email=email, is_admin=False, is_author=True, display_name="Jana Nová", is_active=True,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     session.add(row)
     session.commit()

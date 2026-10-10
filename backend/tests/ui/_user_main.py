@@ -6,12 +6,12 @@ import importlib
 
 import app.ui.admin
 import app.ui.articles_page
-import app.ui.shared_page
 import app.ui.pages
+import app.ui.shared_page
 
 importlib.reload(app.ui.pages)
 
-from nicegui import ui
+from nicegui import ui  # noqa: E402 - must follow the pages reload above
 
 app.ui.admin.register_admin_page()
 app.ui.articles_page.register_articles_pages()

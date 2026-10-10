@@ -188,7 +188,7 @@ class MazdaParser(BaseParser):
                 model = base_model + body_style_suffix
 
                 engine: str | None = None
-                for top, text in _clean_lines(page):
+                for _top, text in _clean_lines(page):
                     if "SKYACTIV" in text.upper() and _PRICE_GROUP_RE.search(text) is None:
                         engine = text.strip()
                         continue

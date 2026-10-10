@@ -181,7 +181,7 @@ def _parse_marks_table(
         nonlocal buffer, pending_marks
         name = " ".join(buffer).strip()
         if name and pending_marks:
-            for trim, mark in zip(trims, pending_marks):
+            for trim, mark in zip(trims, pending_marks, strict=False):
                 if _normalize_mark(mark) == standard_mark:
                     result[trim][name] = "STANDARD"
         buffer = []

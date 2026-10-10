@@ -73,7 +73,7 @@ import sqlite3
 import sys
 import unicodedata
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -733,7 +733,7 @@ class ScraperDataImporter:
                 market=MARKET,
                 locale=LOCALE,
                 effective_date=effective_date,
-                retrieved_at=datetime.fromisoformat(downloaded_at).replace(tzinfo=timezone.utc),
+                retrieved_at=datetime.fromisoformat(downloaded_at).replace(tzinfo=UTC),
             )
             self._db.add(source_document)
             self._db.flush()
@@ -794,7 +794,7 @@ class ScraperDataImporter:
                 price_incl_vat=amount,
                 valid_from=valid_from_date,
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             )
         )
         # SessionLocal is autoflush=False (see app/db/session.py) - flush

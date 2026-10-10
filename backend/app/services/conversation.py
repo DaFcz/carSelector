@@ -15,11 +15,14 @@ from dataclasses import dataclass, field
 
 from sqlalchemy.orm import Session
 
-from app.ai.explanation_generator import ExplanationGenerator, generator as default_generator
-from app.ai.requirement_interpreter import RequirementInterpreter, interpreter as default_interpreter
+from app.ai.explanation_generator import ExplanationGenerator
+from app.ai.explanation_generator import generator as default_generator
+from app.ai.requirement_interpreter import RequirementInterpreter
+from app.ai.requirement_interpreter import interpreter as default_interpreter
 from app.schemas.conversation import ChatMessage, MessageResponse
 from app.schemas.requirement import StructuredRequirements, UserRequirement
-from app.services.recommendation_engine import RecommendationEngine, engine as default_engine
+from app.services.recommendation_engine import RecommendationEngine
+from app.services.recommendation_engine import engine as default_engine
 
 DEFAULT_LANGUAGE = "cs"
 

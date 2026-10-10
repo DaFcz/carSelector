@@ -6,7 +6,7 @@ active admin - the UI only builds the admin controls for admins (see
 `app/ui/admin.py`), but the check belongs where the change is made.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -36,7 +36,7 @@ class AuthorError(Exception):
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _to_read(request: AuthorRequest, email: str) -> AuthorRequestRead:

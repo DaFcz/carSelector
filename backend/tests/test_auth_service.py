@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -156,7 +156,7 @@ def test_code_is_burned_after_max_wrong_attempts_even_if_the_right_one_follows(
 def test_expired_code_is_rejected(db_session: Session, service: AuthService, sender: RecordingSender) -> None:
     service.request_code(db_session, "jana@example.cz")
     row = db_session.scalars(select(LoginCode)).one()
-    row.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+    row.expires_at = datetime.now(UTC) - timedelta(seconds=1)
     db_session.commit()
 
     with pytest.raises(AuthError) as exc_info:
@@ -213,7 +213,7 @@ def test_old_codes_stop_counting_toward_the_rate_limit(
     for _ in range(config.LOGIN_CODE_MAX_REQUESTS_PER_EMAIL_HOUR):
         service.request_code(db_session, "jana@example.cz")
     for row in db_session.scalars(select(LoginCode)):
-        row.created_at = datetime.now(timezone.utc) - timedelta(hours=2)
+        row.created_at = datetime.now(UTC) - timedelta(hours=2)
     db_session.commit()
 
     service.request_code(db_session, "jana@example.cz")
@@ -234,7 +234,7 @@ def test_stale_codes_are_purged_on_the_next_request(
 ) -> None:
     service.request_code(db_session, "old@example.cz")
     stale = db_session.scalars(select(LoginCode)).one()
-    stale.expires_at = datetime.now(timezone.utc) - timedelta(days=3)
+    stale.expires_at = datetime.now(UTC) - timedelta(days=3)
     db_session.commit()
 
     service.request_code(db_session, "new@example.cz")

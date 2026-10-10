@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy.orm import Session
@@ -12,7 +12,7 @@ from app.services import saved_requirements
 
 @pytest.fixture()
 def user(db_session: Session) -> User:
-    row = User(email="driver@example.cz", is_admin=False, is_active=True, created_at=datetime.now(timezone.utc))
+    row = User(email="driver@example.cz", is_admin=False, is_active=True, created_at=datetime.now(UTC))
     db_session.add(row)
     db_session.commit()
     return row
@@ -39,7 +39,7 @@ def test_save_overwrites_the_previous_snapshot_instead_of_adding_a_row(db_sessio
 
 
 def test_save_is_scoped_per_user(db_session: Session, user: User) -> None:
-    other = User(email="other@example.cz", is_admin=False, is_active=True, created_at=datetime.now(timezone.utc))
+    other = User(email="other@example.cz", is_admin=False, is_active=True, created_at=datetime.now(UTC))
     db_session.add(other)
     db_session.commit()
 

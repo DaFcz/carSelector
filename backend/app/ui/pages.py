@@ -15,15 +15,16 @@ from app.models.enums import Drivetrain, FuelType
 from app.schemas.requirement import StructuredRequirements
 from app.schemas.vehicle import VehicleSummary
 from app.ui.auth import AuthState
+from app.ui.compare import MAX_COMPARE, MIN_COMPARE
 from app.ui.components.api_key_dialog import api_key_dialog
 from app.ui.components.author_request_dialog import author_request_dialog
-from app.ui.components.feedback_dialog import feedback_dialog
 from app.ui.components.chat_column import chat_column
+from app.ui.components.compare_dialog import compare_dialog, trim_picker_dialog
+from app.ui.components.feedback_dialog import feedback_dialog
 from app.ui.components.filter_bar import filter_bar
 from app.ui.components.header import app_header
 from app.ui.components.login_dialog import login_dialog
 from app.ui.components.requirements_drawer import requirements_drawer
-from app.ui.components.compare_dialog import compare_dialog, trim_picker_dialog
 from app.ui.components.results_grid import (
     CompareToggles,
     LikeButtons,
@@ -36,7 +37,6 @@ from app.ui.components.vehicle_detail_modal import vehicle_detail_modal
 from app.ui.components.wizard import wizard_dialog
 from app.ui.i18n import LANGUAGES, STRINGS, current_language, set_language, t, t_count
 from app.ui.sort import BACKEND_SORT_OPTIONS, sort_cars
-from app.ui.compare import MAX_COMPARE, MIN_COMPARE
 from app.ui.state import (
     PAGE_SIZE,
     CatalogState,

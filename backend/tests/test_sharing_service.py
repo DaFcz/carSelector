@@ -1,6 +1,6 @@
 """app/services/sharing.py against the seeded in-memory database."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -10,7 +10,7 @@ from app.schemas.requirement import UserRequirement
 from app.services import catalog, sharing
 from tests.conftest import SeededData
 
-NOW = datetime(2026, 9, 25, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 9, 25, 12, 0, tzinfo=UTC)
 REQUIREMENT = UserRequirement(label="Rozpočet", value="do 900 000 Kč", source="„máme doma tři děti“", changed=True)
 
 

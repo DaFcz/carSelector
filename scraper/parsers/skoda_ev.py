@@ -26,7 +26,6 @@ incorrectly merge "Sportline & Klement" (the nearest token BEFORE "&" on
 the same line is "Sportline", not "Laurin")."""
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pdfplumber

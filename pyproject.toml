@@ -8,3 +8,30 @@
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "-p nicegui.testing.user_plugin"
+
+# Ruff (lint + format) for all Python in the repo - backend/, scraper/,
+# scripts/ share this one config, same as they share the root venv. Run
+# from the repo root: `ruff check .` and `ruff format .`.
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["storage", "backend/alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+    "E501",   # `ruff format` wraps code; what's left is long strings/comments
+    "UP042",  # str+Enum -> StrEnum changes str() output (DB/JSON values)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# pytest fixtures are used by naming them as parameters, which shadows
+# the re-imported fixture function
+"**/tests/**" = ["F811"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "scraper", "tests"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency injection via default arguments is intended
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]

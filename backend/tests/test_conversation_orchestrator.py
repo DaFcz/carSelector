@@ -7,7 +7,7 @@ Exercises the real recommendation engine against the seeded catalog
 correctness is the point.
 """
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pytest
 from sqlalchemy.orm import Session
@@ -132,7 +132,7 @@ def _add_cheap_configs(session: Session, count: int, id_offset: int) -> None:
         market="CZ",
         locale="cs-CZ",
         effective_date=date(2026, 1, 1),
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     session.add(source_doc)
     session.flush()
@@ -164,7 +164,7 @@ def _add_cheap_configs(session: Session, count: int, id_offset: int) -> None:
                 price_incl_vat=300_000,
                 valid_from=date(2026, 1, 1),
                 valid_to=None,
-                scraped_at=datetime.now(timezone.utc),
+                scraped_at=datetime.now(UTC),
             )
         )
     session.commit()

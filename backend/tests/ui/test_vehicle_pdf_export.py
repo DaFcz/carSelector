@@ -4,7 +4,6 @@ fixture: open a card's detail, click the button, get a PDF download."""
 from pathlib import Path
 
 import pytest
-from nicegui import ui
 from nicegui.testing import User
 
 from tests.conftest import SeededData

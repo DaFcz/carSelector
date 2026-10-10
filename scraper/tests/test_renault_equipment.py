@@ -11,9 +11,10 @@ see renault_equipment.py's module docstring for the delta-resolution
 own two-side-by-side-columns layout is expected to yield nothing here."""
 from pathlib import Path
 
+import pdfplumber
+
 from scraper.parsers.renault import RenaultParser
 from scraper.parsers.renault_equipment import parse_standard_equipment
-import pdfplumber
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CAPTUR = FIXTURES / "renault_captur_cenik.pdf"

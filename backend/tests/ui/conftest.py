@@ -19,7 +19,6 @@ from app.services.auth import auth_service
 from app.services.mailer import EmailSender
 from tests.conftest import SeededData, seeded_session  # noqa: F401 - re-exported fixture
 
-
 _original_storage_clear = Storage.clear
 
 

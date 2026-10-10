@@ -16,7 +16,7 @@ other version, and `ArticleSummary.language` tells the UI to say so.
 
 import re
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
@@ -63,7 +63,7 @@ class ArticleError(Exception):
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _is_blank_html(html: str) -> bool:

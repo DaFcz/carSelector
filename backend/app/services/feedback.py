@@ -12,7 +12,7 @@ Retention: items are kept until deleted by hand; the plan is to drop
 resolved ones after 12 months once there's a scheduled job to do it.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -44,7 +44,7 @@ class FeedbackError(Exception):
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _to_read(item: Feedback, email: str) -> FeedbackRead:

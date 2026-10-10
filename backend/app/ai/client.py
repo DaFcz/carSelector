@@ -18,7 +18,6 @@ from app.core.config import (
     GROQ_MODEL,
 )
 
-
 # API key entered at runtime through the UI (see app/ui/components/
 # api_key_dialog.py). Held in process memory only - never written to disk or
 # source - and takes priority over the key from the environment/.env, for

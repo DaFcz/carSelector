@@ -9,7 +9,7 @@ catalog's default browse order (see `RecommendationEngine.recommend` and
 """
 
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -41,7 +41,7 @@ def like_many(db: Session, user_id: int, model_ids: Iterable[int]) -> None:
     wanted = set(model_ids) - list_ids(db, user_id)
     if not wanted:
         return
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     db.add_all(LikedModel(user_id=user_id, model_id=model_id, created_at=now) for model_id in wanted)
     db.commit()
 

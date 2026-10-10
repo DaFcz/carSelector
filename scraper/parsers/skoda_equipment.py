@@ -129,7 +129,7 @@ def parse_standalone_equipment(
             price = _parse_price(price_tokens)
             if price is not None:
                 prices[item_name] = price
-            for trim, token in zip(trims, avail_tokens):
+            for trim, token in zip(trims, avail_tokens, strict=False):
                 if token["text"] == _AVAILABLE:
                     result[trim][item_name] = "OPTIONAL"
 

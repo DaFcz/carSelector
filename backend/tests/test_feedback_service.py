@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy.orm import Session
@@ -13,7 +13,7 @@ from tests.conftest import SeededData
 
 
 def _user(session: Session, email: str, *, admin: bool = False, active: bool = True) -> User:
-    row = User(email=email, is_admin=admin, is_active=active, created_at=datetime.now(timezone.utc))
+    row = User(email=email, is_admin=admin, is_active=active, created_at=datetime.now(UTC))
     session.add(row)
     session.commit()
     return row

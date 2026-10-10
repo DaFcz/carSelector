@@ -199,7 +199,7 @@ def _parse_matrix_page(
         item_name = line_text(name_tokens).strip()
         if not item_name or _looks_like_wrap_fragment(item_name):
             continue
-        for trim, mark in zip(trims, marks):
+        for trim, mark in zip(trims, marks, strict=False):
             if mark["text"] == standard_mark:
                 result[trim][item_name] = "STANDARD"
 
