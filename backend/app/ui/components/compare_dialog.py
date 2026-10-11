@@ -6,6 +6,10 @@ Both dialogs are built once per page, like the vehicle detail dialog (see
 `app/ui/components/vehicle_detail_modal.py`); the returned functions open
 them. The rows themselves come from `app/ui/compare.py`, shared with the
 PDF export.
+
+Every comparison of 2+ cars the dialog actually shows is counted for the
+admin console's statistic (`app/ui/comparison_stats_state.py`) - once per
+distinct pick, so reopening the same comparison doesn't inflate it.
 """
 
 import logging
@@ -16,6 +20,7 @@ from nicegui import run, ui
 
 from app.schemas.catalog import TrimChoice
 from app.schemas.vehicle import VehicleDetail, VehicleSummary
+from app.ui import comparison_stats_state
 from app.ui.compare import (
     MAX_COMPARE,
     MIN_COMPARE,
@@ -69,6 +74,8 @@ class _CompareView:
     is_loading: bool = False
     error: bool = False
     differences_only: bool = True
+    # The pick last counted for the statistic - see the module docstring.
+    recorded: frozenset[int] | None = None
 
 
 def compare_dialog(
@@ -201,6 +208,10 @@ def compare_dialog(
             view.is_loading = False
             _toolbar.refresh()
             _body.refresh()
+        shown = frozenset(detail.configuration_id for detail in view.details)
+        if len(shown) >= MIN_COMPARE and shown != view.recorded:
+            view.recorded = shown
+            await comparison_stats_state.record(view.details)
 
     return open_comparison
 

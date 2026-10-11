@@ -1,4 +1,4 @@
-"""Admin console (`/admin`), four tabs:
+"""Admin console (`/admin`), six tabs:
 
 - "Data": the configured OEM sources (`config/sources.yaml`) - read-only.
 - "Ovládání" (Controls): lets a developer trigger the scraper and the
@@ -8,6 +8,10 @@
   responses - see `app/ui/components/llm_trace_panel.py`.
 - "Autoři": author-role requests and current authors - see
   `app/ui/components/authors_admin_panel.py`.
+- "Zpětná vazba": user feedback - see
+  `app/ui/components/feedback_admin_panel.py`.
+- "Porovnání": the most compared car models and what they're compared
+  with - see `app/ui/components/comparison_stats_admin_panel.py`.
 
 Deliberately subprocess-based - `python -m scraper.main` and
 `python scripts/import_scraper_data.py` via `sys.executable` - rather than
@@ -46,10 +50,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from nicegui import app, ui
+from nicegui.events import ValueChangeEventArguments
 
 from app.ui import feedback_state
 from app.ui.auth import AuthState
 from app.ui.components.authors_admin_panel import authors_admin_panel
+from app.ui.components.comparison_stats_admin_panel import comparison_stats_admin_panel
 from app.ui.components.feedback_admin_panel import feedback_admin_panel
 from app.ui.components.llm_trace_panel import llm_trace_panel
 from app.ui.components.login_dialog import login_dialog
@@ -471,6 +477,10 @@ def register_admin_page() -> None:
             _access_denied(auth_state)
             return
 
+        # Read once: the panels below are built over several awaits, during
+        # which a `still_admin` check (e.g. the AI trace's timer) refreshes
+        # `auth_state` and briefly leaves `auth_state.user` unset.
+        admin_id = auth_state.user.id
         scraper_state = JobState()
         import_state = JobState()
         client = ui.context.client
@@ -499,12 +509,13 @@ def register_admin_page() -> None:
                 controls_tab = ui.tab(t("admin.tabs.controls"))
                 trace_tab = ui.tab(t("admin.tabs.aiTrace"))
                 authors_tab = ui.tab(t("admin.tabs.authors"))
-                new_feedback = await feedback_state.count_new(auth_state.user.id)
+                new_feedback = await feedback_state.count_new(admin_id)
                 feedback_tab = ui.tab(
                     t("admin.tabs.feedbackNew", count=new_feedback.value)
                     if new_feedback.ok and new_feedback.value
                     else t("admin.tabs.feedback")
                 ).mark("feedback-tab")
+                comparisons_tab = ui.tab(t("admin.tabs.comparisons")).mark("comparisons-tab")
 
             with ui.tab_panels(tabs, value=data_tab).classes("w-full bg-transparent"):
                 with ui.tab_panel(data_tab).classes("p-0"):
@@ -515,9 +526,17 @@ def register_admin_page() -> None:
                     with ui.column().classes("w-full max-w-[1100px]"):
                         llm_trace_panel(still_admin)
                 with ui.tab_panel(authors_tab).classes("p-0"):
-                    await authors_admin_panel(auth_state.user.id)
+                    await authors_admin_panel(admin_id)
                 with ui.tab_panel(feedback_tab).classes("p-0"):
-                    await feedback_admin_panel(auth_state.user.id)
+                    await feedback_admin_panel(admin_id)
+                with ui.tab_panel(comparisons_tab).classes("p-0"):
+                    load_comparison_stats = await comparison_stats_admin_panel(admin_id)
+
+            async def on_tab_change(event: ValueChangeEventArguments) -> None:
+                if event.value in (comparisons_tab, comparisons_tab.props["name"]):
+                    await load_comparison_stats()
+
+            tabs.on_value_change(on_tab_change)
 
 
 def _data_panel() -> None:

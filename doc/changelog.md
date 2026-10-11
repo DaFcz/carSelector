@@ -24,6 +24,17 @@ to one or more related commits.
 
 ---
 
+## 0.3.6 — 2026-10-11
+
+### Added
+- Comparison statistics: every comparison of 2 or more cars a user actually
+  opens is counted (anonymously, per car model; reopening the same pick
+  doesn't count twice). A new "Porovnání" tab in the admin console lists the
+  most compared models, each with the models it is most often compared with
+  (count and share), and how often its own trims/engines were compared;
+  filterable by the last 7/30/90 days or all time. New tables
+  `comparison_views` / `comparison_view_models` — run `alembic upgrade head`.
+
 ## 0.3.5 — 2026-10-10
 
 ### Security

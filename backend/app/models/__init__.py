@@ -7,6 +7,7 @@ from app.models.author_request import AuthorRequest
 from app.models.brand import Brand
 from app.models.car_model import CarModel
 from app.models.color import Color
+from app.models.comparison_view import ComparisonView, ComparisonViewModel
 from app.models.configuration import Configuration
 from app.models.configuration_color import ConfigurationColor
 from app.models.feedback import Feedback
@@ -30,6 +31,8 @@ __all__ = [
     "Brand",
     "CarModel",
     "Color",
+    "ComparisonView",
+    "ComparisonViewModel",
     "Configuration",
     "ConfigurationColor",
     "Feedback",

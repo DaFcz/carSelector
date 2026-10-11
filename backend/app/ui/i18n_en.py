@@ -69,6 +69,7 @@ STRINGS_EN: dict = {
             "authors": "Authors",
             "feedback": "Feedback",
             "feedbackNew": "Feedback ({count})",
+            "comparisons": "Comparisons",
         },
         "trace": {
             "title": "Communication with the AI ({provider})",
@@ -139,6 +140,26 @@ STRINGS_EN: dict = {
             "not_found": "The request or user wasn't found.",
             "already_decided": "The request has already been decided.",
             "unknown_error": "Something went wrong. Please try again.",
+        },
+    },
+    "comparisonStats": {
+        "description": (
+            "The most compared models and the models users most often compare them with. "
+            "Every displayed comparison of 2 or more cars counts (anonymously, not tied to a user)."
+        ),
+        "periods": {"7": "Last 7 days", "30": "Last 30 days", "90": "Last 90 days", "all": "All time"},
+        "total": {"one": "{count} comparison in the period", "other": "{count} comparisons in the period"},
+        "comparisons": {"one": "compared {count}×", "other": "compared {count}×"},
+        "withinModel": {
+            "one": "of which {count}× comparing its own trims/engines",
+            "other": "of which {count}× comparing its own trims/engines",
+        },
+        "partners": "Most often compared with",
+        "partnerCount": "{count}× · {share} %",
+        "empty": "Nobody has compared 2 or more cars in this period yet.",
+        "errors": {
+            "forbidden": "You don't have permission to see the statistics.",
+            "unknown_error": "The statistics couldn't be loaded.",
         },
     },
     "feedback": {

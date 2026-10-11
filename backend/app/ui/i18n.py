@@ -92,6 +92,7 @@ STRINGS: dict = {
             "authors": "Autoři",
             "feedback": "Zpětná vazba",
             "feedbackNew": "Zpětná vazba ({count})",
+            "comparisons": "Porovnání",
         },
         "trace": {
             "title": "Komunikace s AI ({provider})",
@@ -162,6 +163,31 @@ STRINGS: dict = {
             "not_found": "Žádost ani uživatel nebyli nalezeni.",
             "already_decided": "O žádosti už bylo rozhodnuto.",
             "unknown_error": "Něco se nepovedlo. Zkuste to prosím znovu.",
+        },
+    },
+    "comparisonStats": {
+        "description": (
+            "Nejčastěji porovnávané modely a modely, se kterými je uživatelé srovnávají nejčastěji. "
+            "Počítá se každé zobrazené porovnání 2 a více vozů (anonymně, bez vazby na uživatele)."
+        ),
+        "periods": {"7": "Posledních 7 dní", "30": "Posledních 30 dní", "90": "Posledních 90 dní", "all": "Celou dobu"},
+        "total": {
+            "one": "{count} porovnání v období",
+            "few": "{count} porovnání v období",
+            "other": "{count} porovnání v období",
+        },
+        "comparisons": {"one": "{count}× porovnán", "few": "{count}× porovnán", "other": "{count}× porovnán"},
+        "withinModel": {
+            "one": "z toho {count}× srovnání vlastních výbav/motorů",
+            "few": "z toho {count}× srovnání vlastních výbav/motorů",
+            "other": "z toho {count}× srovnání vlastních výbav/motorů",
+        },
+        "partners": "Nejčastěji srovnáván s",
+        "partnerCount": "{count}× · {share} %",
+        "empty": "V tomto období zatím nikdo neporovnával 2 a více vozů.",
+        "errors": {
+            "forbidden": "Na statistiku nemáte oprávnění.",
+            "unknown_error": "Statistiku se nepodařilo načíst.",
         },
     },
     "feedback": {
